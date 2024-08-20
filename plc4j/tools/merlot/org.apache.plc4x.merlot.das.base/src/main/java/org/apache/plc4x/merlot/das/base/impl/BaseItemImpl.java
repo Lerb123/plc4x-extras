@@ -238,5 +238,15 @@ public class BaseItemImpl implements PlcItem {
     public void itemWrite(ByteBuf byteBuf, int offset) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public void setRingBuffer(RingBuffer<PlcDeviceWriteEvent> ringBuffer) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void itemWrite() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
     
 }
