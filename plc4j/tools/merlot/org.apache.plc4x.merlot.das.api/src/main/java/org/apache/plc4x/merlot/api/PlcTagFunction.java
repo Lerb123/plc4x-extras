@@ -47,4 +47,15 @@ public interface PlcTagFunction  extends Function {
 
     public ImmutablePair<PlcTag, Object[]> getPlcTag(PlcTag plcTag, ByteBuf byteBuf, int byteOffset, byte bitOffset);    
     
+    /*
+    * PlcTag reference for constructing the String that represents 
+    * the write tag.
+    *
+    * @param plcTag PlcTag reference PlcTag 
+    * @paraf byteBuf ByteBuf
+    * @paraf offset 
+    * @return 
+    */
+    public ImmutablePair<PlcTag, Object[]> getPlcTag(PlcTag plcTag, ByteBuf byteBuf, int offset);    
+    
 }
