@@ -65,7 +65,7 @@
     </bean>       
     
     <bean id="LdapServerBean" 
-          class="org.apache.plc4x.merlot.uns.core.LdapEmbeddedServer"
+          class="org.apache.plc4x.merlot.uns.core.LdapEmbeddedServerV2"
           scope="singleton"
           init-method="init" destroy-method="destroy"> 
         <argument ref="LdapDirectoryServiceBean" />                
