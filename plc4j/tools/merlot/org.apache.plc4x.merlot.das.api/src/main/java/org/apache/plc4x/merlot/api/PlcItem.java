@@ -29,6 +29,8 @@ import org.apache.plc4x.java.api.types.PlcResponseCode;
 import org.apache.plc4x.java.api.types.PlcValueType;
 import org.apache.plc4x.java.api.value.PlcValue;
 import org.apache.plc4x.merlot.api.impl.PlcDeviceWriteEvent;
+import org.epics.pvdata.property.AlarmSeverity;
+import org.epics.pvdata.property.AlarmStatus;
 
 public interface PlcItem {
     
@@ -223,5 +225,10 @@ public interface PlcItem {
     *
     */    
     public void itemWrite(final ByteBuf byteBuf, int byteOffset, byte bitOffset);
+    
+    /*
+    *
+    */
+    public void setStaus(AlarmSeverity alrmSeverity, AlarmStatus alrmStatus, String alrmMsg);
     
 }

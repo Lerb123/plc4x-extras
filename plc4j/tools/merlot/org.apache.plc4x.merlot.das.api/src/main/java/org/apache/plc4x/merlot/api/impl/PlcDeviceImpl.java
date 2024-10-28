@@ -57,6 +57,8 @@ import org.apache.plc4x.merlot.api.PlcTagFunction;
 import org.apache.plc4x.merlot.scheduler.api.Job;
 import org.apache.plc4x.merlot.scheduler.api.JobContext;
 import org.apache.plc4x.merlot.scheduler.api.Scheduler;
+import org.epics.pvdata.property.AlarmSeverity;
+import org.epics.pvdata.property.AlarmStatus;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
@@ -183,17 +185,20 @@ public class PlcDeviceImpl implements PlcDevice {
                                 try {        
                                     final PlcReadResponse syncResponse = readRequest.execute().get();
                                         event.getPlcGroup().getGroupItems().forEach((u,i) -> {
+                                            
                                         final PlcValue plcValue = syncResponse.getPlcValue(i.getItemName());
                                         if (null == plcValue) {
                                             LOGGER.debug("Item[{}] = {} ", i.getItemName(),"Null value");
+                                            i.setStaus(AlarmSeverity.MAJOR, AlarmStatus.DEVICE, "The DEVICE don't return value.");                                               
                                         } else {
                                             LOGGER.debug("Item[{}]  Read ", i.getItemName());
                                             i.setPlcValue(plcValue);
                                         }
+                                        
                                     });
 
                                 } catch (Exception ex) {
-                                    LOGGER.error("Read ringbuffer: " + ex.getMessage());
+                                    LOGGER.error("Read ringbuffer: " + ex.getMessage());                 
                                 }                                
                                 watch.stop();
                                 LOGGER.debug("Elapse time Group[{}] time: {}",event.getPlcGroup().getGroupName(), watch.getTime());

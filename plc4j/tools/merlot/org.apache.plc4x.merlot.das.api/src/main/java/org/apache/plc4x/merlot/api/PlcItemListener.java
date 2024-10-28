@@ -19,6 +19,8 @@
 package org.apache.plc4x.merlot.api;
 
 import io.netty.buffer.ByteBuf;
+import org.epics.pvdata.property.AlarmSeverity;
+import org.epics.pvdata.property.AlarmStatus;
 
 
 public interface PlcItemListener {
@@ -28,5 +30,7 @@ public interface PlcItemListener {
     void detach();    
     
     void update();
+    
+    public void setStaus(AlarmSeverity alrmSeverity, AlarmStatus alrmStatus, String alrmMsg);    
     
 }

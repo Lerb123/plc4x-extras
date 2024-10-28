@@ -208,5 +208,10 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.46.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.epics</groupId>
+            <artifactId>epics-pvdata</artifactId>
+            <version>${epics.pvdata.version}</version>
+        </dependency>
     </dependencies>
 </project>

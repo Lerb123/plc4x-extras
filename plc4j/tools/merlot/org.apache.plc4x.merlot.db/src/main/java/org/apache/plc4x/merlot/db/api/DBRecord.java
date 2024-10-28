@@ -25,11 +25,16 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.plc4x.merlot.api.PlcItem;
+import org.apache.plc4x.merlot.api.PlcItemListener;
+import org.epics.pvdata.property.AlarmSeverity;
+import org.epics.pvdata.property.AlarmStatus;
+import org.epics.pvdata.pv.PVInt;
+import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdatabase.PVRecord;
 
-
-public class DBRecord extends PVRecord  {   
+@SuppressWarnings("nls")
+public class DBRecord extends PVRecord   implements PlcItemListener {   
     protected static final String MONITOR_FIELDS = "field(write_value,"+         
             "id,"+
             "offset,"+
@@ -102,8 +107,34 @@ public class DBRecord extends PVRecord  {
             bitOffset  = (byte) Integer.parseInt(matcher.group(BIT_OFFSET ));            
         }
     }
-    
-    
-    
+
+
+    @Override
+    public void atach(PlcItem plcItem) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void detach() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void update() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void setStaus(AlarmSeverity alrmSeverity, AlarmStatus alrmStatus, String alrmMsg) {
+        PVStructure structAlarm = getPVStructure().getStructureField("alarm");
+        PVInt pvSeverity = (PVInt) structAlarm.getIntField("severity");
+        PVInt pvStatus = (PVInt) structAlarm.getIntField("status");  
+        PVString pvMsg = (PVString) structAlarm.getStringField("message"); 
+                
+        pvSeverity.put(alrmSeverity.ordinal());
+        pvStatus.put(alrmStatus.ordinal());
+        pvMsg.put(alrmMsg);        
+    }    
+       
     
 }

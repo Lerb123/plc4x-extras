@@ -31,6 +31,9 @@
 
     <bean id="S7PlcEventConnectionFunctionBean" class="org.apache.plc4x.merlot.drv.s7.impl.S7PlcEventConnectionFunctionImpl" scope="singleton">           
     </bean>
+    
+    <bean id="DBS7CounterFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.DBS7CounterFactory" scope="singleton">           
+    </bean>
 
 
     <service  ranking="0" ref="S7PlcTagFunctionBean" auto-export="interfaces">
@@ -51,6 +54,14 @@
             <entry key="dal.function.version"     value="org.apache.plc4x.s7"/>   
             <entry key="dal.function.type"        value="wrapper"/>                      
         </service-properties>        
-    </service>    
+    </service>   
+    
+    <service id="DBS7CounterFactory"     
+             ref="DBS7CounterFactoryBean" 
+             interface="org.apache.plc4x.merlot.db.api.DBRecordFactory">
+        <service-properties>
+            <entry key="db.record.type" value="s7counter"/>            
+        </service-properties>
+    </service>      
 
 </blueprint>

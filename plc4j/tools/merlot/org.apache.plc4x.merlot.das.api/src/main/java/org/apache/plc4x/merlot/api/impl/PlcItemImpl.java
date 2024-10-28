@@ -31,10 +31,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.plc4x.java.api.messages.PlcReadResponse;
 import org.apache.plc4x.java.api.model.PlcTag;
 import org.apache.plc4x.java.api.types.PlcResponseCode;
+import org.apache.plc4x.java.api.types.PlcValueType;
 import org.apache.plc4x.java.api.value.PlcValue;
 import org.apache.plc4x.java.spi.values.PlcList;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.api.PlcItemListener;
+import org.epics.pvdata.property.AlarmSeverity;
+import org.epics.pvdata.property.AlarmStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,6 +81,10 @@ public class PlcItemImpl implements PlcItem {
     private Date lastReadDate;
     private Date lastWriteDate;
     private Date lastErrorDate;
+    
+    private AlarmSeverity   alrmSeverity;
+    private AlarmStatus     alrmStatus;
+    private String          alrmMsg;
     
     private RingBuffer<PlcDeviceWriteEvent> writeRingBuffer = null;
 
@@ -355,12 +362,24 @@ public class PlcItemImpl implements PlcItem {
         writeEvent.setBitOffset(bitOffset);        
         writeRingBuffer.publish(sequenceId);
     }
+    
+    @Override
+    public void setStaus(AlarmSeverity alrmSeverity, AlarmStatus alrmStatus, String alrmMsg) {
+        this.alrmSeverity   =   alrmSeverity;
+        this.alrmStatus     =   alrmStatus;
+        this.alrmMsg        =   alrmMsg;
+        itemClients.forEach(c -> c.setStaus(alrmSeverity, alrmStatus, alrmMsg));
+    }
+        
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(100);
         sb.append("Name: ").append(itemName).append("\r\n").
             append("Description: ").append(itemDescription).append("\r\n").
+            append("Alarm Severity: ").append(alrmSeverity.toString()).append("\r\n").
+            append("Alarm Status: ").append(alrmStatus.toString()).append("\r\n").
+            append("Alarm Message: ").append(alrmMsg).append("\r\n").                
             append("Id: ").append(itemId).append("\r\n"). 
             append("UID: ").append(itemUid).append("\r\n").
             append("Is enable: ").append(itemEnable).append("\r\n").
@@ -377,7 +396,8 @@ public class PlcItemImpl implements PlcItem {
             append(ByteBufUtil.prettyHexDump(itemBuffer)).append("\r\n");                
         return sb.toString();
     }
-    
+
+
     public static class PlcItemBuilder {
         private final String itemName;
         private  UUID itemUid;    

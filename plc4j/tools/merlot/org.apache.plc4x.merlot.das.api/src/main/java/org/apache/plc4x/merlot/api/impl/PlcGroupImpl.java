@@ -36,6 +36,8 @@ import org.osgi.framework.BundleContext;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.api.PlcGroup;
 import org.apache.plc4x.merlot.api.core.PlcItemClientService;
+import org.epics.pvdata.property.AlarmSeverity;
+import org.epics.pvdata.property.AlarmStatus;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +55,7 @@ public class PlcGroupImpl implements PlcGroup, Job {
         
     private boolean enable = false;
     private boolean isFirtsRun = true;
+    private boolean updateItemStatus = false;
        
     private long groupTransmit = 0;
     private long groupReceives = 0;    
@@ -258,27 +261,57 @@ public class PlcGroupImpl implements PlcGroup, Job {
                             Optional<PlcTag> refPlcTag = refPlcConnection.get().parseTagAddress(i.getItemId());
                             if (refPlcTag.isPresent()) {
                                 i.setItemPlcTag(refPlcTag.get());
+                                i.setStaus(AlarmSeverity.NONE, AlarmStatus.NONE, "");
                             } else {
                                 i.disable();
+                                i.setStaus(AlarmSeverity.MAJOR, AlarmStatus.CONF, "Tag incorrect.");                                
                             }
                         });
                         isFirtsRun = false;
+                        updateItemStatus = true;                          
                     }
                     //executeReadAllItems();
+                    if (!isFirtsRun && !updateItemStatus) {
+                         groupItems.forEach((u,i) -> {
+                            if (i.isEnable())
+                                i.setStaus(AlarmSeverity.NONE, AlarmStatus.NONE, "");               
+                         }); 
+                        updateItemStatus = true;                     
+                    };                    
                     long sequenceId = readRingBuffer.next();
                     final PlcDeviceReadEvent readEvent = readRingBuffer.get(sequenceId);
                     readEvent.setPlcGroup(this);
                     readRingBuffer.publish(sequenceId);
                 } else {
                     LOGGER.info("The driver is disconnected.");
+                    if (updateItemStatus) {
+                         groupItems.forEach((u,i) -> {
+                            if (i.isEnable())
+                                i.setStaus(AlarmSeverity.MAJOR, AlarmStatus.DRIVER, "Driver is disconnected.");                
+                         }); 
+                        updateItemStatus = false;                     
+                    };                    
                 }
             } else {
                 LOGGER.info("Unassigned or null PlcConnection connection.");
+                if (updateItemStatus) {
+                     groupItems.forEach((u,i) -> {
+                        i.setStaus(AlarmSeverity.MAJOR, AlarmStatus.DRIVER, "Driver don't exist.");                
+                     }); 
+                    updateItemStatus = false;                     
+                };
             }
         } else {
             LOGGER.info("The group {}:{} is disable.", 
                     ((String) groupProperties.get(PlcGroup.GROUP_NAME)),
                     ((String) groupProperties.get(PlcGroup.GROUP_UID)));
+            if (updateItemStatus) {
+                groupItems.forEach((u,i) -> {
+                    if (i.isEnable())
+                        i.setStaus(AlarmSeverity.MAJOR, AlarmStatus.CONF, "Group ["+ groupProperties.get(PlcGroup.GROUP_NAME)+"] is disable.");                
+                });
+                updateItemStatus = false;
+            }
         }
     }
 

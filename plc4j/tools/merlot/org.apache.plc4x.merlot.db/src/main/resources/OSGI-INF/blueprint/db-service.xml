@@ -50,11 +50,11 @@
           factory-method="getChannelProviderLocal" 
           scope="singleton"/>
     
-    <bean id="DBControl" 
+<!--    <bean id="DBControl" 
           class="org.apache.plc4x.merlot.db.impl.DBControlImpl" 
           scope="singleton">
         <property name="bundleContext" ref="blueprintBundleContext"/>
-    </bean>
+    </bean>-->
     
     <bean id="DBWriterHandlerImpl" class="org.apache.plc4x.merlot.db.impl.DBWriterHandlerImpl"/>    
 

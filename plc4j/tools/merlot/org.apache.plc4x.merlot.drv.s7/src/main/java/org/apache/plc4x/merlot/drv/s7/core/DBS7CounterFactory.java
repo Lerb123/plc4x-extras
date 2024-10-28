@@ -16,92 +16,93 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.plc4x.merlot.db.core;
-
+package org.apache.plc4x.merlot.drv.s7.core;
 
 import io.netty.buffer.Unpooled;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.api.PlcItemListener;
 import org.apache.plc4x.merlot.db.api.DBRecord;
+import org.apache.plc4x.merlot.db.core.DBBaseFactory;
 import org.epics.nt.NTScalar;
 import org.epics.nt.NTScalarArray;
 import org.epics.nt.NTScalarArrayBuilder;
 import org.epics.nt.NTScalarBuilder;
 import org.epics.pvdata.factory.FieldFactory;
-import org.epics.pvdata.property.AlarmSeverity;
-import org.epics.pvdata.property.AlarmStatus;
+import org.epics.pvdata.pv.FieldBuilder;
 import org.epics.pvdata.pv.FieldCreate;
 import org.epics.pvdata.pv.PVBoolean;
-import org.epics.pvdata.pv.PVBooleanArray;
-import org.epics.pvdata.pv.PVInt;
+import org.epics.pvdata.pv.PVShort;
+import org.epics.pvdata.pv.PVShortArray;
 import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.ScalarType;
+import org.epics.pvdatabase.PVRecord;
 
 
-public class DBBooleanFactory extends DBBaseFactory {
+public class DBS7CounterFactory extends DBBaseFactory {
     
-    private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();    
-    
-    public DBBooleanFactory() {};
-    
+    private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
+       
     @Override
     public DBRecord create(String recordName) {
         NTScalarBuilder ntScalarBuilder = NTScalar.createBuilder();
+        FieldBuilder fb = fieldCreate.createFieldBuilder();
+
         PVStructure pvStructure = ntScalarBuilder.
-            value(ScalarType.pvBoolean).
-            addDescriptor(). 
-            add("id", fieldCreate.createScalar(ScalarType.pvString)). 
+            value(ScalarType.pvShort).
+            addDescriptor().            
+            add("id", fieldCreate.createScalar(ScalarType.pvString)).  
             add("offset", fieldCreate.createScalar(ScalarType.pvString)).                 
             add("scan_time", fieldCreate.createScalar(ScalarType.pvString)).
             add("scan_enable", fieldCreate.createScalar(ScalarType.pvBoolean)).
-            add("write_enable", fieldCreate.createScalar(ScalarType.pvBoolean)).
-            add("write_value", fieldCreate.createScalar(ScalarType.pvBoolean)). 
+            add("write_enable", fieldCreate.createScalar(ScalarType.pvBoolean)).  
+            add("write_value", fieldCreate.createScalar(ScalarType.pvShort)).                 
             addAlarm().
             addTimeStamp().
             addDisplay().
             addControl(). 
-            createPVStructure();    
-        DBRecord dbRecord = new DBBooleanRecord(recordName,pvStructure);
+            createPVStructure();          
+        DBRecord dbRecord = new DBS7CounterRecord(recordName,pvStructure);      
         return dbRecord;
     }
 
     @Override
-    public DBRecord createArray(String recordName, int length) {
-        NTScalarBuilder ntScalarBuilder = NTScalar.createBuilder();        
+    public DBRecord createArray(String recordName,int length) {
+        NTScalarBuilder ntScalarBuilder = NTScalar.createBuilder();                
         NTScalarArrayBuilder ntScalarArrayBuilder = NTScalarArray.createBuilder();
+
         PVStructure pvStructure = ntScalarArrayBuilder.
-            value(ScalarType.pvBoolean).
+            value(ScalarType.pvShort).
             addDescriptor(). 
             add("id", fieldCreate.createScalar(ScalarType.pvString)). 
             add("offset", fieldCreate.createScalar(ScalarType.pvString)).                 
             add("scan_time", fieldCreate.createScalar(ScalarType.pvString)).
             add("scan_enable", fieldCreate.createScalar(ScalarType.pvBoolean)).
             add("write_enable", fieldCreate.createScalar(ScalarType.pvBoolean)). 
-            add("write_value", fieldCreate.createFixedScalarArray(ScalarType.pvBoolean, length)).
+            add("write_value", fieldCreate.createFixedScalarArray(ScalarType.pvShort, length)).                   
             addAlarm().
             addTimeStamp().
             addDisplay().
             addControl(). 
             createPVStructure();
-        PVBooleanArray pvValue = (PVBooleanArray) pvStructure.getScalarArrayField("value", ScalarType.pvBoolean);
+        PVShortArray pvValue = (PVShortArray) pvStructure.getScalarArrayField("value", ScalarType.pvShort);
         pvValue.setCapacity(length);
-        pvValue.setLength(length);        
-        DBRecord dbRecord = new DBBooleanRecord(recordName,pvStructure);
+        pvValue.setLength(length);
+        DBRecord dbRecord = new DBS7CounterRecord(recordName,pvStructure);
         return dbRecord;
     }
+           
+    class DBS7CounterRecord extends DBRecord implements PlcItemListener {    
     
-    class DBBooleanRecord extends DBRecord {
-        
-        private PVBoolean value;
-        private PVBoolean write_value;
-        private PVBoolean write_enable;
-        private boolean blnValue = false;
-                 
-        public DBBooleanRecord(String recordName,PVStructure pvStructure) {
+        private PVShort value; 
+        private PVShort write_value;
+        private PVBoolean write_enable;  
+        short b, c, d, bcd;
+    
+        public DBS7CounterRecord(String recordName,PVStructure pvStructure) {
             super(recordName, pvStructure);
-            value = pvStructure.getBooleanField("value");
-            write_value = pvStructure.getBooleanField("write_value"); 
+            value = pvStructure.getShortField("value");
+            write_value = pvStructure.getShortField("write_value");
             write_enable = pvStructure.getBooleanField("write_enable");            
         }    
 
@@ -111,28 +112,23 @@ public class DBBooleanFactory extends DBBaseFactory {
          */
         public void process()
         {
-            if (null != plcItem) {    
-                if (write_enable.get()) {    
+            if (null != plcItem) {               
+                if (write_enable.get()) {                          
                     write_value.put(value.get());                           
                     innerWriteBuffer.clear();                     
-                    innerWriteBuffer.writeBoolean(write_value.get());                         
+                    innerWriteBuffer.writeShort(write_value.get());                         
                     super.process();                      
                 }
-                
-            }             
-        } 
+            }               
+        }
 
         @Override
-        public void atach(PlcItem plcItem) {
-            try {
-                this.plcItem = plcItem;
-                //offset = this.getPVStructure().getIntField("offset").get() * Byte.BYTES; 
-                getOffset( this.getPVStructure().getStringField("offset").get());
-                innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, Byte.BYTES);
-                innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);                
-            } catch (Exception ex) {
-                LOGGER.error(this.getClass().getName() + " : " + ex.getMessage());
-            }
+        public void atach(final PlcItem plcItem) {
+            this.plcItem = plcItem;
+            //offset = this.getPVStructure().getIntField("offset").get() * Short.BYTES;  
+            getOffset( this.getPVStructure().getStringField("offset").get());            
+            innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, Short.BYTES);
+            innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);
         }
 
         @Override
@@ -140,32 +136,22 @@ public class DBBooleanFactory extends DBBaseFactory {
             this.plcItem  = null;
         }
 
-        /*
-        * ***************************************************************************
-        * Modbus      : Return a array of bytes, where every byte is a boolean.
-        * S7          : Return a array of bytes, where every byte, packet 8 booleans.        
-        * Ethernet/IP : TODO:
-        * ***************************************************************************        
-        */
         @Override
-        public void update() {
-            if (null != plcItem)   {   
-                if (bitOffset == -1) {
-                    if (value.get() != innerBuffer.getBoolean(0))                    
-                        value.put(innerBuffer.getBoolean(0));
-                } else {
-                    blnValue = ((innerBuffer.getByte(0) >> bitOffset & 1) == 1);
-                    value.put(blnValue);
-                }
+        public void update() {    
+            if (null != plcItem) {
+                b = (short)(innerBuffer.getByte(0) & 0x0F);
+                c = (short)((innerBuffer.getByte(1) & 0xF0) >> 4);
+                d = (short)(innerBuffer.getByte(1) & 0x0F);
+                bcd = (short)(b*100 + c*10 + d);
+                if (value.get() != bcd)
+                    value.put(bcd);
             }
         }
-
+        
         @Override
         public String getFieldsToMonitor() {
             return MONITOR_FIELDS;
-        }
-                                
+        }        
     }
-    
-    
+           
 }
