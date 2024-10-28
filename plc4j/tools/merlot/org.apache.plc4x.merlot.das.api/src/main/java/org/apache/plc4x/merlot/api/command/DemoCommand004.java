@@ -122,7 +122,22 @@ public class DemoCommand004  implements Action  {
                         optPlcItem.get().enable();
                         System.out.println(optPlcItem.get().getItemUid().toString()+ " : " + optPlcItem.get().getItemName());
                     }                                                            
-                }           
+                }    
+                
+                for (int i= 1; i < 10; i++) {
+                    Optional<PlcItem> optPlcItem = plcGeneralFunction.createItem(UUID.randomUUID().toString(), 
+                            optPlcGroup.get().getGroupUid().toString(),
+                            optPlcDevice.get().getUid().toString(),
+                            "S7COUNTERS_" + i,
+                            "Item description _" + i,
+                            "%C0:COUNTER[20]",
+                            "true");
+                    if (optPlcItem.isPresent()){
+                        optPlcItem.get().enable();
+                        System.out.println(optPlcItem.get().getItemUid().toString()+ " : " + optPlcItem.get().getItemName());
+                    }                                                            
+                }                    
+                
 
             }
         }
