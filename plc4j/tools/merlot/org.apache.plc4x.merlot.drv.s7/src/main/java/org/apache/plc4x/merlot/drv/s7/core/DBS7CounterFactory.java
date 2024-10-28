@@ -116,7 +116,7 @@ public class DBS7CounterFactory extends DBBaseFactory {
                 if (write_enable.get()) {                          
                     write_value.put(value.get());                           
                     innerWriteBuffer.clear();                     
-                    innerWriteBuffer.writeShort(write_value.get());                         
+                    innerWriteBuffer.writeShort(intToBcd(write_value.get()));
                     super.process();                      
                 }
             }               
@@ -151,7 +151,23 @@ public class DBS7CounterFactory extends DBBaseFactory {
         @Override
         public String getFieldsToMonitor() {
             return MONITOR_FIELDS;
+        }
+
+        private short intToBcd(int decimal) {
+            if (decimal < 0 ) decimal = 0;
+            if (decimal > 999 ) decimal = 999;
+            short bcd = 0;
+            int shift = 0;
+            while (decimal > 0) {
+                int digit = decimal % 10;
+                bcd |= (digit << (shift * 4));
+                decimal /= 10;
+                shift++;
+            }
+            return bcd;
         }        
+
+        
     }
            
 }

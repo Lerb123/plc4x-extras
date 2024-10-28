@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBuf;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.java.api.model.PlcTag;
 import static org.apache.plc4x.java.api.types.PlcValueType.BOOL;
+import static org.apache.plc4x.java.api.types.PlcValueType.USINT;
 import org.apache.plc4x.java.s7.readwrite.MemoryArea;
 import static org.apache.plc4x.java.s7.readwrite.MemoryArea.DATA_BLOCKS;
 import static org.apache.plc4x.java.s7.readwrite.MemoryArea.DIRECT_PERIPHERAL_ACCESS;
@@ -146,12 +147,14 @@ public class S7PlcTagFunctionImpl implements PlcTagFunction {
         short tempValue = 0;
         int intBlockNumber = 0;
         int intByteOffset = 0;
+        byte byBitOffset = 0;        
         S7Tag s7PlcTag = null;
         if (plcTag instanceof S7Tag){
             final S7Tag s7Tag = (S7Tag) plcTag;
             LOGGER.info("Processing S7Tag: {}", s7Tag.toString()); 
+            LOGGER.info("Buffer: \r\n" + byteBuf.toString());
             Object[] objValues = new Object[byteBuf.capacity()];
-            switch (s7Tag.getPlcValueType()) { 
+            switch (s7Tag.getDataType()) { 
                 case BYTE:  
                         intBlockNumber = (s7Tag.getMemoryArea() == MemoryArea.DATA_BLOCKS)?
                                             s7Tag.getBlockNumber() : 0;
@@ -162,7 +165,7 @@ public class S7PlcTagFunctionImpl implements PlcTagFunction {
                                             intByteOffset,
                                             bitOffset,
                                             byteBuf.capacity());
-                        LOGGER.info("Write BOOL S7Tag: {}", s7Tag.toString());                         
+                        LOGGER.info("Write BOOL S7Tag: {}", s7PlcTag.toString());                         
                         byteBuf.resetReaderIndex();
                         for (int i=0; i < byteBuf.capacity(); i++){
                             objValues[i] = byteBuf.readBoolean();
@@ -176,18 +179,36 @@ public class S7PlcTagFunctionImpl implements PlcTagFunction {
                                             intByteOffset,
                                             (byte) 0,
                                             byteBuf.capacity());
-                        LOGGER.info("Write ANY S7Tag: {}", s7Tag.toString()); 
+                        LOGGER.info("Write ANY S7Tag: {}", s7PlcTag.toString()); 
                         byteBuf.resetReaderIndex();
                         for (int i=0; i < byteBuf.capacity(); i++){
                             tempValue = (short) (byteBuf.readByte() & 0xFF);                            
                             objValues[i] = tempValue;
                         }                                  
                     break;
+                case COUNTER:                         
+                        intByteOffset = ((s7Tag.getByteOffset() << 3) + 
+                                         s7Tag.getBitOffset()) + (byteOffset / 2);                                                                   
+                        s7PlcTag = new S7Tag(s7Tag.getDataType(),
+                                            s7Tag.getMemoryArea(),
+                                            s7Tag.getBlockNumber(),
+                                            intByteOffset,
+                                            byBitOffset,
+                                            byteBuf.capacity() / 2);
+                        LOGGER.info("> Write COUNTER S7Tag: {}", s7PlcTag.toString()); 
+                        byteBuf.resetReaderIndex();
+                        objValues = new Object[byteBuf.capacity() / 2];
+                        for (int i=0; i < byteBuf.capacity() / 2; i++){
+                            tempValue = (short) (byteBuf.readShort() & 0xFFFF);                            
+                            objValues[i] = tempValue;
+                        }                                  
+                    break;                    
+                    
                 default:;
                 
             }
             if (null != s7PlcTag)
-            LOGGER.info("Writing tag : {}", s7PlcTag.toString());
+                LOGGER.info("Writing tag : {}", s7PlcTag.toString());         
             return new ImmutablePair<>(s7PlcTag, objValues);            
         }        
         return null;
