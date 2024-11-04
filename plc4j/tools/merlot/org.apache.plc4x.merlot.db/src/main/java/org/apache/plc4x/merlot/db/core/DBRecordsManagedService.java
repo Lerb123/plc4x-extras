@@ -28,13 +28,17 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.function.Consumer;
 import org.apache.plc4x.java.api.PlcConnection;
 import org.apache.plc4x.merlot.api.PlcDevice;
 import org.apache.plc4x.merlot.api.PlcGeneralFunction;
+import org.apache.plc4x.merlot.api.PlcGroup;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.api.PlcItemListener;
 import org.apache.plc4x.merlot.db.api.DBRecord;
@@ -48,6 +52,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
+import org.osgi.service.dal.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,8 +61,11 @@ public class DBRecordsManagedService implements ManagedServiceFactory, Job {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(DBRecordsManagedService.class);  
     private static final String DEFAULT_REQUEST = "field(write_value,scan_time,scan_enable,control.limitLow)";
+    
     private String filter =  "(&(" + Constants.OBJECTCLASS + "=" + DBRecordFactory.class.getName() + ")"+
-                           "(db.record.type=*))";    
+                           "(db.record.type=*))"; 
+    private String filterWriterHandler =  "(&(" + Constants.OBJECTCLASS + "=" + DBWriterHandler.class.getName() + ")"+
+                           "(DEVICE_CATEGORY=*))"; 
     
     private final PlcGeneralFunction generalFunction;
     private final PVDatabase master;
@@ -70,7 +78,7 @@ public class DBRecordsManagedService implements ManagedServiceFactory, Job {
     
     private final DBControl dbControl;
     private final DBWriterHandler writerHandler;
-    
+    private DBWriterHandler servWriteHandler;  
     
     public DBRecordsManagedService(BundleContext bundleContext,
                                    PVDatabase master,
@@ -171,13 +179,15 @@ public class DBRecordsManagedService implements ManagedServiceFactory, Job {
                 } else {
                     strScalarType = dataFields[0];
                 }
-
+                System.out.println("1. strScalarType: " + strScalarType);
                 recordFactory = getRecordFactory(strScalarType);
                 
                 if (recordFactory != null){
+                    System.out.println("2. Creando el Record: " + key.toString());
                     DBRecord dbRecord = recordFactory.create(key.toString(), dataFields);
                     
                     if (dbRecord != null){
+                    System.out.println("3. Agrego el record: " + dbRecord.getRecordName());                        
                         dbRecords.add(dbRecord);
                     } else {
                         LOGGER.info("PVRecord '" + key +"' could not be created.");
@@ -189,15 +199,32 @@ public class DBRecordsManagedService implements ManagedServiceFactory, Job {
             dbRecords.forEach(pvr -> {                
                 PVStructure structure = pvr.getPVStructure();
                 PVBoolean pvScanEnable = structure.getBooleanField("scan_enable");
+                
+                //TODO: in a future it's used by the optimizer.
                 pvScanEnable.put(false);   
-                String id = structure.getStringField("id").get();   
-
+                String id = structure.getStringField("id").get(); 
+                
+                System.out.println("4. Agrego el record: " + id);  
                 Optional<PlcItem> plcItem = generalFunction.getPlcItem(id);
                 if (plcItem.isPresent()) {
                     if (null == master.findRecord(pvr.getRecordName())) {
                         plcItem.get().addItemListener((PlcItemListener) pvr);
+                
+                        System.out.println("5. Agregado a la base de datos: " + id);                         
                         master.addRecord(pvr); 
-                        writerHandler.putDBRecord(pvr);
+                        //TODO: Each driver can publish its writing service, creating special cases. 
+                        Optional<String> optStrDriver = generalFunction.getDriverIdForItem(plcItem.get());
+                        if (optStrDriver.isPresent()){
+                            servWriteHandler = getWriterHandler(optStrDriver.get());
+                            System.out.println("6. El driver existe: " + id);                              
+                        }
+                        if (null != servWriteHandler ) {
+                            System.out.println("7. Handler alterno.");                              
+                            servWriteHandler.putDBRecord(pvr);
+                        } else {
+                            System.out.println("8. Principal.");                             
+                            writerHandler.putDBRecord(pvr);
+                        }
                         LOGGER.info("Add DBRecord... [{}] linked to [{}].",pvr.getRecordName(), id);    
                     } else {
                         LOGGER.info("DBRMS DBRecord [{}] already exist.", pvr.getRecordName());                          
@@ -257,6 +284,23 @@ public class DBRecordsManagedService implements ManagedServiceFactory, Job {
             return refDev;            
         } catch (Exception ex){
             LOGGER.error("getDevice: " + ex.toString());
+        }
+        return null;
+    } 
+       
+    private DBWriterHandler getWriterHandler(String uid){
+        try {
+            String strFilter = filterWriterHandler.replace("*", uid);
+            System.out.println("El filtro: " + strFilter);
+            references = bundleContext.getServiceReferences((String) null, strFilter); 
+            if (references != null){
+               return (DBWriterHandler) bundleContext.getService(references[0]);
+            } else {
+                LOGGER.info("DBWriterHandler type: '" + uid + "' don't exist.");
+                return null;
+            }
+        } catch (Exception ex) {
+            LOGGER.error("getWriterHandler: " + ex.toString());
         }
         return null;
     }    

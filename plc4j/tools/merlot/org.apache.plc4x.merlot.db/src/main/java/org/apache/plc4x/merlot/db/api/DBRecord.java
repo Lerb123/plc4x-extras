@@ -21,9 +21,13 @@ package org.apache.plc4x.merlot.db.api;
 
 
 import io.netty.buffer.ByteBuf;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.api.PlcItemListener;
 import org.epics.pvdata.property.AlarmSeverity;
@@ -58,12 +62,15 @@ public class DBRecord extends PVRecord   implements PlcItemListener {
     protected static final String BIT_OFFSET = "bitOffset"; 
     
     protected int byteOffset = -1;
-    protected byte bitOffset = -1;    
+    protected byte bitOffset = -1;  
+    protected  ArrayList<MutablePair<Integer, Integer>> offsets;    
     
     
     protected PlcItem plcItem = null; 
     protected ByteBuf innerBuffer = null; 
-    protected ByteBuf innerWriteBuffer = null;     
+    protected ByteBuf innerWriteBuffer = null;
+    
+    protected boolean bFirtsRun = true;
    
     
     public DBRecord(String recordName, PVStructure pvStructure) {
@@ -91,9 +98,9 @@ public class DBRecord extends PVRecord   implements PlcItemListener {
     
     public byte getBiteOffset(){
         return bitOffset;
-    }    
-    
-    
+    }  
+
+        
     public String getFieldsToMonitor(){
         return MONITOR_VALUE_FIELD;
     };
@@ -107,6 +114,28 @@ public class DBRecord extends PVRecord   implements PlcItemListener {
             bitOffset  = (byte) Integer.parseInt(matcher.group(BIT_OFFSET ));            
         }
     }
+    
+    public Optional<Integer> getRelativeBitOffset(int index) {
+        try {
+            Integer iByteOffset = offsets.get(index).getLeft() + byteOffset;
+            return Optional.of(iByteOffset);
+
+        } catch (Exception ex){
+            //
+        } 
+        return Optional.empty();
+    }
+
+    public Optional<Integer> getRelativeByteOffset(int index) {
+        try {
+            Integer iBitOffset = offsets.get(index).getRight();
+            return Optional.of(iBitOffset);
+
+        } catch (Exception ex){
+            //
+        } 
+        return Optional.empty();
+    }    
 
 
     @Override
@@ -134,7 +163,19 @@ public class DBRecord extends PVRecord   implements PlcItemListener {
         pvSeverity.put(alrmSeverity.ordinal());
         pvStatus.put(alrmStatus.ordinal());
         pvMsg.put(alrmMsg);        
-    }    
+    }  
+    
+    public  boolean isBitSet(byte b, int bit) {
+        return ((b >> bit) & 1 ) == 0;
+    }        
+
+    public void setBit(byte b, int bit) {
+        b |= 1 << bit;
+    }  
+
+    public void clearBit(byte b, int bit) {
+        b &= ~(1 << bit);
+    }      
        
     
 }

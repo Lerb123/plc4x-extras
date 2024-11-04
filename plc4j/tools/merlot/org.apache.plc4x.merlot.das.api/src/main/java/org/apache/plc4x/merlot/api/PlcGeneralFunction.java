@@ -243,6 +243,15 @@ public interface PlcGeneralFunction extends PlcFunction {
     public Optional<byte[]> getPlcItemBytes(UUID item_uid);  
     
     /*
+    * Returns the value associated to item driver.
+    *
+
+    * @return Return a String value, representing the driver.     
+    */       
+    public Optional<String> getDriverIdForItem(PlcItem plcItem);
+    
+    
+    /*
     * Enables the element corresponding to the UUID.
     *
     * @param item_uid String representation of the item's UUID.    

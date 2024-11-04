@@ -618,15 +618,14 @@ public class PlcGeneralFunctionImpl implements PlcGeneralFunction  {
     }    
     
     @Override
-    public Map<String, Object> getPlcDeviceMeta(UUID group_uid) {
-        Map<String, Object> props = new HashMap<>();
+    public Map<String, Object> getPlcDeviceMeta(UUID device_uid) {
+        Map<String, Object> props = null;
         
         try {
-            String filter = FILTER_DEVICE_UID.replace("*", group_uid.toString());
-            
-            ServiceReference ref = bc.getServiceReference(filter);
-            if (null != ref) {
-                final PlcDevice device = (PlcDevice) bc.getService(ref);
+            final PlcDevice device = getPlcDevice(device_uid);
+
+            if (null != device) {
+                props = new HashMap<>();
                 props.putAll(device.getProperties());
             }
         } catch (Exception ex) {
@@ -802,7 +801,31 @@ public class PlcGeneralFunctionImpl implements PlcGeneralFunction  {
         Optional<PlcItem> item = getPlcItem(item_uid);
         if (item.isPresent()) return Optional.of(item.get().getItemByteBuf().array());         
         return Optional.empty();
-    }        
+    }    
+
+    @Override    
+    public Optional<String> getDriverIdForItem(PlcItem plcItem) {
+        var groups = getPlcGroups();
+        
+        for (UUID uuid:groups.keySet()){
+            PlcGroup plcGroup = getPlcGroup(uuid);
+            Optional<PlcItem> optPlcItem = plcGroup.getItems().stream().
+                    filter(i -> i.getItemUid().equals(plcItem.getItemUid())).findFirst();
+            
+            if (optPlcItem.isPresent()) {
+                System.out.println("PlcItem uuid: " + optPlcItem.get().getItemUid());
+                System.out.println("PlcGroup uuid: " + uuid);
+                System.out.println("PlcDevice uuid: " + plcGroup.getGroupDeviceUid());
+                var deviceMeta = getPlcDeviceMeta( plcGroup.getGroupDeviceUid());
+                System.out.println(deviceMeta.toString());
+                return Optional.of((String) deviceMeta.get("DEVICE_CATEGORY"));
+            };
+
+        }
+
+        return Optional.empty();
+    }
+    
     
     @Override
     public void enable(UUID uuid) {

@@ -39,7 +39,7 @@ import org.epics.pvdata.pv.ScalarType;
 import org.epics.pvdatabase.PVRecord;
 
 
-public class DBS7CounterFactory extends DBBaseFactory {
+public class S7DBCounterFactory extends DBBaseFactory {
     
     private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
        

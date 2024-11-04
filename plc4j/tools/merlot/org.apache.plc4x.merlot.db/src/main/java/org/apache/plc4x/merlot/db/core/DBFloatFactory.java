@@ -89,6 +89,7 @@ public class DBFloatFactory extends DBBaseFactory {
 
     class DBFloatRecord extends DBRecord implements PlcItemListener {
     
+        private static final String MONITOR_SCALAR_FIELDS = "field(value, write_enable)";        
         private PVFloat value;  
         private PVFloat write_value;
         private PVBoolean write_enable;          
@@ -133,6 +134,7 @@ public class DBFloatFactory extends DBBaseFactory {
 
         @Override
         public void update() {
+            System.out.println("Update!");
             if (null != plcItem)   
                 if (value.get() != innerBuffer.getFloat(0))
                 value.put(innerBuffer.getFloat(0));
@@ -140,7 +142,7 @@ public class DBFloatFactory extends DBBaseFactory {
         
         @Override
         public String getFieldsToMonitor() {
-            return MONITOR_FIELDS;
+            return MONITOR_SCALAR_FIELDS;
         }        
     }  
     

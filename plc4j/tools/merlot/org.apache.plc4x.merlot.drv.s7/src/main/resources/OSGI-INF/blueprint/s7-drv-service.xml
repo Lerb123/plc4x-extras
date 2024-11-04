@@ -32,8 +32,26 @@
     <bean id="S7PlcEventConnectionFunctionBean" class="org.apache.plc4x.merlot.drv.s7.impl.S7PlcEventConnectionFunctionImpl" scope="singleton">           
     </bean>
     
-    <bean id="DBS7CounterFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.DBS7CounterFactory" scope="singleton">           
+    <bean id="S7DBCounterFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBCounterFactory" scope="singleton">           
     </bean>
+    
+    <bean id="S7DBDiFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBDiFactory" scope="singleton">           
+    </bean> 
+    
+    <bean id="S7DBAiFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBAiFactory" scope="singleton">           
+    </bean>  
+    
+    <bean id="S7DBAoFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBAoFactory" scope="singleton">           
+    </bean> 
+    
+    <bean id="S7DBValveFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBValveFactory" scope="singleton">           
+    </bean>  
+    
+    <bean id="S7DBMotorFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBMotorFactory" scope="singleton">           
+    </bean>   
+    
+                                                                                    
+    <bean id="S7DBWriterHandlerImpl" class="org.apache.plc4x.merlot.drv.s7.impl.S7DBWriterHandlerImpl"/>                                                                                                                                                                                                                                                      
 
 
     <service  ranking="0" ref="S7PlcTagFunctionBean" auto-export="interfaces">
@@ -56,12 +74,58 @@
         </service-properties>        
     </service>   
     
-    <service id="DBS7CounterFactory"     
-             ref="DBS7CounterFactoryBean" 
+    <service id="S7DBCounterFactory"     
+             ref="S7DBCounterFactoryBean" 
              interface="org.apache.plc4x.merlot.db.api.DBRecordFactory">
         <service-properties>
             <entry key="db.record.type" value="s7counter"/>            
         </service-properties>
-    </service>      
+    </service>   
+    
+    <service id="S7DBDiFactory"     
+             ref="S7DBDiFactoryBean" 
+             interface="org.apache.plc4x.merlot.db.api.DBRecordFactory">
+        <service-properties>
+            <entry key="db.record.type" value="s7di"/>            
+        </service-properties>
+    </service>  
+    
+    <service id="S7DBAiFactory"     
+             ref="S7DBAiFactoryBean" 
+             interface="org.apache.plc4x.merlot.db.api.DBRecordFactory">
+        <service-properties>
+            <entry key="db.record.type" value="s7ai"/>            
+        </service-properties>
+    </service>  
+    
+    <service id="S7DBAoFactory"     
+             ref="S7DBAoFactoryBean" 
+             interface="org.apache.plc4x.merlot.db.api.DBRecordFactory">
+        <service-properties>
+            <entry key="db.record.type" value="s7ao"/>            
+        </service-properties>
+    </service>                               
+        
+    <service id="S7DBValveFactory"     
+             ref="S7DBValveFactoryBean" 
+             interface="org.apache.plc4x.merlot.db.api.DBRecordFactory">
+        <service-properties>
+            <entry key="db.record.type" value="s7valve"/>            
+        </service-properties>
+    </service>  
+    
+    <service id="S7DBMotorFactory"     
+             ref="S7DBMotorFactoryBean" 
+             interface="org.apache.plc4x.merlot.db.api.DBRecordFactory">
+        <service-properties>
+            <entry key="db.record.type" value="s7motor"/>            
+        </service-properties>
+    </service>   
+    
+    <service ref="S7DBWriterHandlerImpl" interface="org.apache.plc4x.merlot.db.api.DBWriterHandler">
+        <service-properties>
+            <entry key="DEVICE_CATEGORY"  value="s7"/>           
+        </service-properties>        
+    </service>
 
 </blueprint>
