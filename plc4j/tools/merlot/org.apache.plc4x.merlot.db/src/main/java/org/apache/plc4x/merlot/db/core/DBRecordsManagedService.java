@@ -179,15 +179,14 @@ public class DBRecordsManagedService implements ManagedServiceFactory, Job {
                 } else {
                     strScalarType = dataFields[0];
                 }
-                System.out.println("1. strScalarType: " + strScalarType);
+
                 recordFactory = getRecordFactory(strScalarType);
                 
                 if (recordFactory != null){
-                    System.out.println("2. Creando el Record: " + key.toString());
+
                     DBRecord dbRecord = recordFactory.create(key.toString(), dataFields);
                     
-                    if (dbRecord != null){
-                    System.out.println("3. Agrego el record: " + dbRecord.getRecordName());                        
+                    if (dbRecord != null){                      
                         dbRecords.add(dbRecord);
                     } else {
                         LOGGER.info("PVRecord '" + key +"' could not be created.");
@@ -203,26 +202,21 @@ public class DBRecordsManagedService implements ManagedServiceFactory, Job {
                 //TODO: in a future it's used by the optimizer.
                 pvScanEnable.put(false);   
                 String id = structure.getStringField("id").get(); 
-                
-                System.out.println("4. Agrego el record: " + id);  
+
                 Optional<PlcItem> plcItem = generalFunction.getPlcItem(id);
                 if (plcItem.isPresent()) {
                     if (null == master.findRecord(pvr.getRecordName())) {
                         plcItem.get().addItemListener((PlcItemListener) pvr);
-                
-                        System.out.println("5. Agregado a la base de datos: " + id);                         
+                                    
                         master.addRecord(pvr); 
                         //TODO: Each driver can publish its writing service, creating special cases. 
                         Optional<String> optStrDriver = generalFunction.getDriverIdForItem(plcItem.get());
                         if (optStrDriver.isPresent()){
-                            servWriteHandler = getWriterHandler(optStrDriver.get());
-                            System.out.println("6. El driver existe: " + id);                              
+                            servWriteHandler = getWriterHandler(optStrDriver.get());                              
                         }
-                        if (null != servWriteHandler ) {
-                            System.out.println("7. Handler alterno.");                              
+                        if (null != servWriteHandler ) {                            
                             servWriteHandler.putDBRecord(pvr);
-                        } else {
-                            System.out.println("8. Principal.");                             
+                        } else {                          
                             writerHandler.putDBRecord(pvr);
                         }
                         LOGGER.info("Add DBRecord... [{}] linked to [{}].",pvr.getRecordName(), id);    
@@ -291,7 +285,6 @@ public class DBRecordsManagedService implements ManagedServiceFactory, Job {
     private DBWriterHandler getWriterHandler(String uid){
         try {
             String strFilter = filterWriterHandler.replace("*", uid);
-            System.out.println("El filtro: " + strFilter);
             references = bundleContext.getServiceReferences((String) null, strFilter); 
             if (references != null){
                return (DBWriterHandler) bundleContext.getService(references[0]);

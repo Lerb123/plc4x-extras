@@ -21,9 +21,11 @@ package org.apache.plc4x.merlot.drv.s7.impl;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.db.api.DBRecord;
 import org.apache.plc4x.merlot.db.api.DBWriterHandler;
@@ -81,6 +83,8 @@ public class S7DBWriterHandlerImpl implements DBWriterHandler {
 
     @Override
     public void monitorEvent(Monitor monitor) {
+        int byteOffset = 0;
+        byte bitOffset = -1;
         try 
         {
             element = monitor.poll();
@@ -91,28 +95,20 @@ public class S7DBWriterHandlerImpl implements DBWriterHandler {
             if ((recordMonitors.containsKey(monitor)) && 
                  structure.getBooleanField("write_enable").get()) {
                 
-                System.out.println("La Estructura: " + structure);
-                System.out.println("ChangeBitSet:  " + changedBitSet);
-                System.out.println("OverrunBitSet: " + overrunBitSet);
-
                 final DBRecord dbRecord = recordMonitors.get(monitor);
                 final Optional<PlcItem> optPlcItem = dbRecord.getPlcItem();
 
                 PVField[] fields = new PVField[structure.getNumberFields()];
                 
                 
-                if (optPlcItem.isPresent()) {
-                    System.out.println("Numero de bits cambiados: " + changedBitSet.cardinality());
-                    System.out.println("Numero de campos: " + structure.getNumberFields());                                     
+                if (optPlcItem.isPresent()) {                                   
                     
                     //Tansform the tree to lineal array of fields
                     //I avoid recursion
                     int i = 1;
                     for (PVField pvField:structure.getPVFields()) {
-                        System.out.println("I: " + i);
                         fields[i] = pvField;
-                        if (pvField instanceof PVStructure) {
-                            System.out.println(">Es una estructura");                        
+                        if (pvField instanceof PVStructure) {                       
                             final PVStructure pvStructure = (PVStructure) pvField;
                             for (PVField f:pvStructure.getPVFields()){
                                 i++;
@@ -122,11 +118,9 @@ public class S7DBWriterHandlerImpl implements DBWriterHandler {
                         i++;
                     }
                 
-                    System.out.println("Campos que cambiaron:");
                     int index = changedBitSet.nextSetBit(0);
                     for (i = 0; i < changedBitSet.cardinality(); i++) {
-                        System.out.println("Indice encontrado: " + index);
-                        System.out.println("PVField: " + fields[index]);
+
                         ByteBuf byteBuf = null;
                         if (fields[index] instanceof PVScalar){
                             //Capturo la informacion en un ByteBuf
@@ -135,57 +129,50 @@ public class S7DBWriterHandlerImpl implements DBWriterHandler {
                             byteBuf = Unpooled.buffer(Double.BYTES);
                             switch(pvScalar.getScalar().getScalarType()) {
                                 case pvBoolean:
-                                    System.out.println("b");
                                     byteBuf.writeBoolean(((PVBoolean) f).get());
                                     break;
                                 case pvByte:
-                                    System.out.println("by"); 
                                     byteBuf.writeByte(((PVByte) f).get());                                   
                                     break;  
                                 case pvDouble:
-                                    System.out.println("dou");
                                     byteBuf.writeDouble(((PVDouble) f).get());                                     
                                     break; 
                                 case pvFloat:
-                                    System.out.println("f"); 
                                     byteBuf.writeFloat(((PVFloat) f).get());                                     
                                     break; 
                                 case pvInt:
-                                    System.out.println("int");
                                     byteBuf.writeInt(((PVInt) f).get());
                                     break; 
                                 case pvLong:
-                                    System.out.println("l");  
                                     byteBuf.writeLong(((PVLong) f).get());                                    
                                     break; 
                                 case pvShort:
-                                    System.out.println("sh"); 
                                     byteBuf.writeShort(((PVShort) f).get());                                     
                                     break; 
-                                case pvString:
-                                    System.out.println("str");  
+                                case pvString: 
                                     //byteBuf.write(((PVShort) f).get());                                     
                                     break;  
-                                case pvUByte:
-                                    System.out.println("ub");  
+                                case pvUByte: 
                                     byteBuf.writeByte(((PVUByte) f).get());                                     
                                     break;                                      
-                                case pvUInt:
-                                    System.out.println("uint");  
+                                case pvUInt: 
                                     byteBuf.writeInt(((PVUInt) f).get());                                     
                                     break;  
                                 case pvULong:
-                                    System.out.println("ul");  
                                     byteBuf.writeLong(((PVLong) f).get());                                     
                                     break;  
-                                case pvUShort:
-                                    System.out.println("us");                                    
+                                case pvUShort:                                   
                                     byteBuf.writeShort(((PVUShort) f).get());                                     
                                     break; 
                             }
                             
-                            System.out.println(ByteBufUtil.prettyHexDump(byteBuf));
-                            //if ByteBuf is not null we check the offets
+                            ArrayList<ImmutablePair<Integer,Integer>> fieldOffsets = dbRecord.getFieldOffsets();
+                            byteOffset = dbRecord.getByteOffset() + ((fieldOffsets.get(index) != null)?fieldOffsets.get(index).left:0);
+                            bitOffset = (byte) ((fieldOffsets.get(index) != null)?fieldOffsets.get(index).right:-1);
+                            
+                            if (optPlcItem.isPresent()) {
+                                optPlcItem.get().itemWrite(byteBuf, byteOffset, bitOffset);  
+                            }                            
                             
                             
                         };
@@ -195,21 +182,7 @@ public class S7DBWriterHandlerImpl implements DBWriterHandler {
                     }
                     
                     
-                }
-                
-//                if (changedBitSet.get(1) && 
-//                    (changedBitSet.length() == 2) &&
-//                    overrunBitSet.isEmpty()) {
-//
-//                    final DBRecord dbRecord = recordMonitors.get(monitor);
-//                    final Optional<PlcItem> optPlcItem = dbRecord.getPlcItem();
-//                    LOGGER.info(ByteBufUtil.prettyHexDump(dbRecord.getWriteBuffer().get()));
-//                    
-//                    if (optPlcItem.isPresent()) {
-//                        optPlcItem.get().itemWrite(dbRecord.getWriteBuffer().get(), dbRecord.getByteOffset(), dbRecord.getBiteOffset());  
-//                    }
-//
-//                }
+                }                
             }
         } catch (Exception ex) {
              LOGGER.error(ex.getMessage());

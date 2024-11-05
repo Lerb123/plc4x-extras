@@ -153,7 +153,7 @@ public class S7PlcTagFunctionImpl implements PlcTagFunction {
             final S7Tag s7Tag = (S7Tag) plcTag;
             LOGGER.info("Processing S7Tag: {}", s7Tag.toString()); 
             LOGGER.info("Buffer: \r\n" + byteBuf.toString());
-            Object[] objValues = new Object[byteBuf.capacity()];
+            Object[] objValues = new Object[byteBuf.readableBytes()];
             switch (s7Tag.getDataType()) { 
                 case BYTE:  
                         intBlockNumber = (s7Tag.getMemoryArea() == MemoryArea.DATA_BLOCKS)?
@@ -172,19 +172,37 @@ public class S7PlcTagFunctionImpl implements PlcTagFunction {
                         }                        
                     break;
                 case USINT:  
-                        intByteOffset = s7Tag.getByteOffset() + byteOffset;                    
-                        s7PlcTag = new S7Tag(s7Tag.getDataType(),
-                                            s7Tag.getMemoryArea(),
-                                            s7Tag.getBlockNumber(),
-                                            intByteOffset,
-                                            (byte) 0,
-                                            byteBuf.capacity());
-                        LOGGER.info("Write ANY S7Tag: {}", s7PlcTag.toString()); 
-                        byteBuf.resetReaderIndex();
-                        for (int i=0; i < byteBuf.capacity(); i++){
-                            tempValue = (short) (byteBuf.readByte() & 0xFF);                            
-                            objValues[i] = tempValue;
-                        }                                  
+                        if (bitOffset == -1) {
+                            intByteOffset = s7Tag.getByteOffset() + byteOffset;                    
+                            s7PlcTag = new S7Tag(s7Tag.getDataType(),
+                                                s7Tag.getMemoryArea(),
+                                                s7Tag.getBlockNumber(),
+                                                intByteOffset,
+                                                (byte) 0,
+                                                byteBuf.readableBytes());
+                            LOGGER.info("Write ANY BYTES S7Tag: {}", s7PlcTag.toString()); 
+                            byteBuf.resetReaderIndex();
+                            int readableBytes =  byteBuf.readableBytes();
+                            for (int i=0; i < readableBytes; i++){
+                                tempValue = (short) (byteBuf.readByte() & 0xFF);                            
+                                objValues[i] = tempValue;
+                            }                              
+                        } else {
+                            intByteOffset = s7Tag.getByteOffset() + byteOffset;                    
+                            s7PlcTag = new S7Tag(TransportSize.BOOL,
+                                                s7Tag.getMemoryArea(),
+                                                s7Tag.getBlockNumber(),
+                                                intByteOffset,
+                                                bitOffset,
+                                                byteBuf.readableBytes());
+                            LOGGER.info("Write ANY BOOL S7Tag: {}", s7PlcTag.toString());  
+                            byteBuf.resetReaderIndex();
+                            int readableBytes =  byteBuf.readableBytes();                            
+                            for (int i=0; i < readableBytes; i++){
+                                objValues[i] = byteBuf.readBoolean();
+                            }                            
+                        }
+                                                                                
                     break;
                 case COUNTER:                         
                         intByteOffset = ((s7Tag.getByteOffset() << 3) + 
@@ -198,7 +216,7 @@ public class S7PlcTagFunctionImpl implements PlcTagFunction {
                         LOGGER.info("> Write COUNTER S7Tag: {}", s7PlcTag.toString()); 
                         byteBuf.resetReaderIndex();
                         objValues = new Object[byteBuf.capacity() / 2];
-                        for (int i=0; i < byteBuf.capacity() / 2; i++){
+                        for (int i=0; i < byteBuf.readableBytes() / 2; i++){
                             tempValue = (short) (byteBuf.readShort() & 0xFFFF);                            
                             objValues[i] = tempValue;
                         }                                  

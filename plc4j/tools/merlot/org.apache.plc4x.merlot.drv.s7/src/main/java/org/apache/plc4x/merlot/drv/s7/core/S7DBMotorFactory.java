@@ -20,6 +20,7 @@ package org.apache.plc4x.merlot.drv.s7.core;
 
 import io.netty.buffer.Unpooled;
 import java.util.ArrayList;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.api.PlcItemListener;
@@ -84,10 +85,10 @@ public class S7DBMotorFactory extends DBBaseFactory {
         
         Field out =  fb.setId("output_t").   
                 add("iMode", fieldCreate.createScalar(ScalarType.pvShort)).                
-                add("bPBEN_ResetError", fieldCreate.createScalar(ScalarType.pvBoolean)). 
-                add("bPBEN_Forward", fieldCreate.createScalar(ScalarType.pvBoolean)). 
-                add("bPBEN_Reverse", fieldCreate.createScalar(ScalarType.pvBoolean)). 
-                add("bPBEN_Stop", fieldCreate.createScalar(ScalarType.pvBoolean)).  
+                add("bPB_ResetError", fieldCreate.createScalar(ScalarType.pvBoolean)). 
+                add("bPB_Forward", fieldCreate.createScalar(ScalarType.pvBoolean)). 
+                add("bPB_Reverse", fieldCreate.createScalar(ScalarType.pvBoolean)). 
+                add("bPB_Stop", fieldCreate.createScalar(ScalarType.pvBoolean)).  
                 createStructure();           
         
         PVStructure pvStructure = ntScalarBuilder.
@@ -116,8 +117,8 @@ public class S7DBMotorFactory extends DBBaseFactory {
                                 
     class DBS7MotorRecord extends DBRecord implements PlcItemListener {   
         
-        private int BUFFER_SIZE = 8;
-        private static final String MONITOR_TF_FIELDS = "field(write_enable, out{iMode, bPBEN_ResetError, bPBEN_Forward, bPBEN_Reverse, bPBEN_Stop})";
+        private int BUFFER_SIZE = 9;
+        private static final String MONITOR_TF_FIELDS = "field(write_enable, out{iMode, bPB_ResetError, bPB_Forward, bPB_Reverse, bPB_Stop})";
         
         
         private PVShort value; 
@@ -151,10 +152,10 @@ public class S7DBMotorFactory extends DBBaseFactory {
         private PVBoolean bMotorNotStopped;  
         
         private PVShort out_iMode;         
-        private PVBoolean out_bPBEN_ResetError;         
-        private PVBoolean out_bPBEN_Forward;
-        private PVBoolean out_bPBEN_Reverse;
-        private PVBoolean out_bPBEN_Stop;        
+        private PVBoolean out_bPB_ResetError;         
+        private PVBoolean out_bPB_Forward;
+        private PVBoolean out_bPB_Reverse;
+        private PVBoolean out_bPB_Stop;        
         
         byte byTemp;
     
@@ -163,14 +164,15 @@ public class S7DBMotorFactory extends DBBaseFactory {
             
             bFirtsRun = true;
             
-            offsets = new ArrayList<>();
-            offsets.add(0, null);
-            offsets.add(1, new MutablePair(6,5));
-            offsets.add(2, null); 
-            offsets.add(3, new MutablePair(6,7));   
-            offsets.add(4, new MutablePair(6,7)); 
-            offsets.add(5, new MutablePair(6,7));             
-            offsets.add(6, new MutablePair(6,7));                         
+            fieldOffsets = new ArrayList<>();
+            fieldOffsets.add(0, null);
+            fieldOffsets.add(1, null);
+            fieldOffsets.add(2, null); 
+            fieldOffsets.add(3, new ImmutablePair(0,-1));   
+            fieldOffsets.add(4, new ImmutablePair(6,0)); 
+            fieldOffsets.add(5, new ImmutablePair(6,1));             
+            fieldOffsets.add(6, new ImmutablePair(6,2));
+            fieldOffsets.add(7, new ImmutablePair(6,3));            
             
             value = pvStructure.getShortField("value");
             write_value = pvStructure.getShortField("write_value");
@@ -206,23 +208,29 @@ public class S7DBMotorFactory extends DBBaseFactory {
             
             PVStructure pvStructureOut = pvStructure.getStructureField("out"); 
             out_iMode = pvStructureOut.getShortField("iMode");
-            out_bPBEN_ResetError = pvStructureOut.getBooleanField("bPBEN_ResetError"); 
-            out_bPBEN_Forward = pvStructureOut.getBooleanField("bPBEN_Forward"); 
-            out_bPBEN_Reverse = pvStructureOut.getBooleanField("bPBEN_Reverse"); 
-            out_bPBEN_Stop = pvStructureOut.getBooleanField("bPBEN_Stop");              
+            out_bPB_ResetError = pvStructureOut.getBooleanField("bPB_ResetError"); 
+            out_bPB_Forward = pvStructureOut.getBooleanField("bPB_Forward"); 
+            out_bPB_Reverse = pvStructureOut.getBooleanField("bPB_Reverse"); 
+            out_bPB_Stop = pvStructureOut.getBooleanField("bPB_Stop");              
 
         }    
 
         /**
-         * Implement real time data to the record.
-         * The main code is here.
+         * For other special types of data, adaptation must be made here 
+         * to write to the PLC.
+         * 
+         * 1. In the first write all fields are written
+         * 2. In the second one only the changes are written.
+         * 
          */
         public void process() {
-            if (bFirtsRun) {
-                out_iMode.put(iMode.get());               
-            } else{
-             if (iMode.get() != out_iMode.get()) out_iMode.put(iMode.get());  
-            }
+
+            if (iMode.get() != out_iMode.get()) out_iMode.put(iMode.get()); 
+            if (bPB_ResetError.get() != out_bPB_ResetError.get()) out_bPB_ResetError.put(bPB_ResetError.get()); 
+            if (bPB_Forward.get() != out_bPB_Forward.get()) out_bPB_Forward.put(bPB_Forward.get()); 
+            if (bPB_Reverse.get() != out_bPB_Reverse.get()) out_bPB_Reverse.put(bPB_Reverse.get()); 
+            if (bPB_Stop.get() != out_bPB_Stop.get()) out_bPB_Stop.put(bPB_Stop.get());                
+
         }
 
         //udtHMI_DigitalInput
@@ -252,13 +260,20 @@ public class S7DBMotorFactory extends DBBaseFactory {
                 bPB_Forward.put(isBitSet(byTemp, 1));                
                 bPB_Reverse.put(isBitSet(byTemp, 2));  
                 bPB_Stop.put(isBitSet(byTemp, 3));                  
-                bPBEN_ResetError.put(isBitSet(byTemp, 4));
-                
-                bPBEN_Forward.put(isBitSet(byTemp, 5));
-                
+                bPBEN_ResetError.put(isBitSet(byTemp, 4));                
+                bPBEN_Forward.put(isBitSet(byTemp, 5));                
                 bPBEN_Reverse.put(isBitSet(byTemp, 6));                 
-                bPBEN_Stop.put(isBitSet(byTemp, 7));  
+                bPBEN_Stop.put(isBitSet(byTemp, 7)); 
                 
+                if (bFirtsRun) {
+                    out_iMode.put(iMode.get());
+                    out_bPB_ResetError.put(bPB_ResetError.get());
+                    out_bPB_Forward.put(bPB_Forward.get());
+                    out_bPB_Reverse.put(bPB_Reverse.get());
+                    out_bPB_Stop.put(bPB_Stop.get());
+                    bFirtsRun = false;
+                }                
+                                
                 byTemp = innerBuffer.readByte(); 
                 bForwardOn.put(isBitSet(byTemp, 0));                 
                 bReverseOn.put(isBitSet(byTemp, 1));

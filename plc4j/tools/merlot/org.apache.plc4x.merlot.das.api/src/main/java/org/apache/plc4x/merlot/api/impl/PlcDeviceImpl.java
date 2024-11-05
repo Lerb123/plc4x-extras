@@ -17,6 +17,7 @@
 package org.apache.plc4x.merlot.api.impl;
 
 
+
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.SequenceBarrier;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -30,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
+
 import static java.util.stream.Collectors.toList;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -50,7 +51,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.dal.Device;
 import org.osgi.service.dal.DeviceException;
 import org.osgi.service.device.Constants;
-import org.slf4j.Logger;
+
 import org.slf4j.LoggerFactory;
 import org.apache.plc4x.merlot.api.PlcGroup;
 import org.apache.plc4x.merlot.api.PlcTagFunction;
@@ -61,6 +62,7 @@ import org.epics.pvdata.property.AlarmSeverity;
 import org.epics.pvdata.property.AlarmStatus;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
 
 /*
 *
@@ -251,14 +253,16 @@ public class PlcDeviceImpl implements PlcDevice {
 
                                             writeBuffer.forEach(i -> {
                                                 if (null != i)
-                                                    builder.addTag(Long.toString(System.nanoTime()), i.left, i.right);
+                                                    builder.addTag(Long.toString(System.nanoTime()), i.left, i.right);                                                                                                  
                                                 });
-
                                             final PlcWriteRequest writeRequest = builder.build();
                                             writeBuffer.clear();
                                             //TODO: Max time of waiting
+
                                             PlcWriteResponse writeResponse = 
-                                                writeRequest.execute().get(); 
+                                                writeRequest.execute().get();
+                                            
+                                            
                                             //TODO: Change to debug
                                             writeResponse.getTagNames().forEach( t->
                                                     LOGGER.info("Write tag[{}] is {}", t, writeResponse.getResponseCode(t))
@@ -271,7 +275,7 @@ public class PlcDeviceImpl implements PlcDevice {
                                     LOGGER.error("Write ringbuffer: " + ex.getMessage());
                                 } finally {
                                     readProcessor.restart();
-                                    messageCounter[0] = 0;                                
+                                    messageCounter[0] = 0;                                  
                                 }
                                 
                             }

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.plc4x.merlot.api.PlcItem;
@@ -63,7 +64,7 @@ public class DBRecord extends PVRecord   implements PlcItemListener {
     
     protected int byteOffset = -1;
     protected byte bitOffset = -1;  
-    protected  ArrayList<MutablePair<Integer, Integer>> offsets;    
+    protected  ArrayList<ImmutablePair<Integer, Integer>> fieldOffsets;    
     
     
     protected PlcItem plcItem = null; 
@@ -98,9 +99,12 @@ public class DBRecord extends PVRecord   implements PlcItemListener {
     
     public byte getBiteOffset(){
         return bitOffset;
-    }  
-
-        
+    }
+    
+    public ArrayList<ImmutablePair<Integer, Integer>> getFieldOffsets(){
+        return fieldOffsets;
+    }
+            
     public String getFieldsToMonitor(){
         return MONITOR_VALUE_FIELD;
     };
@@ -115,29 +119,6 @@ public class DBRecord extends PVRecord   implements PlcItemListener {
         }
     }
     
-    public Optional<Integer> getRelativeBitOffset(int index) {
-        try {
-            Integer iByteOffset = offsets.get(index).getLeft() + byteOffset;
-            return Optional.of(iByteOffset);
-
-        } catch (Exception ex){
-            //
-        } 
-        return Optional.empty();
-    }
-
-    public Optional<Integer> getRelativeByteOffset(int index) {
-        try {
-            Integer iBitOffset = offsets.get(index).getRight();
-            return Optional.of(iBitOffset);
-
-        } catch (Exception ex){
-            //
-        } 
-        return Optional.empty();
-    }    
-
-
     @Override
     public void atach(PlcItem plcItem) {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -166,7 +147,7 @@ public class DBRecord extends PVRecord   implements PlcItemListener {
     }  
     
     public  boolean isBitSet(byte b, int bit) {
-        return ((b >> bit) & 1 ) == 0;
+        return ((b >> bit) & 1 ) == 1;
     }        
 
     public void setBit(byte b, int bit) {

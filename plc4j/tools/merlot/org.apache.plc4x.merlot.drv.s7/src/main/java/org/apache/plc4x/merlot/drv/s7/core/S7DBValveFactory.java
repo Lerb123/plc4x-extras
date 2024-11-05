@@ -78,7 +78,7 @@ public class S7DBValveFactory extends DBBaseFactory {
                 createStructure();
         
         Field sts =  fb.setId("sts_t").               
-                add("bNotHomeFeedback", fieldCreate.createScalar(ScalarType.pvBoolean)).
+                add("bNoHomeFeedback", fieldCreate.createScalar(ScalarType.pvBoolean)).
                 add("bNoWorkFeedback", fieldCreate.createScalar(ScalarType.pvBoolean)).
                 add("bHomeFeedbackStillActive", fieldCreate.createScalar(ScalarType.pvBoolean)).
                 add("bWorkFeedbackStillActive", fieldCreate.createScalar(ScalarType.pvBoolean)).
@@ -86,10 +86,9 @@ public class S7DBValveFactory extends DBBaseFactory {
         
         Field out =  fb.setId("output_t").   
                 add("iMode", fieldCreate.createScalar(ScalarType.pvShort)).                
-                add("bPBEN_ResetError", fieldCreate.createScalar(ScalarType.pvBoolean)). 
-                add("bPBEN_Home", fieldCreate.createScalar(ScalarType.pvBoolean)). 
-                add("bPBEN_Work", fieldCreate.createScalar(ScalarType.pvBoolean)). 
-                add("bPBEN_Stop", fieldCreate.createScalar(ScalarType.pvBoolean)). 
+                add("bPB_ResetError", fieldCreate.createScalar(ScalarType.pvBoolean)). 
+                add("bPB_Home", fieldCreate.createScalar(ScalarType.pvBoolean)). 
+                add("bPB_Work", fieldCreate.createScalar(ScalarType.pvBoolean)). 
                 createStructure();          
         
         PVStructure pvStructure = ntScalarBuilder.
@@ -119,7 +118,7 @@ public class S7DBValveFactory extends DBBaseFactory {
     class DBS7ValveRecord extends DBRecord implements PlcItemListener {   
         
         private int BUFFER_SIZE = 9;        
-        private static final String MONITOR_TF_FIELDS = "field(write_enable, cmd{bPBEN_ResetError, bPBEN_Home, bPBEN_Work, bPBEN_Stop})";
+        private static final String MONITOR_TF_FIELDS = "field(write_enable, out{iMode, bPB_ResetError, bPB_Home, bPB_Work})";
 
         private PVShort value; 
         private PVShort write_value;
@@ -144,23 +143,31 @@ public class S7DBValveFactory extends DBBaseFactory {
         private PVBoolean bError; 
         private PVBoolean bInterlock; 
 
-        private PVBoolean bNotHomeFeedback;
+        private PVBoolean bNoHomeFeedback;
         private PVBoolean bNoWorkFeedback;  
         private PVBoolean bHomeFeedbackStillActive;
-        private PVBoolean bWorkFeedbackStillActive;        
+        private PVBoolean bWorkFeedbackStillActive;
+
+        private PVShort out_iMode;         
+        private PVBoolean out_bPB_ResetError; 
+        private PVBoolean out_bPB_Home; 
+        private PVBoolean out_bPB_Work;
         
         byte byTemp;
     
         public DBS7ValveRecord(String recordName,PVStructure pvStructure) {
             super(recordName, pvStructure);
-            offsets = new ArrayList<>();
-            offsets.add(0, null);
-            offsets.add(1, new MutablePair(6,5));
-            offsets.add(2, null); 
-            offsets.add(3, new MutablePair(6,7));   
-            offsets.add(4, new MutablePair(6,7)); 
-            offsets.add(5, new MutablePair(6,7));             
-            offsets.add(6, new MutablePair(6,7));             
+            
+            bFirtsRun = true;            
+            
+            fieldOffsets = new ArrayList<>();
+            fieldOffsets.add(0, null);
+            fieldOffsets.add(1, null);
+            fieldOffsets.add(2, null); 
+            fieldOffsets.add(3, new ImmutablePair(0,-1));   
+            fieldOffsets.add(4, new ImmutablePair(6,0)); 
+            fieldOffsets.add(5, new ImmutablePair(6,1));             
+            fieldOffsets.add(6, new ImmutablePair(6,2));             
             
             value = pvStructure.getShortField("value");
             write_value = pvStructure.getShortField("write_value");
@@ -176,30 +183,45 @@ public class S7DBValveFactory extends DBBaseFactory {
             bPB_Work = pvStructureCmd.getBooleanField("bPB_Work");
             bPBEN_ResetError = pvStructureCmd.getBooleanField("bPBEN_ResetError");
             bPBEN_Home = pvStructureCmd.getBooleanField("bPBEN_Home");            
-            bPBEN_Work = pvStructureCmd.getBooleanField("PBEN_Work");
+            bPBEN_Work = pvStructureCmd.getBooleanField("bPBEN_Work");
             bPBEN_Stop = pvStructureCmd.getBooleanField("bPBEN_Stop");
             
             bHomeOn = pvStructureCmd.getBooleanField("bHomeOn");            
             bWorkOn = pvStructureCmd.getBooleanField("bWorkOn");
-            bSignalHome = pvStructureCmd.getBooleanField("SignalHome");            
-            bSignalWork = pvStructureCmd.getBooleanField("SignalWork");   
+            bSignalHome = pvStructureCmd.getBooleanField("bSignalHome");            
+            bSignalWork = pvStructureCmd.getBooleanField("bSignalWork");   
             bError = pvStructureCmd.getBooleanField("bError");
             bInterlock = pvStructureCmd.getBooleanField("bInterlock");
             
             PVStructure pvStructureSts = pvStructure.getStructureField("sts");            
-            bNotHomeFeedback = pvStructureSts.getBooleanField("bNoHomeFeedback");
+            bNoHomeFeedback = pvStructureSts.getBooleanField("bNoHomeFeedback");
             bNoWorkFeedback = pvStructureSts.getBooleanField("bNoWorkFeedback");
             bHomeFeedbackStillActive = pvStructureSts.getBooleanField("bHomeFeedbackStillActive");  
-            bWorkFeedbackStillActive = pvStructureSts.getBooleanField("bWorkFeedbackStillActive");             
+            bWorkFeedbackStillActive = pvStructureSts.getBooleanField("bWorkFeedbackStillActive"); 
+
+            PVStructure pvStructureOut = pvStructure.getStructureField("out");
+            out_iMode = pvStructureOut.getShortField("iMode");
+            out_bPB_ResetError = pvStructureOut.getBooleanField("bPB_ResetError"); 
+            out_bPB_Home = pvStructureOut.getBooleanField("bPB_Home"); 
+            out_bPB_Work = pvStructureOut.getBooleanField("bPB_Work");             
             
         }    
 
         /**
-         * Implement real time data to the record.
-         * The main code is here.
+         * For other special types of data, adaptation must be made here 
+         * to write to the PLC.
+         * 
+         * 1. In the first write all fields are written
+         * 2. In the second one only the changes are written.
+         * 
          */
         public void process() {
-            System.out.println("Valve processing...");
+
+            if (iMode.get() != out_iMode.get()) out_iMode.put(iMode.get()); 
+            if (bPB_ResetError.get() != out_bPB_ResetError.get()) out_bPB_ResetError.put(bPB_ResetError.get()); 
+            if (bPB_Home.get() != out_bPB_Home.get()) out_bPB_Home.put(bPB_Home.get()); 
+            if (bPB_Work.get() != out_bPB_Work.get()) out_bPB_Work.put(bPB_Work.get());                
+
         }
 
         //udtHMI_DigitalInput
@@ -234,6 +256,14 @@ public class S7DBValveFactory extends DBBaseFactory {
                 bPBEN_Stop.put(isBitSet(byTemp, 6)); 
                 bHomeOn.put(isBitSet(byTemp, 7));
                 
+                if (bFirtsRun) {
+                    out_iMode.put(iMode.get());
+                    out_bPB_ResetError.put(bPB_ResetError.get());
+                    out_bPB_Home.put(bPB_Home.get());
+                    out_bPB_Work.put(bPB_Work.get());
+                    bFirtsRun = false;                
+                }                
+                
                 byTemp = innerBuffer.readByte(); 
                 bWorkOn.put(isBitSet(byTemp, 0));
                 bSignalHome.put(isBitSet(byTemp, 1));                
@@ -242,7 +272,7 @@ public class S7DBValveFactory extends DBBaseFactory {
                 bInterlock.put(isBitSet(byTemp, 4));
                 
                 byTemp = innerBuffer.readByte(); 
-                bNotHomeFeedback.put(isBitSet(byTemp, 0));
+                bNoHomeFeedback.put(isBitSet(byTemp, 0));
                 bNoWorkFeedback.put(isBitSet(byTemp, 1)); 
                 bHomeFeedbackStillActive.put(isBitSet(byTemp, 2)); 
                 bWorkFeedbackStillActive.put(isBitSet(byTemp, 3));                                 

@@ -813,11 +813,7 @@ public class PlcGeneralFunctionImpl implements PlcGeneralFunction  {
                     filter(i -> i.getItemUid().equals(plcItem.getItemUid())).findFirst();
             
             if (optPlcItem.isPresent()) {
-                System.out.println("PlcItem uuid: " + optPlcItem.get().getItemUid());
-                System.out.println("PlcGroup uuid: " + uuid);
-                System.out.println("PlcDevice uuid: " + plcGroup.getGroupDeviceUid());
                 var deviceMeta = getPlcDeviceMeta( plcGroup.getGroupDeviceUid());
-                System.out.println(deviceMeta.toString());
                 return Optional.of((String) deviceMeta.get("DEVICE_CATEGORY"));
             };
 
