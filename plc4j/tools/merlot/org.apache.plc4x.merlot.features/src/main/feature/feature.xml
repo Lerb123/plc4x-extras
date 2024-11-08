@@ -17,12 +17,12 @@
     limitations under the License.
 -->
 <features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.6.0">
+    
+    <!-- Repositories of complementary projects are indicated -->
+    <repository>mvn:org.apache.activemq/artemis-features/2.38.0/xml/features</repository>        
 
     <feature name='${project.artifactId}' description='${project.name}' version='${project.version}'>
-        <details>${project.description}</details>
-        
-        <!-- Repositories of complementary projects are indicated -->
-<!--        <repository>mvn:org.apache.karaf.decanter/apache-karaf-decanter/2.10.0/xml/features</repository>         -->
+        <details>${project.description}</details>             
 
         <!-- Top level feature -->  
         <feature prerequisite="true">aries-blueprint</feature>
@@ -81,10 +81,10 @@
         <bundle>wrap:mvn:org.quartz-scheduler/quartz/${quartz.version}/$Export-Package=*;version=&quot;${quartz.version}&quot;,!*</bundle>   
         <bundle>wrap:mvn:jakarta.xml.bind/jakarta.xml.bind-api/${jakarta.xml.bind.version}/$Export-Package=*;version=&quot;${jakarta.xml.bind.version}&quot;,!*</bundle>            -->
         
- 
+        <!-- Internal boquer -->
+        
          <feature>plc4x-core</feature>              
-
-                        
+         <feature>plc4x-decanter</feature>                         
         <!-- Plc4x-Merlot-Core> 
             1. Driver packages must have a "start-level" greater than 40.
         -->
@@ -92,7 +92,9 @@
 
         <feature>plc4x-epics-core</feature>        
         <feature>plc4x-scheduler</feature> 
-        <feature>plc4x-drivers</feature>             
+        <feature>plc4x-drivers</feature>  
+        
+                              
               
         <bundle start-level="32">mvn:org.apache.plc4x.merlot.api/org.apache.plc4x.merlot.api/${project.version}</bundle>               
         <bundle start-level="50">mvn:org.apache.plc4x.merlot.das/org.apache.plc4x.merlot.das/${project.version}</bundle>
@@ -226,6 +228,10 @@
     <feature name='plc4x-ui' description='${project.name}' version='${project.version}'>
         <feature>war</feature>
         <bundle>webbundle:mvn:org.apache.plc4x.merlot.ui/org.apache.plc4x.merlot.ui/${project.version}/war?Web-ContextPath=plc4xui</bundle>         
+    </feature>    
+
+    <feature name='plc4x-decanter' description='${project.name}' version='${project.version}'>         
+        <!--<bundle start-level="60">mvn:org.apache.plc4x.merlot.decanter/org.apache.plc4x.merlot.decanter/${project.version}</bundle>-->                          
     </feature>    
 
     <!--
