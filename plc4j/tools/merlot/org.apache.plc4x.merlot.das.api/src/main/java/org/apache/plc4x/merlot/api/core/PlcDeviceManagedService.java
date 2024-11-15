@@ -39,10 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.plc4x.merlot.api.PlcDeviceFactory;
 import org.apache.plc4x.merlot.api.PlcDevice;
-/**
- *
- * @author cgarcia
- */
+
 public class PlcDeviceManagedService implements ManagedService, ConfigurationListener, Job {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(PlcDeviceManagedService.class);     

@@ -258,7 +258,8 @@ under the License.
         
     <module>org.apache.plc4x.merlot.drv.mb</module>
         
-    <module>decanter</module>
+    <module>org.apache.plc4x.merlot.decanter</module>
+        
       
   </modules>
   

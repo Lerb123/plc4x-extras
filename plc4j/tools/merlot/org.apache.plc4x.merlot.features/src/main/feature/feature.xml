@@ -100,8 +100,8 @@
         <bundle start-level="50">mvn:org.apache.plc4x.merlot.das/org.apache.plc4x.merlot.das/${project.version}</bundle>
         <bundle start-level="60">mvn:org.apache.plc4x.merlot.das.ref/org.apache.plc4x.merlot.das.ref/${project.version}</bundle> 
 
-        <bundle start-level="100">mvn:org.apache.plc4x.merlot.das.base/org.apache.plc4x.merlot.das.base/${project.version}</bundle> 
-        <configfile finalname="/etc/org.apache.plc4x.merlot.das.devices.cfg">mvn:org.apache.plc4x.merlot.das.base/org.apache.plc4x.merlot.das.base/${project.version}/cfg</configfile>
+        <!--<bundle start-level="100">mvn:org.apache.plc4x.merlot.das.base/org.apache.plc4x.merlot.das.base/${project.version}</bundle>--> 
+        <!--<configfile finalname="/etc/org.apache.plc4x.merlot.das.devices.cfg">mvn:org.apache.plc4x.merlot.das.base/org.apache.plc4x.merlot.das.base/${project.version}/cfg</configfile>-->
         
         <bundle start-level="60">mvn:org.apache.plc4x.merlot.db/org.apache.plc4x.merlot.db/${project.version}</bundle>         
         <!-- <bundle start-level="40">mvn:org.apache.plc4x.dummy/org.apache.plc4x.dummy/${project.version}</bundle>   -->                     
@@ -230,8 +230,14 @@
         <bundle>webbundle:mvn:org.apache.plc4x.merlot.ui/org.apache.plc4x.merlot.ui/${project.version}/war?Web-ContextPath=plc4xui</bundle>         
     </feature>    
 
-    <feature name='plc4x-decanter' description='${project.name}' version='${project.version}'>         
-        <!--<bundle start-level="60">mvn:org.apache.plc4x.merlot.decanter/org.apache.plc4x.merlot.decanter/${project.version}</bundle>-->                          
+    <feature name='plc4x-decanter' description='${project.name}' version='${project.version}'>   
+        <feature>plc4x-epics-gpclient</feature>
+        <bundle start-level="40">mvn:org.eclipse.paho/org.eclipse.paho.client.mqttv3/1.2.5</bundle>                 
+        <bundle start-level="60">mvn:org.apache.plc4x.merlot.decanter/org.apache.plc4x.merlot.decanter/${project.version}</bundle>
+        <configfile finalname="/etc/org.apache.plc4x.merlot.decanter-grafana.cfg">mvn:org.apache.plc4x.merlot.decanter/org.apache.plc4x.merlot.decanter/${project.version}/cfg</configfile>                
+        <configfile finalname="/etc/org.apache.plc4x.merlot.decanter-iotdb.cfg">mvn:org.apache.plc4x.merlot.decanter/org.apache.plc4x.merlot.decanter/${project.version}/cfg</configfile> 
+        <configfile finalname="/etc/org.apache.plc4x.merlot.pvhtc.cfg">mvn:org.apache.plc4x.merlot.decanter/org.apache.plc4x.merlot.decanter/${project.version}/cfg2</configfile>  
+        <configfile finalname="/etc/org.apache.plc4x.merlot.pvrt.cfg">mvn:org.apache.plc4x.merlot.decanter/org.apache.plc4x.merlot.decanter/${project.version}/cfg2</configfile>                                                                                                                                                                                                               
     </feature>    
 
     <!--

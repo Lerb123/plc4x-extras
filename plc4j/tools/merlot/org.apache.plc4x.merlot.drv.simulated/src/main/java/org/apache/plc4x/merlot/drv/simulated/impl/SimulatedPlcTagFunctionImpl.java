@@ -16,16 +16,16 @@
  */
 package org.apache.plc4x.merlot.drv.simulated.impl;
 
+import com.fasterxml.jackson.databind.PropertyMetadata;
 import io.netty.buffer.ByteBuf;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.java.api.model.PlcTag;
 import static org.apache.plc4x.java.api.types.PlcValueType.BOOL;
-import static org.apache.plc4x.java.api.types.PlcValueType.BYTE;
 import org.apache.plc4x.java.simulated.tag.SimulatedTag;
 import org.apache.plc4x.merlot.api.PlcTagFunction;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.dal.OperationMetadata;
-import org.osgi.service.dal.PropertyMetadata;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,12 +141,7 @@ public class SimulatedPlcTagFunctionImpl implements PlcTagFunction {
         }
     }    
     
-    
-    @Override
-    public PropertyMetadata getPropertyMetadata(String propertyName) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
+   
     @Override
     public OperationMetadata getOperationMetadata(String operationName) {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -160,6 +155,11 @@ public class SimulatedPlcTagFunctionImpl implements PlcTagFunction {
     @Override
     public String[] getServicePropertyKeys() {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public org.osgi.service.dal.PropertyMetadata getPropertyMetadata(String propertyName) {
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
 
