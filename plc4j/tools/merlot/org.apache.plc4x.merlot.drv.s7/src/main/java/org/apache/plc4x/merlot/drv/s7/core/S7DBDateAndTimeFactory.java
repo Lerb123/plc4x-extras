@@ -19,6 +19,8 @@
 package org.apache.plc4x.merlot.drv.s7.core;
 
 import io.netty.buffer.Unpooled;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.merlot.api.PlcItem;
@@ -33,15 +35,16 @@ import org.epics.pvdata.factory.FieldFactory;
 import org.epics.pvdata.pv.FieldBuilder;
 import org.epics.pvdata.pv.FieldCreate;
 import org.epics.pvdata.pv.PVBoolean;
+import org.epics.pvdata.pv.PVInt;
 import org.epics.pvdata.pv.PVShort;
 import org.epics.pvdata.pv.PVShortArray;
 import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.ScalarType;
 import org.epics.pvdatabase.PVRecord;
-import org.apache.plc4x.merlot.drv.s7.core.S7DBStaticHelper;
 
-public class S7DBCounterFactory extends DBBaseFactory {
+
+public class S7DBDateAndTimeFactory extends DBBaseFactory {
     
     private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
        
@@ -51,14 +54,15 @@ public class S7DBCounterFactory extends DBBaseFactory {
         FieldBuilder fb = fieldCreate.createFieldBuilder();
 
         PVStructure pvStructure = ntScalarBuilder.
-            value(ScalarType.pvShort).
+            value(ScalarType.pvByte).
             addDescriptor().            
             add("id", fieldCreate.createScalar(ScalarType.pvString)).  
             add("offset", fieldCreate.createScalar(ScalarType.pvString)).                 
             add("scan_time", fieldCreate.createScalar(ScalarType.pvString)).
             add("scan_enable", fieldCreate.createScalar(ScalarType.pvBoolean)).
             add("write_enable", fieldCreate.createScalar(ScalarType.pvBoolean)).  
-            add("write_value", fieldCreate.createScalar(ScalarType.pvShort)).                 
+            add("write_value", fieldCreate.createScalar(ScalarType.pvByte)). 
+            add("strValue", fieldCreate.createScalar(ScalarType.pvString)).  
             addAlarm().
             addTimeStamp().
             addDisplay().
@@ -96,13 +100,17 @@ public class S7DBCounterFactory extends DBBaseFactory {
            
     class DBS7CounterRecord extends DBRecord implements PlcItemListener {    
     
-        private int BUFFER_SIZE = 2;
+        private int BUFFER_SIZE = 8;
         private static final String MONITOR_TF_FIELDS = "field(write_enable, write_value)";        
         
-        private PVShort value; 
-        private PVShort write_value;
-        private PVBoolean write_enable;  
-        short b, c, d, bcd;
+        private PVInt value; 
+        private PVInt write_value;
+        private PVBoolean write_enable;
+        private PVString strValue;         
+        private LocalDateTime lastDAT;        
+        private LocalDateTime userDAT;
+        
+        int tempValue;
     
         public DBS7CounterRecord(String recordName,PVStructure pvStructure) {
             super(recordName, pvStructure);
@@ -113,9 +121,10 @@ public class S7DBCounterFactory extends DBBaseFactory {
             fieldOffsets.add(0, null);
             fieldOffsets.add(1, new ImmutablePair(0,-1));
                         
-            value = pvStructure.getShortField("value");
-            write_value = pvStructure.getShortField("write_value");
-            write_enable = pvStructure.getBooleanField("write_enable");            
+            value = pvStructure.getIntField("value");
+            write_value = pvStructure.getIntField("write_value");
+            write_enable = pvStructure.getBooleanField("write_enable");
+            strValue = pvStructure.getStringField("strValue");
         }    
 
         /**
@@ -125,10 +134,19 @@ public class S7DBCounterFactory extends DBBaseFactory {
         public void process()
         {
             if (null != plcItem) {               
-                if (write_enable.get()) {                          
-                    write_value.put(value.get());                                               
+                if (write_enable.get()) {   
+                    try {
+                        userDAT = LocalDateTime.parse(strValue.get());
+                        if (!lastDAT.equals(userDAT)) {
+                            //Fire the write process
+                            write_value.put(0);        
+                        }
+                    } catch (Exception ex) {
+                        LOGGER.info("S7 DATE_AND_TIME mal formed.");
+                    }
+                                              
                 }
-            } 
+            }              
         }
 
         @Override
@@ -146,12 +164,15 @@ public class S7DBCounterFactory extends DBBaseFactory {
         @Override
         public void update() {    
             if (null != plcItem) {
-                b = (short)(innerBuffer.getByte(0) & 0x0F);
-                c = (short)((innerBuffer.getByte(1) & 0xF0) >> 4);
-                d = (short)(innerBuffer.getByte(1) & 0x0F);
-                bcd = (short)(b*100 + c*10 + d);
-                if (value.get() != bcd)
-                    value.put(bcd);
+                tempValue = innerBuffer.getInt(0);
+                if (value.get() != tempValue) {
+                    value.put(tempValue);
+                    lastDAT = S7DBStaticHelper.s7DateTimeToLocalDateTime(innerBuffer);
+                    if (bFirtsRun ){
+                        bFirtsRun = false;
+                    }
+                    strValue.put(lastDAT.toString());                    
+                }
             }
         }
         
@@ -159,11 +180,6 @@ public class S7DBCounterFactory extends DBBaseFactory {
         public String getFieldsToMonitor() {
             return MONITOR_TF_FIELDS;
         }
-
-
-                
-  
-
         
     }
            

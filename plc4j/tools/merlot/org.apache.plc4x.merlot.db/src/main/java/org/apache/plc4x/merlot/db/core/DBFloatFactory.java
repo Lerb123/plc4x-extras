@@ -19,6 +19,8 @@
 package org.apache.plc4x.merlot.db.core;
 
 import io.netty.buffer.Unpooled;
+import java.util.ArrayList;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.api.PlcItemListener;
 import org.apache.plc4x.merlot.db.api.DBRecord;
@@ -88,14 +90,21 @@ public class DBFloatFactory extends DBBaseFactory {
     }
 
     class DBFloatRecord extends DBRecord implements PlcItemListener {
-    
-        private static final String MONITOR_SCALAR_FIELDS = "field(value, write_enable)";        
+        
+        private int BUFFER_SIZE = Float.BYTES;             
         private PVFloat value;  
         private PVFloat write_value;
         private PVBoolean write_enable;          
         
         public DBFloatRecord(String recordName,PVStructure pvStructure) {
             super(recordName, pvStructure);
+           
+            bFirtsRun = true;
+            
+            fieldOffsets = new ArrayList<>();
+            fieldOffsets.add(0, null);
+            fieldOffsets.add(1, new ImmutablePair(0,-1));  
+            
             value = pvStructure.getFloatField("value");
             write_value = pvStructure.getFloatField("write_value");
             write_enable = pvStructure.getBooleanField("write_enable");
@@ -123,7 +132,7 @@ public class DBFloatFactory extends DBBaseFactory {
             this.plcItem = plcItem; 
             //offset = this.getPVStructure().getIntField("offset").get();  
             getOffset( this.getPVStructure().getStringField("offset").get());            
-            innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, Float.BYTES);
+            innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
             innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);
         }
 

@@ -28,29 +28,33 @@
     <bean id="S7PlcTagFunctionBean" class="org.apache.plc4x.merlot.drv.s7.impl.S7PlcTagFunctionImpl" scope="singleton">
         <argument ref="blueprintBundleContext"/>             
     </bean>
+    
+    <bean id="S7PlcEventConnectionFunctionBean" class="org.apache.plc4x.merlot.drv.s7.impl.S7PlcEventConnectionFunctionImpl" scope="singleton" />  
+    
+    <!-- -->       
+    
+    <bean id="S7DBCounterFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBCounterFactory" scope="singleton" />                  
+    
+    <bean id="S7DBS5TimeFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBS5TimeFactory" scope="singleton" /> 
 
-    <bean id="S7PlcEventConnectionFunctionBean" class="org.apache.plc4x.merlot.drv.s7.impl.S7PlcEventConnectionFunctionImpl" scope="singleton">           
-    </bean>
+    <bean id="S7DBDateFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBDateFactory" scope="singleton" />   
     
-    <bean id="S7DBCounterFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBCounterFactory" scope="singleton">           
-    </bean>
+    <bean id="S7DBTimeFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBTimeFactory" scope="singleton" />  
     
-    <bean id="S7DBDiFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBDiFactory" scope="singleton">           
-    </bean> 
+    <bean id="S7DBTimeOfDayFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBTimeOfDayFactory" scope="singleton" />  
     
-    <bean id="S7DBAiFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBAiFactory" scope="singleton">           
-    </bean>  
+    <bean id="S7DBDateAndTimeFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBDateAndTimeFactory" scope="singleton" />                             
     
-    <bean id="S7DBAoFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBAoFactory" scope="singleton">           
-    </bean> 
+    <bean id="S7DBDiFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBDiFactory" scope="singleton" />           
     
-    <bean id="S7DBValveFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBValveFactory" scope="singleton">           
-    </bean>  
+    <bean id="S7DBAiFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBAiFactory" scope="singleton" />           
     
-    <bean id="S7DBMotorFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBMotorFactory" scope="singleton">           
-    </bean>   
+    <bean id="S7DBAoFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBAoFactory" scope="singleton" />           
     
-                                                                                    
+    <bean id="S7DBValveFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBValveFactory" scope="singleton" />           
+    
+    <bean id="S7DBMotorFactoryBean" class="org.apache.plc4x.merlot.drv.s7.core.S7DBMotorFactory" scope="singleton" />           
+                                                                                       
     <bean id="S7DBWriterHandlerImpl" class="org.apache.plc4x.merlot.drv.s7.impl.S7DBWriterHandlerImpl"/>                                                                                                                                                                                                                                                      
 
 
@@ -73,6 +77,46 @@
             <entry key="dal.function.type"        value="wrapper"/>                      
         </service-properties>        
     </service>   
+    
+    <service id="S7DBS5TimeFactory"     
+             ref="S7DBS5TimeFactoryBean" 
+             interface="org.apache.plc4x.merlot.db.api.DBRecordFactory">
+        <service-properties>
+            <entry key="db.record.type" value="s5time"/>            
+        </service-properties>
+    </service>    
+    
+    <service id="S7DBDateFactory"     
+             ref="S7DBDateFactoryBean" 
+             interface="org.apache.plc4x.merlot.db.api.DBRecordFactory">
+        <service-properties>
+            <entry key="db.record.type" value="s7date"/>            
+        </service-properties>
+    </service>         
+      
+    <service id="S7DBTimeFactory"     
+             ref="S7DBTimeFactoryBean" 
+             interface="org.apache.plc4x.merlot.db.api.DBRecordFactory">
+        <service-properties>
+            <entry key="db.record.type" value="s7time"/>            
+        </service-properties>
+    </service>         
+    
+    <service id="S7DBTimeOfDayFactory"     
+             ref="S7DBTimeOfDayFactoryBean" 
+             interface="org.apache.plc4x.merlot.db.api.DBRecordFactory">
+        <service-properties>
+            <entry key="db.record.type" value="s7tod"/>            
+        </service-properties>
+    </service>  
+    
+    <service id="S7DBDateAndTimeFactory"     
+             ref="S7DBDateAndTimeFactoryBean" 
+             interface="org.apache.plc4x.merlot.db.api.DBRecordFactory">
+        <service-properties>
+            <entry key="db.record.type" value="s7dat"/>
+        </service-properties>
+    </service>           
     
     <service id="S7DBCounterFactory"     
              ref="S7DBCounterFactoryBean" 
@@ -122,6 +166,7 @@
         </service-properties>
     </service>   
     
+    <!-- TODO: se requiere cambiar el identificador, causa problema con DAS. -->
     <service ref="S7DBWriterHandlerImpl" interface="org.apache.plc4x.merlot.db.api.DBWriterHandler">
         <service-properties>
             <entry key="DEVICE_CATEGORY"  value="s7"/>           

@@ -29,7 +29,7 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+ 
 public class MerlotMqttAppenderImpl  implements MerlotAppender {
     private static final Logger LOGGER = LoggerFactory.getLogger(MerlotMqttAppenderImpl.class); 
     
@@ -42,7 +42,7 @@ public class MerlotMqttAppenderImpl  implements MerlotAppender {
     private final String strMarshallerTarget;   
     private final String watchdogTime;    
 
-    
+    private MqttConnectOptions options;
     private MqttClient client;
     private MqttMessage message;
     
@@ -60,14 +60,19 @@ public class MerlotMqttAppenderImpl  implements MerlotAppender {
     
     @Override
     public void init() {
-        try {            
+        try {        
             message = new MqttMessage();
             client = new MqttClient(strServerUri, strClientId, new MemoryPersistence());
-            MqttConnectOptions options = new MqttConnectOptions();
+            options = new MqttConnectOptions();
             options.setCleanSession(true);
             options.setUserName(strUserName);
             options.setPassword(strPassword.toCharArray());
             client.connect(options);
+            if (client.isConnected()) {
+                LOGGER.info("Conected.");
+            } else {
+                LOGGER.info("Not conected.");
+            }
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());
         }
@@ -85,17 +90,31 @@ public class MerlotMqttAppenderImpl  implements MerlotAppender {
         
     @Override
     public void handleEvent(Event event) {
-        System.out.println("Evento: " + event.toString());
+        if ((null != client) & (client.isConnected())) {
+            final String strPayload = (String) event.getProperty("value");
+
+            if (null == message) {
+                message = new MqttMessage();
+            }
+
+            message.setPayload(strPayload.getBytes());
+
+            try {
+                client.publish((String) event.getProperty("tag"), message);
+            } catch (MqttException ex) {
+                LOGGER.error(ex.toString());
+            }
+        }
     }
 
     @Override
     public void execute(JobContext context) {
-        System.out.println("EXECUTE");
+        if ((null == client) || (!client.isConnected())){
+            init();
+        }
     }
 
-
-    
-    
+        
    public static class Builder {
        private String strServerUri;
        private String strClientId;
@@ -112,7 +131,7 @@ public class MerlotMqttAppenderImpl  implements MerlotAppender {
        }
        
        public Builder ClientId(String strClientId){
-           this.strServerUri = strClientId;
+           this.strClientId = strClientId;
            return this;
        }       
             

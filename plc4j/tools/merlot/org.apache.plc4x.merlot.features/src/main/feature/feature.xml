@@ -27,7 +27,8 @@
         <!-- Top level feature -->  
         <feature prerequisite="true">aries-blueprint</feature>
         <feature prerequisite="true">spifly</feature>
-        <feature prerequisite="true">pax-jdbc-sqlite</feature>        
+        <feature prerequisite="true">pax-jdbc-sqlite</feature>
+        <feature>plc4x-epics-gpclient</feature>               
         
         <bundle>wrap:mvn:org.osgi/org.osgi.service.device/1.1.0/$Export-Package=*;version=&quot;1.1.0&quot;,!*</bundle>   
                  
@@ -82,9 +83,9 @@
         <bundle>wrap:mvn:jakarta.xml.bind/jakarta.xml.bind-api/${jakarta.xml.bind.version}/$Export-Package=*;version=&quot;${jakarta.xml.bind.version}&quot;,!*</bundle>            -->
         
         <!-- Internal boquer -->
-        
-         <feature>plc4x-core</feature>              
-         <feature>plc4x-decanter</feature>                         
+
+        <feature>plc4x-core</feature>              
+        <feature>plc4x-decanter</feature>                         
         <!-- Plc4x-Merlot-Core> 
             1. Driver packages must have a "start-level" greater than 40.
         -->
@@ -232,8 +233,8 @@
 
     <feature name='plc4x-decanter' description='${project.name}' version='${project.version}'>   
         <feature>plc4x-epics-gpclient</feature>
-        <bundle start-level="40">mvn:org.eclipse.paho/org.eclipse.paho.client.mqttv3/1.2.5</bundle>                 
-        <bundle start-level="60">mvn:org.apache.plc4x.merlot.decanter/org.apache.plc4x.merlot.decanter/${project.version}</bundle>
+        <bundle start-level="30">mvn:org.eclipse.paho/org.eclipse.paho.client.mqttv3/1.2.5</bundle>                 
+        <bundle start-level="90">mvn:org.apache.plc4x.merlot.decanter/org.apache.plc4x.merlot.decanter/${project.version}</bundle>
         <configfile finalname="/etc/org.apache.plc4x.merlot.decanter-grafana.cfg">mvn:org.apache.plc4x.merlot.decanter/org.apache.plc4x.merlot.decanter/${project.version}/cfg</configfile>                
         <configfile finalname="/etc/org.apache.plc4x.merlot.decanter-iotdb.cfg">mvn:org.apache.plc4x.merlot.decanter/org.apache.plc4x.merlot.decanter/${project.version}/cfg</configfile> 
         <configfile finalname="/etc/org.apache.plc4x.merlot.pvhtc.cfg">mvn:org.apache.plc4x.merlot.decanter/org.apache.plc4x.merlot.decanter/${project.version}/cfg2</configfile>  
@@ -505,23 +506,25 @@ dataSourceName=rtdb
     
 
     <feature name='plc4x-epics-core' description='${project.name}' version='${project.version}'>
-        <bundle>wrap:mvn:org.epics/epics-util/${epics.util.version}/$Export-Package=*;version=&quot;${epics.util.version}&quot;,!*</bundle>        
-        <bundle>wrap:mvn:org.epics/epics-pvdata/${epics.pvdata.version}/$Export-Package=*;veplc4j-spirsion=&quot;${epics.pvdata.version}&quot;,!*</bundle>   
-        <bundle>wrap:mvn:org.epics/epics-ntypes/${epics.ntypes.version}/$Export-Package=*;version=&quot;${epics.ntypes.version}&quot;,!*</bundle>         
-        <bundle>wrap:mvn:org.epics/jca/${epics.jca.version}/$Export-Package=*;version=&quot;${epics.jca.version}&quot;,!*</bundle>         
-        <bundle>wrap:mvn:org.epics/epics-pvaccess/${epics.pvaccess.version}/$overwrite=merge&amp;Export-Package=org.epics.pvaccess.server.impl.remote.*,*;version=&quot;${epics.pvaccess.version}&quot;,!*</bundle>          
-        <bundle>wrap:mvn:org.epics/epics-pvaclient/${epics.pvaclient.version}/$Export-Package=*;version=&quot;${epics.pvaclient.version}&quot;,!*</bundle>                    
-        <bundle>wrap:mvn:org.epics/epics-pvdatabase/${epics.pvdatabase.version}/$Export-Package=*;version=&quot;${epics.pvdatabase.version}&quot;,!*</bundle>                                                                                
+        <bundle start-level="30">wrap:mvn:org.epics/epics-util/${epics.util.version}/$Export-Package=*;version=&quot;${epics.util.version}&quot;,!*</bundle>        
+        <bundle start-level="30">wrap:mvn:org.epics/epics-pvdata/${epics.pvdata.version}/$Export-Package=*;veplc4j-spirsion=&quot;${epics.pvdata.version}&quot;,!*</bundle>   
+        <bundle start-level="30">wrap:mvn:org.epics/epics-ntypes/${epics.ntypes.version}/$Export-Package=*;version=&quot;${epics.ntypes.version}&quot;,!*</bundle>  
+        <bundle start-level="30">wrap:mvn:org.epics/vtype/${epics.vtype.version}/$Export-Package=*;version=&quot;${epics.vtype.version}&quot;,!*</bundle>             
+        <bundle start-level="30">wrap:mvn:org.epics/vtype-json/${epics.vtype.json.version}/$Export-Package=*;version=&quot;${epics.vtype.json.version}&quot;,!*</bundle>            
+        <bundle start-level="30">wrap:mvn:org.epics/jca/${epics.jca.version}/$Export-Package=*;version=&quot;${epics.jca.version}&quot;,!*</bundle>         
+        <bundle start-level="30">wrap:mvn:org.epics/epics-pvaccess/${epics.pvaccess.version}/$overwrite=merge&amp;Export-Package=org.epics.pvaccess.server.impl.remote.*,*;version=&quot;${epics.pvaccess.version}&quot;,!*</bundle>          
+        <bundle start-level="30">wrap:mvn:org.epics/epics-pvaclient/${epics.pvaclient.version}/$Export-Package=*;version=&quot;${epics.pvaclient.version}&quot;,!*</bundle>                    
+        <bundle start-level="30">wrap:mvn:org.epics/epics-pvdatabase/${epics.pvdatabase.version}/$Export-Package=*;version=&quot;${epics.pvdatabase.version}&quot;,!*</bundle>                                                                                
     </feature>    
 
     <feature name='plc4x-epics-gpclient' description='${project.name}' version='${project.version}'>
         <feature>plc4x-epics-core</feature>
-        <bundle>wrap:mvn:org.epics/gpclient-core/${epics.gpclient.core.version}/$Export-Package=*;version=&quot;${epics.gpclient.core.version}&quot;,!*</bundle>         
-        <bundle>wrap:mvn:org.epics/gpclient-sim/${epics.gpclient.sim.version}/$Export-Package=*;version=&quot;${epics.gpclient.sim.version}&quot;,!*</bundle>
-        <bundle>wrap:mvn:org.epics/gpclient-loc/${epics.gpclient.loc.version}/$Export-Package=*;version=&quot;${epics.gpclient.loc.version}&quot;,!*</bundle>
-        <bundle>wrap:mvn:org.epics/gpclient-pva/${epics.gpclient.pva.version}/$Export-Package=*;version=&quot;${epics.gpclient.pva.version}&quot;,!*</bundle>
-        <bundle>wrap:mvn:org.epics/gpclient-ca/${epics.gpclient.ca.version}$Export-Package=*;version=&quot;${epics.gpclient.ca.version}&quot;,!*</bundle>
-        <bundle>wrap:mvn:org.epics/vtype/${epics.vtype.version}/$Export-Package=*;version=&quot;${epics.vtype.version}&quot;,!*</bundle>         
+        <bundle start-level="30">wrap:mvn:org.epics/gpclient-core/${epics.gpclient.core.version}/$Export-Package=*;version=&quot;${epics.gpclient.core.version}&quot;,!*</bundle>         
+        <bundle start-level="30">wrap:mvn:org.epics/gpclient-sim/${epics.gpclient.sim.version}/$Export-Package=*;version=&quot;${epics.gpclient.sim.version}&quot;,!*</bundle>
+        <bundle start-level="30">wrap:mvn:org.epics/gpclient-loc/${epics.gpclient.loc.version}/$Export-Package=*;version=&quot;${epics.gpclient.loc.version}&quot;,!*</bundle>
+        <bundle start-level="30">wrap:mvn:org.epics/gpclient-pva/${epics.gpclient.pva.version}/$Export-Package=*;version=&quot;${epics.gpclient.pva.version}&quot;,!*</bundle>
+        <bundle start-level="30">wrap:mvn:org.epics/gpclient-ca/${epics.gpclient.ca.version}$Export-Package=*;version=&quot;${epics.gpclient.ca.version}&quot;,!*</bundle>
+      
     </feature> 
 
     <feature name='plc4x-uns-xx' description='${project.name}' version='${project.version}'>

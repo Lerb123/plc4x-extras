@@ -86,8 +86,9 @@ public class DBIntFactory extends DBBaseFactory {
         return dbRecord;
     }
 
-    class DBIntRecord extends DBRecord implements PlcItemListener {    
-    
+    class DBIntRecord extends DBRecord implements PlcItemListener { 
+        
+        private int BUFFER_SIZE = Integer.BYTES;       
         private PVInt value; 
         private PVInt write_value;
         private PVBoolean write_enable;                
@@ -120,7 +121,7 @@ public class DBIntFactory extends DBBaseFactory {
             this.plcItem = plcItem;
             //offset = this.getPVStructure().getIntField("offset").get();  
             getOffset( this.getPVStructure().getStringField("offset").get());            
-            innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, Integer.BYTES);
+            innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
             innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);
         }
 
@@ -138,7 +139,7 @@ public class DBIntFactory extends DBBaseFactory {
         
         @Override
         public String getFieldsToMonitor() {
-            return MONITOR_FIELDS;
+            return MONITOR_SCALAR_FIELDS;
         }        
     }
 }

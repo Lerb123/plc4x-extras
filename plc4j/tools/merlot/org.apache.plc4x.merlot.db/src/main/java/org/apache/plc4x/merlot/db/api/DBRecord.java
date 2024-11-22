@@ -52,6 +52,7 @@ public class DBRecord extends PVRecord   implements PlcItemListener {
     
     protected static final String MONITOR_VALUE_FIELD = "field(value)";
     protected static final String MONITOR_WRITE_FIELD = "field(write_value)"; 
+    protected static final String MONITOR_SCALAR_FIELDS = "field(write_enable, write_value)";      
     
     private static final Pattern BYTE_OFFSET_PATTERN = 
              Pattern.compile("(?<byteOffset>\\d{1,5})");
@@ -75,7 +76,11 @@ public class DBRecord extends PVRecord   implements PlcItemListener {
    
     
     public DBRecord(String recordName, PVStructure pvStructure) {
-        super(recordName, pvStructure);
+        super(recordName, pvStructure);           
+            bFirtsRun = true;            
+            fieldOffsets = new ArrayList<>();
+            fieldOffsets.add(0, null);
+            fieldOffsets.add(1, new ImmutablePair(0,-1));        
     }
     
     public Optional<PlcItem> getPlcItem(){

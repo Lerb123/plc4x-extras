@@ -17,6 +17,7 @@
 package org.apache.plc4x.merlot.decanter.impl;
 
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Optional;
 import org.apache.plc4x.merlot.decanter.api.MerlotAppender;
 import org.apache.plc4x.merlot.decanter.api.MerlotDecanterFactory;
@@ -28,21 +29,23 @@ public class MerlotMqttAppenderFactory implements MerlotDecanterFactory {
     @Override
     public Optional<MerlotAppender> createBundle(Dictionary<String, ?> props) {
         MerlotAppender appender = null;
-        
-        appender = new MerlotMqttAppenderImpl.Builder().                
-                ServerUri("server").
-                ClientId("").
-                Topic("topic").
-                UserName("username").
-                Password("password").
-                EventTopic("eventtopic").
-                MarshallerTarget("marshaller.target").
-                WatchDogTime("watchdogtime").build();
                 
-        
-        
+        appender = new MerlotMqttAppenderImpl.Builder().                
+                ServerUri(getValue(props,"server")).
+                ClientId(getValue(props,"clientId")).
+                Topic(getValue(props,"topic")).
+                UserName(getValue(props,"username")).
+                Password(getValue(props,"password")).
+                EventTopic(getValue(props,"eventtopic")).
+                MarshallerTarget(getValue(props,"marshaller.target")).
+                WatchDogTime(getValue(props,"watchdogtime")).build();
+                                
         return Optional.of(appender);
         
+    }
+    
+    private String getValue(Dictionary<String, ?> props, String strKey){
+        return (null == props.get(strKey))? "" : (String) props.get(strKey);
     }
     
 }

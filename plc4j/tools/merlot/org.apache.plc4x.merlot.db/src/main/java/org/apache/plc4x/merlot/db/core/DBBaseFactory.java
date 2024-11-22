@@ -18,7 +18,9 @@
  */
 package org.apache.plc4x.merlot.db.core;
 
+import java.util.ArrayList;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.merlot.db.api.DBRecord;
 import org.apache.plc4x.merlot.db.api.DBRecordFactory;
 import org.epics.pvdata.copy.CreateRequest;
@@ -34,7 +36,7 @@ import org.slf4j.LoggerFactory;
 //TODO: Replace string processing with with regex.
 public class DBBaseFactory implements DBRecordFactory  {
     protected static final Logger LOGGER = LoggerFactory.getLogger(DBBaseFactory.class); 
-         
+   
     @Override
     public DBRecord create(String recordName) {
         throw new UnsupportedOperationException("Not supported yet.");

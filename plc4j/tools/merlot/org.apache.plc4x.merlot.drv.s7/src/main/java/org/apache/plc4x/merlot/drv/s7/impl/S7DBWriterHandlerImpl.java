@@ -43,6 +43,7 @@ import org.epics.pvdata.pv.PVInt;
 import org.epics.pvdata.pv.PVLong;
 import org.epics.pvdata.pv.PVScalar;
 import org.epics.pvdata.pv.PVShort;
+import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.PVUByte;
 import org.epics.pvdata.pv.PVUInt;
@@ -150,7 +151,12 @@ public class S7DBWriterHandlerImpl implements DBWriterHandler {
                                     byteBuf.writeShort(((PVShort) f).get());                                     
                                     break; 
                                 case pvString: 
-                                    //byteBuf.write(((PVShort) f).get());                                     
+                                    int l = ((PVString) f).get().length();
+                                    byteBuf = Unpooled.buffer(l + 1); 
+                                    byteBuf.resetWriterIndex();
+                                    byteBuf.writeByte(l);
+                                    byteBuf.writeBytes(((PVString) f).get().getBytes());
+                                    
                                     break;  
                                 case pvUByte: 
                                     byteBuf.writeByte(((PVUByte) f).get());                                     
@@ -172,9 +178,7 @@ public class S7DBWriterHandlerImpl implements DBWriterHandler {
                             
                             if (optPlcItem.isPresent()) {
                                 optPlcItem.get().itemWrite(byteBuf, byteOffset, bitOffset);  
-                            }                            
-                            
-                            
+                            }                                                                                    
                         };
                         
                         index = changedBitSet.nextSetBit(index);

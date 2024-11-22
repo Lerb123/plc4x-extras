@@ -19,6 +19,8 @@
 package org.apache.plc4x.merlot.db.core;
 
 import io.netty.buffer.Unpooled;
+import java.util.ArrayList;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.api.PlcItemListener;
 import org.apache.plc4x.merlot.db.api.DBRecord;
@@ -26,7 +28,6 @@ import org.epics.nt.NTScalar;
 import org.epics.nt.NTScalarArray;
 import org.epics.nt.NTScalarArrayBuilder;
 import org.epics.nt.NTScalarBuilder;
-import org.epics.pvdata.copy.PVCopy;
 import org.epics.pvdata.factory.FieldFactory;
 import org.epics.pvdata.pv.FieldCreate;
 import org.epics.pvdata.pv.PVBoolean;
@@ -34,10 +35,6 @@ import org.epics.pvdata.pv.PVByte;
 import org.epics.pvdata.pv.PVByteArray;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.ScalarType;
-import org.epics.pvdatabase.PVListener;
-import org.epics.pvdatabase.PVRecord;
-import org.epics.pvdatabase.PVRecordField;
-import org.epics.pvdatabase.PVRecordStructure;
 
 
 public class DBByteFactory extends DBBaseFactory {
@@ -94,13 +91,14 @@ public class DBByteFactory extends DBBaseFactory {
     }
  
     class DBByteRecord extends DBRecord implements PlcItemListener {
-                
+        
+        private int BUFFER_SIZE = Byte.BYTES;                       
         private PVByte value;
         private PVByte write_value;
         private PVBoolean write_enable;
               
         public DBByteRecord(String recordName,PVStructure pvStructure) {
-            super(recordName, pvStructure);
+            super(recordName, pvStructure);           
             value = pvStructure.getByteField("value");
             write_value = pvStructure.getByteField("write_value");
             write_enable = pvStructure.getBooleanField("write_enable");
@@ -127,7 +125,7 @@ public class DBByteFactory extends DBBaseFactory {
             this.plcItem = plcItem;
             //offset = this.getPVStructure().getIntField("offset").get() * Byte.BYTES;  
             getOffset( this.getPVStructure().getStringField("offset").get());            
-            innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, Byte.BYTES);
+            innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
             innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);
         }
 
@@ -146,7 +144,7 @@ public class DBByteFactory extends DBBaseFactory {
        
         @Override
         public String getFieldsToMonitor() {
-            return MONITOR_FIELDS;
+            return MONITOR_SCALAR_FIELDS;
         }        
 
               

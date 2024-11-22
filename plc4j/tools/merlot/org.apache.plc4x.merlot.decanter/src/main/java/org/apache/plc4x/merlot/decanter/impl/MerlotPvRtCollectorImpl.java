@@ -21,57 +21,70 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.plc4x.merlot.decanter.api.MerlotCollector;
-import org.apache.plc4x.merlot.decanter.core.MerlotDecanterManagedService;
+import org.apache.plc4x.merlot.decanter.api.MerlotGPClient;
 import org.apache.plc4x.merlot.scheduler.api.Job;
 import org.apache.plc4x.merlot.scheduler.api.JobContext;
 import org.apache.plc4x.merlot.scheduler.api.ScheduleOptions;
 import org.apache.plc4x.merlot.scheduler.api.Scheduler;
-import org.apache.plc4x.merlot.scheduler.api.SchedulerError;
-import org.epics.gpclient.GPClient;
+import org.epics.gpclient.PVEvent;
 import org.epics.gpclient.PVEventRecorder;
 import org.epics.gpclient.PVReader;
-import org.epics.vtype.VType;
+import org.epics.gpclient.PVReaderListener;
+import org.epics.vtype.*;
 import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
+import org.osgi.service.cm.ManagedServiceFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventProperties;
 import org.slf4j.LoggerFactory;
 
 
-public class MerlotPvRtCollectorImpl implements MerlotCollector, ManagedService {
+public class MerlotPvRtCollectorImpl implements MerlotCollector, ManagedServiceFactory, PVReaderListener {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(MerlotPvRtCollectorImpl.class);  
     private static final String HTC_ROUTE = "decanter/collector/rt";
     private static final Pattern GROUP_INDEX_PATTERN =
-        Pattern.compile("^G(?<groupIndex>\\d{4})"); 
+        Pattern.compile("^RG(?<groupIndex>\\d{4})"); 
     private static final Pattern PV_INDEX_PATTERN =
         Pattern.compile("^PV(?<groupIndex>\\d{4})");    
     
-    protected static final String GROUP_INDEX = "groupIndex";    
-       
+    protected static final String GROUP_INDEX = "groupIndex"; 
+           
     private final Scheduler scheduler;
     private final EventAdmin eventAdmin;
+    private final MerlotGPClient gpClient;
     private final Map<String, SchedulerGroup> groups = new ConcurrentHashMap<>();     
-    private final Map<String, MutablePair<SchedulerGroup, PVReader<VType>>> pvs = new ConcurrentHashMap<>();    
-
-    public MerlotPvRtCollectorImpl(Scheduler scheduler, EventAdmin eventAdmin) {
+    private final Map<String, MutablePair<SchedulerGroup, PVReader<VType>>> pvs = new ConcurrentHashMap<>();  
+    
+    public MerlotPvRtCollectorImpl(Scheduler scheduler, EventAdmin eventAdmin, MerlotGPClient gpClient) {
         this.scheduler = scheduler;
         this.eventAdmin = eventAdmin;
+        this.gpClient = gpClient;
     }
-    
+     
 
     @Override
     public void init() {
-
+//        ServiceLoader<DataSourceProvider> ldr = ServiceLoader.load(DataSourceProvider.class);
+//        CompositeDataSource cds = new CompositeDataSource();
+//        for (DataSourceProvider spiObject : ldr) {
+//            cds.putDataSource(spiObject.getName(), spiObject.createInstance());
+//        }
+//        
+//        cds.getDataSourceProviders().forEach((s,d) -> { System.out.println("> " + s); });
+//        
+//        this.gpCLient = new GPClientConfiguration().defaultMaxRate(Duration.ofMillis(50))
+//                .notificationExecutor(org.epics.util.concurrent.Executors.localThread())
+//                .dataSource(cds)
+//                .dataProcessingThreadPool(Executors.newScheduledThreadPool(Math.max(1, Runtime.getRuntime().availableProcessors() - 1),
+//                org.epics.util.concurrent.Executors.namedPool("PVMgr RT Worker "))).build();     
+        
     }
 
     @Override
@@ -98,7 +111,7 @@ public class MerlotPvRtCollectorImpl implements MerlotCollector, ManagedService 
     }
 
     @Override
-    public void updated(Dictionary<String, ?> properties) throws ConfigurationException {
+    public void updated(String pid, Dictionary<String, ?> properties) throws ConfigurationException {
         Matcher matcher;        
         String strObject;
         String strKey;
@@ -108,50 +121,56 @@ public class MerlotPvRtCollectorImpl implements MerlotCollector, ManagedService 
         groups.clear();
         
         if (null == properties) return;      
+        //Group Section
         Enumeration<String> enumKeys = properties.keys();
         while(enumKeys.hasMoreElements()) {
             strKey = enumKeys.nextElement();
             strValue = (String) properties.get(strKey);
             if ((matcher = GROUP_INDEX_PATTERN.matcher(strKey)).matches()) {
-                System.out.println("strKey: " + strKey);                
-                System.out.println("strValue: " + strValue);
                 addGroup(strKey, strValue);                
             }   
         }
         
+        //PV Section
         enumKeys = properties.keys();
         while(enumKeys.hasMoreElements()) {
             strKey = enumKeys.nextElement();
             strValue = (String) properties.get(strKey);
             if ((matcher = PV_INDEX_PATTERN.matcher(strKey)).matches()) {
-                System.out.println("> strKey: " + strKey);                
-                System.out.println("> strValue: " + strValue);
                 String[] fields = strValue.split(";");
-                System.out.println("Length  : " + fields.length);
-                System.out.println("PV      : " + fields[0]);
-                System.out.println("Group   : " + fields[1]);
-                System.out.println("Change  : " + fields[2]);
+                           
                 final SchedulerGroup group = groups.get(fields[1]);
+                
                 if (null != group) {
                     PVInfo pvInfo = new PVInfo();
                     pvInfo.strPv    = fields[0];
                     pvInfo.strGroup = fields[1]; 
-                    pvInfo.delta    = Float.parseFloat(fields[2]) / 100;
-                    PVEventRecorder recorder = new PVEventRecorder();
-                    PVReader<VType> pvr = GPClient.read(pvInfo.strPv).
+                    pvInfo.delta    = Double.parseDouble(fields[2]);
+                    pvInfo.strTag   = fields[3]; 
+                    
+                    PVEventRecorder recorder = new PVEventRecorder();                    
+                    PVReader<VType> pvr = gpClient.read(pvInfo.strPv).
                             addListener(recorder).
-//                            addReadListener((event, p) -> {
-//                            System.out.println(event + " " + p.isConnected() + " " + p.getValue());}).
+                            addReadListener(this).                            
                             start();
+                    LOGGER.info("Registered RT Pv: " + pvInfo.strPv);                    
                     pvInfo.pvr = pvr;
                     pvInfo.lastValue = null;
                     group.addPvReader(strKey, pvInfo);
                 }
             };     
-        }        
-        
-        
+        }                        
     }
+    
+    @Override
+    public String getName() {
+        return "Merlot - Rt";
+    }
+
+    @Override
+    public void deleted(String pid) {
+        //
+    }    
             
     @Override
     public void addGroup(String strGroup, String... args) {
@@ -200,12 +219,21 @@ public class MerlotPvRtCollectorImpl implements MerlotCollector, ManagedService 
 
     }
 
+    @Override
+    public void pvChanged(PVEvent event, PVReader pvReader) {
+        if (event.isType(PVEvent.Type.EXCEPTION)) {
+            LOGGER.info("EVENT: " + event.toString());            
+        }
+
+    }
+    
     private class PVInfo {
         public PVReader<VType> pvr;
-        public VType lastValue;
+        public VNumber lastValue;
         public String strPv;
         public String strGroup;
-        public Float delta;        
+        public Double delta;
+        public String strTag;
     }
 
     private class SchedulerGroup implements Job {
@@ -214,31 +242,40 @@ public class MerlotPvRtCollectorImpl implements MerlotCollector, ManagedService 
         
         private final Map<String, PVInfo> pvs = new ConcurrentHashMap<>();         
         private Map<String, String>  properties = new Hashtable();
-        private VType value;
+        private VNumber value;
         
         public SchedulerGroup(EventAdmin eventAdmin, ScheduleOptions schOptions) {
             this.eventAdmin = eventAdmin;
             this.schOptions = schOptions;
         }
-        
+           
         @Override
         public void execute(JobContext context) {            
-            LOGGER.info("GRUPO EXECUTE RT " + HTC_ROUTE);
-            pvs.forEach((s, pv) -> {
-                System.out.println("<<EXECUTE>>");
-                if ((pv.pvr.isConnected()) && (!pv.pvr.isPaused())) {
-                    value = pv.pvr.getValue();
-                    System.out.println("Valor: " + pv.pvr.getValue());
-                    if ((null == pv.lastValue) || !value.equals(pv.lastValue)) {
-                        pv.lastValue = value;
-                        
-                        properties.clear();
-                        properties.put(pv.strPv, value.toString());                        
-                        EventProperties eventProps = new EventProperties(properties);                                                    
+            pvs.forEach(new BiConsumer<String, PVInfo>() {
+                @Override
+                public void accept(String s, PVInfo pv) {
 
-                        Event decanterEvent = new Event(HTC_ROUTE, properties); 
-                        eventAdmin.postEvent(decanterEvent);                        
-                                                                        
+                    if ((pv.pvr.isConnected()) && (!pv.pvr.isPaused())) {
+                        
+                        value = (VNumber) pv.pvr.getValue();                                           
+                        if ((null == pv.lastValue) || !value.equals(pv.lastValue)) {
+                            
+                            Double actualValue = ((VNumber) value).getValue().doubleValue();
+                            Double lastValue = (null == pv.lastValue)? 0 : pv.lastValue.getValue().doubleValue();
+                            
+                            if ((Math.abs(actualValue - lastValue)) > pv.delta) {
+                                pv.lastValue = value;                                
+                                properties.clear();
+                                properties.put("tag", pv.strTag);                            
+                                properties.put("value", value.getValue().toString());
+
+                                EventProperties eventProps = new EventProperties(properties);
+
+                                Event decanterEvent = new Event(HTC_ROUTE, properties);
+                                eventAdmin.postEvent(decanterEvent);
+                            }
+                            
+                        }
                     }
                 }
             });

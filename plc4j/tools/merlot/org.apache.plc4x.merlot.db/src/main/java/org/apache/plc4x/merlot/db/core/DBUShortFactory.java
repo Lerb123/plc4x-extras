@@ -90,6 +90,7 @@ public class DBUShortFactory extends DBBaseFactory {
 
     class DBUShortRecord extends DBRecord implements PlcItemListener{
     
+        private int BUFFER_SIZE = Short.BYTES;          
         private PVUShort value;
         private PVUShort write_value;        
         private PVBoolean write_enable;  
@@ -122,7 +123,7 @@ public class DBUShortFactory extends DBBaseFactory {
             this.plcItem = plcItem;
             //offset = this.getPVStructure().getIntField("offset").get(); 
             getOffset( this.getPVStructure().getStringField("offset").get());            
-            innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, Short.BYTES);
+            innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
             innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);
         }
 
@@ -140,7 +141,7 @@ public class DBUShortFactory extends DBBaseFactory {
 
         @Override
         public String getFieldsToMonitor() {
-            return MONITOR_FIELDS;
+            return MONITOR_SCALAR_FIELDS;
         }
 
     }

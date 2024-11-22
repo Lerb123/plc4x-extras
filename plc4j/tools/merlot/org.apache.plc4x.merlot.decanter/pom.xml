@@ -46,9 +46,11 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Export-Package>org.apache.plc4x.merlot.decanter*;version=${project.version}</Export-Package>
-                        <Import-Package>*</Import-Package>
+                        <Import-Package>org.epics.gpclient.datasource.sim,
+                            org.epics.gpclient.datasource.pva, *</Import-Package>
                         <Karaf-Commands>org.apache.plc4x.merlot.api.command*</Karaf-Commands>
-                        <_removeheaders>Import-Service,Export-Service</_removeheaders>                           
+                        <!--<_removeheaders>Import-Service,Export-Service</_removeheaders>-->   
+                        <SPI-Consumer>*</SPI-Consumer>                                                
                     </instructions>
                 </configuration>
             </plugin>
@@ -56,8 +58,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>17</source>
+                    <target>17</target>
                     <maxmem>256M</maxmem>
                 </configuration>
             </plugin>
@@ -135,6 +137,32 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.17.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.epics</groupId>
+            <artifactId>epics-ntypes</artifactId>
+            <version>0.3.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.epics</groupId>
+            <artifactId>vtype</artifactId>
+            <version>1.0.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.epics</groupId>
+            <artifactId>epics-vtype-all</artifactId>
+            <version>1.0.7</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.epics</groupId>
+            <artifactId>vtype-json</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.epics</groupId>
+            <artifactId>gpclient-core</artifactId>
+            <version>1.0.8</version>
         </dependency>
     </dependencies>
 </project>

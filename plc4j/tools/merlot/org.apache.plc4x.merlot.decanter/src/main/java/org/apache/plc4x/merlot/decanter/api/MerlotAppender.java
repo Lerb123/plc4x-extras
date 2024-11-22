@@ -17,6 +17,7 @@
 package org.apache.plc4x.merlot.decanter.api;
 
 import org.apache.plc4x.merlot.scheduler.api.Job;
+import org.osgi.service.cm.ManagedService;
 import org.osgi.service.event.EventHandler;
 
 /**

@@ -19,6 +19,7 @@
 package org.apache.plc4x.merlot.drv.s7.core;
 
 import io.netty.buffer.Unpooled;
+import java.time.Duration;
 import java.util.ArrayList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.merlot.api.PlcItem;
@@ -39,9 +40,9 @@ import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.ScalarType;
 import org.epics.pvdatabase.PVRecord;
-import org.apache.plc4x.merlot.drv.s7.core.S7DBStaticHelper;
 
-public class S7DBCounterFactory extends DBBaseFactory {
+
+public class S7DBS5TimeFactory extends DBBaseFactory {
     
     private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
        
@@ -58,7 +59,8 @@ public class S7DBCounterFactory extends DBBaseFactory {
             add("scan_time", fieldCreate.createScalar(ScalarType.pvString)).
             add("scan_enable", fieldCreate.createScalar(ScalarType.pvBoolean)).
             add("write_enable", fieldCreate.createScalar(ScalarType.pvBoolean)).  
-            add("write_value", fieldCreate.createScalar(ScalarType.pvShort)).                 
+            add("write_value", fieldCreate.createScalar(ScalarType.pvShort)). 
+            add("strValue", fieldCreate.createScalar(ScalarType.pvString)).                
             addAlarm().
             addTimeStamp().
             addDisplay().
@@ -101,8 +103,11 @@ public class S7DBCounterFactory extends DBBaseFactory {
         
         private PVShort value; 
         private PVShort write_value;
-        private PVBoolean write_enable;  
-        short b, c, d, bcd;
+        private PVBoolean write_enable; 
+        private PVString strValue; 
+        private Duration lastDuration;
+        
+        short tempValue;
     
         public DBS7CounterRecord(String recordName,PVStructure pvStructure) {
             super(recordName, pvStructure);
@@ -115,7 +120,8 @@ public class S7DBCounterFactory extends DBBaseFactory {
                         
             value = pvStructure.getShortField("value");
             write_value = pvStructure.getShortField("write_value");
-            write_enable = pvStructure.getBooleanField("write_enable");            
+            write_enable = pvStructure.getBooleanField("write_enable");
+            strValue = pvStructure.getStringField("strValue");
         }    
 
         /**
@@ -125,10 +131,19 @@ public class S7DBCounterFactory extends DBBaseFactory {
         public void process()
         {
             if (null != plcItem) {               
-                if (write_enable.get()) {                          
-                    write_value.put(value.get());                                               
+                if (write_enable.get()) {   
+                    try {
+                        Duration userS5Time = Duration.parse(strValue.get());
+                        if (!lastDuration.equals(userS5Time)) {
+                            short writeValue = S7DBStaticHelper.durationToS5Time(userS5Time);
+                            write_value.put(writeValue);        
+                        }
+                    } catch (Exception ex) {
+                        LOGGER.info("S5TIME mal formed.");
+                    }
+                                              
                 }
-            } 
+            }               
         }
 
         @Override
@@ -146,12 +161,15 @@ public class S7DBCounterFactory extends DBBaseFactory {
         @Override
         public void update() {    
             if (null != plcItem) {
-                b = (short)(innerBuffer.getByte(0) & 0x0F);
-                c = (short)((innerBuffer.getByte(1) & 0xF0) >> 4);
-                d = (short)(innerBuffer.getByte(1) & 0x0F);
-                bcd = (short)(b*100 + c*10 + d);
-                if (value.get() != bcd)
-                    value.put(bcd);
+                tempValue = innerBuffer.getShort(0);
+                if (value.get() != tempValue) {
+                    value.put(tempValue);
+                    lastDuration = S7DBStaticHelper.s5TimeToDuration(value.get());                   
+                    if (bFirtsRun ){
+                        bFirtsRun = false;
+                    }
+                    strValue.put(lastDuration.toString());                    
+                }
             }
         }
         
@@ -159,11 +177,6 @@ public class S7DBCounterFactory extends DBBaseFactory {
         public String getFieldsToMonitor() {
             return MONITOR_TF_FIELDS;
         }
-
-
-                
-  
-
         
     }
            

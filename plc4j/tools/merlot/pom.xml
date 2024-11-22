@@ -156,11 +156,12 @@ under the License.
         
     <epics.core.version>7.0.9</epics.core.version>
         
-    <epics.util.version>1.0.6</epics.util.version>
+    <epics.util.version>1.0.7</epics.util.version>
         
-    <epics.vtype.version>1.0.6</epics.vtype.version>
+    <epics.vtype.version>1.0.7</epics.vtype.version>
+    <epics.vtype.json.version>2.9.0</epics.vtype.json.version>    
         
-    <epics.vtype.all.version>1.0.6</epics.vtype.all.version>
+    <epics.vtype.all.version>1.0.7</epics.vtype.all.version>
         
     <epics.ntypes.version>0.3.8</epics.ntypes.version>
         

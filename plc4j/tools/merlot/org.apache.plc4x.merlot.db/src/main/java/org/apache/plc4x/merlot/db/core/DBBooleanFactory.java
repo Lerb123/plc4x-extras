@@ -20,6 +20,8 @@ package org.apache.plc4x.merlot.db.core;
 
 
 import io.netty.buffer.Unpooled;
+import java.util.ArrayList;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.api.PlcItemListener;
 import org.apache.plc4x.merlot.db.api.DBRecord;
@@ -93,6 +95,7 @@ public class DBBooleanFactory extends DBBaseFactory {
     
     class DBBooleanRecord extends DBRecord {
         
+        private int BUFFER_SIZE = Byte.BYTES;                 
         private PVBoolean value;
         private PVBoolean write_value;
         private PVBoolean write_enable;
@@ -128,7 +131,7 @@ public class DBBooleanFactory extends DBBaseFactory {
                 this.plcItem = plcItem;
                 //offset = this.getPVStructure().getIntField("offset").get() * Byte.BYTES; 
                 getOffset( this.getPVStructure().getStringField("offset").get());
-                innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, Byte.BYTES);
+                innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
                 innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);                
             } catch (Exception ex) {
                 LOGGER.error(this.getClass().getName() + " : " + ex.getMessage());
@@ -162,7 +165,7 @@ public class DBBooleanFactory extends DBBaseFactory {
 
         @Override
         public String getFieldsToMonitor() {
-            return MONITOR_FIELDS;
+            return MONITOR_SCALAR_FIELDS;
         }
                                 
     }

@@ -24,15 +24,16 @@
     
     <reference
         id="refEventAdminService"
-        interface="org.osgi.service.event.EventAdmin" availability="mandatory" timeout="1200"/>         
+        interface="org.osgi.service.event.EventAdmin" availability="mandatory" timeout="1200"/>   
     
-    <bean   id="BrokerServiceBean" 
+    <bean id="MerlotGPClientBean" 
+            class="org.apache.plc4x.merlot.decanter.impl.MerlotGPClientImpl"
+            init-method="init"  
+            destroy-method="destroy"                           
             scope="singleton"
-            class="org.apache.plc4x.merlot.decanter.impl.BrokerServiceImpl"
-            init-method="init"
-            destroy-method="destroy"
-            activation="eager"    />    
-        
+            activation="eager">
+    </bean>             
+    
     <bean id="MerlotMqttAppenderFactoryBean" 
             class="org.apache.plc4x.merlot.decanter.impl.MerlotMqttAppenderFactory" 
             scope="singleton"
@@ -48,19 +49,26 @@
     
     <bean id="MerlotPvHtcCollectorImplBean" 
             class="org.apache.plc4x.merlot.decanter.impl.MerlotPvHtcCollectorImpl" 
+            init-method="init"              
             scope="singleton"
             activation="eager">
             <argument ref="refSchedulerService" />
-            <argument ref="refEventAdminService" />            
+            <argument ref="refEventAdminService" />  
+            <argument ref="MerlotGPClientBean" />                        
     </bean>  
     
     <bean id="MerlotPvRtCollectorImplBean" 
             class="org.apache.plc4x.merlot.decanter.impl.MerlotPvRtCollectorImpl" 
+            init-method="init"            
             scope="singleton"
             activation="eager">
             <argument ref="refSchedulerService" />
-            <argument ref="refEventAdminService" />            
-    </bean>                  
+            <argument ref="refEventAdminService" />   
+            <argument ref="MerlotGPClientBean" />                      
+    </bean>  
+    
+    <service ref="MerlotGPClientBean" auto-export="interfaces">       
+    </service>                                      
     
     <service ref="MerlotMqttAppenderFactoryBean" auto-export="interfaces">
     	<service-properties>
@@ -89,8 +97,6 @@
             <entry key="service.pid" value="org.apache.plc4x.merlot.pvrt"/>  
         </service-properties>
     </service>        
-   
-   
-    <service ref="BrokerServiceBean" interface="org.apache.plc4x.merlot.decanter.api.BrokerService"/>
+      
 
 </blueprint>

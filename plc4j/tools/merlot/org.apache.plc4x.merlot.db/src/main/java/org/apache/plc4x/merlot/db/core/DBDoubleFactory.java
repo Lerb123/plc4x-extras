@@ -20,6 +20,8 @@ package org.apache.plc4x.merlot.db.core;
 
 
 import io.netty.buffer.Unpooled;
+import java.util.ArrayList;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.api.PlcItemListener;
 import org.apache.plc4x.merlot.db.api.DBRecord;
@@ -88,13 +90,14 @@ public class DBDoubleFactory extends DBBaseFactory {
     }
     
     class DBDoubleRecord extends DBRecord implements PlcItemListener {
-    
+        
+        private int BUFFER_SIZE = Double.BYTES;        
         private PVDouble value;
         private PVDouble write_value; 
         private PVBoolean write_enable;                
         
         public DBDoubleRecord(String recordName,PVStructure pvStructure) {
-            super(recordName, pvStructure);
+            super(recordName, pvStructure);            
             value = pvStructure.getDoubleField("value");  
             write_value = pvStructure.getDoubleField("write_value");  
             write_enable = pvStructure.getBooleanField("write_enable");
@@ -121,7 +124,7 @@ public class DBDoubleFactory extends DBBaseFactory {
             this.plcItem = plcItem;
             //offset = this.getPVStructure().getIntField("offset").get(); 
             getOffset( this.getPVStructure().getStringField("offset").get());            
-            innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, Double.BYTES);
+            innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
             innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);
         }
 
@@ -139,7 +142,7 @@ public class DBDoubleFactory extends DBBaseFactory {
         
         @Override
         public String getFieldsToMonitor() {
-            return MONITOR_FIELDS;
+            return MONITOR_SCALAR_FIELDS;
         }        
     } 
     

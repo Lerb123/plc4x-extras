@@ -23,6 +23,7 @@ import org.apache.plc4x.merlot.decanter.api.MerlotAppender;
 import org.apache.plc4x.merlot.decanter.api.MerlotDecanterFactory;
 import org.apache.plc4x.merlot.scheduler.api.Job;
 import org.apache.plc4x.merlot.scheduler.api.JobContext;
+import org.apache.plc4x.merlot.scheduler.api.Scheduler;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
@@ -44,7 +45,6 @@ public class MerlotDecanterManagedService implements ManagedServiceFactory, Job 
         
     @Override    
     public void updated(String pid, Dictionary<String, ?> props) throws ConfigurationException {   
-        LOGGER.info("UPDATE 01");
         String strFactory = (String) props.get("factory");
         
         if (null != strFactory) {
@@ -53,12 +53,17 @@ public class MerlotDecanterManagedService implements ManagedServiceFactory, Job 
                 Optional<MerlotAppender> optBundle = factory.createBundle(props);
                 if (optBundle.isPresent()) {
                     //Register the decanter service
-
-                    String strEventTopic = (String) props.get("eventtopic");
-                    System.out.println("CONFIGURANDO: " + strEventTopic);                    
+                    optBundle.get().init();
+                    String strEventTopic = (String) props.get("eventtopic");                   
                     Dictionary<String, String> properties = new Hashtable<>();
-                    properties.put(EventConstants.EVENT_TOPIC, strEventTopic);
-                    ctx.registerService(new String[]{MerlotAppender.class.getName(), EventHandler.class.getName()} , optBundle.get(), properties);
+                    
+                    properties.put(EventConstants.EVENT_TOPIC, strEventTopic);                    
+                    properties.put(Scheduler.PROPERTY_SCHEDULER_NAME, "MerlotAppender:" + getValue(props, "clientId"));     
+                    properties.put(Scheduler.PROPERTY_SCHEDULER_PERIOD, getValue(props, "watchdogtime"));                     
+                    properties.put(Scheduler.PROPERTY_SCHEDULER_IMMEDIATE, "true");
+                    properties.put(Scheduler.PROPERTY_SCHEDULER_CONCURRENT, "false");                    
+                    
+                    ctx.registerService(new String[]{MerlotAppender.class.getName(), EventHandler.class.getName(), Job.class.getName()} , optBundle.get(), properties);
                     
                 } else {
                     LOGGER.info("Bundle for [" + strFactory +"] not present.");                     
@@ -74,7 +79,7 @@ public class MerlotDecanterManagedService implements ManagedServiceFactory, Job 
     
     @Override
     public void execute(JobContext context) {
-        LOGGER.info("EXECUTE");
+        //LOGGER.info("EXECUTE");
     }
 
     @Override
@@ -87,6 +92,10 @@ public class MerlotDecanterManagedService implements ManagedServiceFactory, Job 
     public void deleted(String pid) {
         LOGGER.info("DELETE");
     }
+    
+    private String getValue(Dictionary<String, ?> props, String strKey){
+        return (null == props.get(strKey))? "" : (String) props.get(strKey);
+    }    
     
     private MerlotDecanterFactory getFactory(String strFactory){
         try{
