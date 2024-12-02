@@ -169,7 +169,7 @@
     <!-- TODO: se requiere cambiar el identificador, causa problema con DAS. -->
     <service ref="S7DBWriterHandlerImpl" interface="org.apache.plc4x.merlot.db.api.DBWriterHandler">
         <service-properties>
-            <entry key="DEVICE_CATEGORY"  value="s7"/>           
+            <entry key="db.record.writehandler.category"  value="s7"/>           
         </service-properties>        
     </service>
 

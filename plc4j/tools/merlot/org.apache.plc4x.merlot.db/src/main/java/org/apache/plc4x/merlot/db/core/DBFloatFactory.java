@@ -97,18 +97,10 @@ public class DBFloatFactory extends DBBaseFactory {
         private PVBoolean write_enable;          
         
         public DBFloatRecord(String recordName,PVStructure pvStructure) {
-            super(recordName, pvStructure);
-           
-            bFirtsRun = true;
-            
-            fieldOffsets = new ArrayList<>();
-            fieldOffsets.add(0, null);
-            fieldOffsets.add(1, new ImmutablePair(0,-1));  
-            
+            super(recordName, pvStructure);           
             value = pvStructure.getFloatField("value");
             write_value = pvStructure.getFloatField("write_value");
             write_enable = pvStructure.getBooleanField("write_enable");
-            //offset = pvStructure.getIntField("offset").get();  
         }    
 
         /**
@@ -130,7 +122,6 @@ public class DBFloatFactory extends DBBaseFactory {
         @Override
         public void atach(PlcItem plcItem) {
             this.plcItem = plcItem; 
-            //offset = this.getPVStructure().getIntField("offset").get();  
             getOffset( this.getPVStructure().getStringField("offset").get());            
             innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
             innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);
@@ -143,7 +134,6 @@ public class DBFloatFactory extends DBBaseFactory {
 
         @Override
         public void update() {
-            System.out.println("Update!");
             if (null != plcItem)   
                 if (value.get() != innerBuffer.getFloat(0))
                 value.put(innerBuffer.getFloat(0));

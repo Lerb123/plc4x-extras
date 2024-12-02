@@ -18,7 +18,6 @@
  */
 package org.apache.plc4x.merlot.drv.s7.core;
 
-import io.netty.buffer.Unpooled;
 import java.util.ArrayList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.merlot.api.PlcItem;
@@ -35,11 +34,8 @@ import org.epics.pvdata.pv.FieldCreate;
 import org.epics.pvdata.pv.PVBoolean;
 import org.epics.pvdata.pv.PVShort;
 import org.epics.pvdata.pv.PVShortArray;
-import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.ScalarType;
-import org.epics.pvdatabase.PVRecord;
-import org.apache.plc4x.merlot.drv.s7.core.S7DBStaticHelper;
 
 public class S7DBCounterFactory extends DBBaseFactory {
     

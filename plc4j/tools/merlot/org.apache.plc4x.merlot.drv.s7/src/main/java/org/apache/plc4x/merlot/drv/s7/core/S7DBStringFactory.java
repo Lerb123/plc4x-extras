@@ -20,7 +20,6 @@ package org.apache.plc4x.merlot.drv.s7.core;
 
 import io.netty.buffer.Unpooled;
 import java.nio.charset.Charset;
-import java.time.Duration;
 import java.util.ArrayList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.merlot.api.PlcItem;
@@ -35,13 +34,10 @@ import org.epics.pvdata.factory.FieldFactory;
 import org.epics.pvdata.pv.FieldBuilder;
 import org.epics.pvdata.pv.FieldCreate;
 import org.epics.pvdata.pv.PVBoolean;
-import org.epics.pvdata.pv.PVInt;
-import org.epics.pvdata.pv.PVShort;
 import org.epics.pvdata.pv.PVShortArray;
 import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.ScalarType;
-import org.epics.pvdatabase.PVRecord;
 
 
 public class S7DBStringFactory extends DBBaseFactory {

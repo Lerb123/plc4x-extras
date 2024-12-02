@@ -118,8 +118,7 @@ public class DBLongFactory extends DBBaseFactory {
 
         @Override
         public void atach(PlcItem plcItem) {
-            this.plcItem = plcItem;
-            //offset = this.getPVStructure().getIntField("offset").get();    
+            this.plcItem = plcItem;  
             getOffset( this.getPVStructure().getStringField("offset").get());            
             innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
             innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);

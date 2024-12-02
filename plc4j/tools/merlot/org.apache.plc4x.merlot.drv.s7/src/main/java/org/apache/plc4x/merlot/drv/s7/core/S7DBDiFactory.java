@@ -24,21 +24,15 @@ import org.apache.plc4x.merlot.api.PlcItemListener;
 import org.apache.plc4x.merlot.db.api.DBRecord;
 import org.apache.plc4x.merlot.db.core.DBBaseFactory;
 import org.epics.nt.NTScalar;
-import org.epics.nt.NTScalarArray;
-import org.epics.nt.NTScalarArrayBuilder;
 import org.epics.nt.NTScalarBuilder;
 import org.epics.pvdata.factory.FieldFactory;
 import org.epics.pvdata.pv.Field;
 import org.epics.pvdata.pv.FieldBuilder;
 import org.epics.pvdata.pv.FieldCreate;
 import org.epics.pvdata.pv.PVBoolean;
-import org.epics.pvdata.pv.PVInt;
 import org.epics.pvdata.pv.PVShort;
-import org.epics.pvdata.pv.PVShortArray;
-import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.ScalarType;
-import org.epics.pvdatabase.PVRecord;
 
 
 public class S7DBDiFactory extends DBBaseFactory {
@@ -58,12 +52,23 @@ public class S7DBDiFactory extends DBBaseFactory {
                 add("bPB_Off", fieldCreate.createScalar(ScalarType.pvBoolean)).                                 
                 add("bPBEN_On", fieldCreate.createScalar(ScalarType.pvBoolean)).    
                 add("bPBEN_Off", fieldCreate.createScalar(ScalarType.pvBoolean)).                 
+                createStructure(); 
+        
+        Field sts = fb.addNestedStructure("sts").                                
+                createStructure();        
+        
+        Field out =  fb.setId("output_t").   
+                add("iMode", fieldCreate.createScalar(ScalarType.pvShort)).                
+                add("bPB_On", fieldCreate.createScalar(ScalarType.pvBoolean)).                 
+                add("bPB_Off", fieldCreate.createScalar(ScalarType.pvBoolean)).                 
                 createStructure();           
         
         PVStructure pvStructure = ntScalarBuilder.
             value(ScalarType.pvShort).
             addDescriptor().
-            add("cmd", cmd).                 
+            add("cmd", cmd).
+            add("sts", sts).                    
+            add("out", out).    
             add("id", fieldCreate.createScalar(ScalarType.pvString)).  
             add("offset", fieldCreate.createScalar(ScalarType.pvString)).                 
             add("scan_time", fieldCreate.createScalar(ScalarType.pvString)).
@@ -83,8 +88,7 @@ public class S7DBDiFactory extends DBBaseFactory {
     class DBS7DiRecord extends DBRecord implements PlcItemListener {   
         
         private int BUFFER_SIZE = 3;
-        private static final String MONITOR_TF_FIELDS = "field(bPBEN_On," +
-                 "bPBEN_Off)";          
+        private static final String MONITOR_TF_FIELDS = "field(write_enable, out{bPBEN_On,bPBEN_Off})";          
     
         private PVShort value; 
         private PVShort write_value;
@@ -96,7 +100,11 @@ public class S7DBDiFactory extends DBBaseFactory {
         private PVBoolean bPB_On;
         private PVBoolean bPB_Off; 
         private PVBoolean bPBEN_On;  
-        private PVBoolean bPBEN_Off;         
+        private PVBoolean bPBEN_Off;  
+        
+        private PVShort out_iMode; 
+        private PVBoolean out_bPB_On;
+        private PVBoolean out_bPB_Off;         
         
         byte byTemp;
     
@@ -106,14 +114,20 @@ public class S7DBDiFactory extends DBBaseFactory {
             write_value = pvStructure.getShortField("write_value");
             write_enable = pvStructure.getBooleanField("write_enable");
             
-            iMode = pvStructure.getShortField("cmd/iMode");
+            PVStructure pvStructureCmd = pvStructure.getStructureField("cmd");                        
+            iMode = pvStructureCmd.getShortField("iMode");            
+            bOn = pvStructureCmd.getBooleanField("bOn");            
+            bOnActual = pvStructureCmd.getBooleanField("bOnActual");            
+            bPB_On = pvStructureCmd.getBooleanField("bPB_On");
+            bPB_Off = pvStructureCmd.getBooleanField("bPB_Off");            
+            bPBEN_On = pvStructureCmd.getBooleanField("bPBEN_On");
+            bPBEN_Off = pvStructureCmd.getBooleanField("bPBEN_Off");
             
-            bOn = pvStructure.getBooleanField("cmd/bOn");            
-            bOnActual = pvStructure.getBooleanField("cmd/bOnActual");            
-            bPB_On = pvStructure.getBooleanField("cmd/bPB_On");
-            bPB_Off = pvStructure.getBooleanField("cmd/bPB_Off");            
-            bPBEN_On = pvStructure.getBooleanField("cmd/bPBEN_On");
-            bPBEN_Off = pvStructure.getBooleanField("cmd/bPBEN_Off");
+            PVStructure pvStructureOut = pvStructure.getStructureField("out");             
+            out_iMode = pvStructureOut.getShortField("iMode");
+            out_bPB_On = pvStructureOut.getBooleanField("bPB_On");
+            out_bPB_Off = pvStructureOut.getBooleanField("bPB_Off");              
+            
         }    
 
         /**
@@ -124,9 +138,9 @@ public class S7DBDiFactory extends DBBaseFactory {
         {
             if (null != plcItem) {               
                 if (write_enable.get()) {                          
-                    write_value.put(value.get());                           
-                    innerWriteBuffer.clear();                     
-//                    innerWriteBuffer.writeShort(intToBcd(write_value.get()));
+                    if (iMode.get() != out_iMode.get()) out_iMode.put(iMode.get()); 
+                    if (bPB_On.get() != out_bPB_On.get()) out_bPB_On.put(bPB_On.get());
+                    if (bPB_Off.get() != out_bPB_Off.get()) out_bPB_Off.put(bPB_Off.get());                      
                     super.process();                      
                 }
             }               
@@ -136,7 +150,6 @@ public class S7DBDiFactory extends DBBaseFactory {
         @Override
         public void atach(final PlcItem plcItem) {
             this.plcItem = plcItem;
-            //offset = this.getPVStructure().getIntField("offset").get() * Short.BYTES;  
             getOffset( this.getPVStructure().getStringField("offset").get());            
             innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
             innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);
@@ -157,9 +170,20 @@ public class S7DBDiFactory extends DBBaseFactory {
                 bOn.put(isBitSet(byTemp, 0));
                 bOnActual.put(isBitSet(byTemp, 1));                
                 bPB_On.put(isBitSet(byTemp, 2));  
-                bPB_Off.put(isBitSet(byTemp, 3));                  
+                bPB_Off.put(isBitSet(byTemp, 3)); 
+                
+                if (bFirtsRun) {
+                    out_iMode.put(iMode.get());
+                    out_bPB_On.put(bPB_On.get());
+                    out_bPB_Off.put(bPB_Off.get());                    
+                    bFirtsRun = false;
+                }                  
+                
                 bPBEN_On.put(isBitSet(byTemp, 4));
                 bPBEN_Off.put(isBitSet(byTemp, 5)); 
+                
+              
+                
                 
             }
         }

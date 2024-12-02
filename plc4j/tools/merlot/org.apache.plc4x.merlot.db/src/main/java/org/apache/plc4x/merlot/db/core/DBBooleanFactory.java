@@ -116,9 +116,7 @@ public class DBBooleanFactory extends DBBaseFactory {
         {
             if (null != plcItem) {    
                 if (write_enable.get()) {    
-                    write_value.put(value.get());                           
-                    innerWriteBuffer.clear();                     
-                    innerWriteBuffer.writeBoolean(write_value.get());                         
+                    write_value.put(value.get());                                                  
                     super.process();                      
                 }
                 
@@ -129,10 +127,8 @@ public class DBBooleanFactory extends DBBaseFactory {
         public void atach(PlcItem plcItem) {
             try {
                 this.plcItem = plcItem;
-                //offset = this.getPVStructure().getIntField("offset").get() * Byte.BYTES; 
                 getOffset( this.getPVStructure().getStringField("offset").get());
-                innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
-                innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);                
+                innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);                
             } catch (Exception ex) {
                 LOGGER.error(this.getClass().getName() + " : " + ex.getMessage());
             }

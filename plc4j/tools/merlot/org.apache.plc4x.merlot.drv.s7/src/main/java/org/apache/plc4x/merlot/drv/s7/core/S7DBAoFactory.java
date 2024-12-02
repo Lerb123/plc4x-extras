@@ -24,8 +24,6 @@ import org.apache.plc4x.merlot.api.PlcItemListener;
 import org.apache.plc4x.merlot.db.api.DBRecord;
 import org.apache.plc4x.merlot.db.core.DBBaseFactory;
 import org.epics.nt.NTScalar;
-import org.epics.nt.NTScalarArray;
-import org.epics.nt.NTScalarArrayBuilder;
 import org.epics.nt.NTScalarBuilder;
 import org.epics.pvdata.factory.FieldFactory;
 import org.epics.pvdata.pv.Field;
@@ -35,11 +33,8 @@ import org.epics.pvdata.pv.PVBoolean;
 import org.epics.pvdata.pv.PVFloat;
 import org.epics.pvdata.pv.PVInt;
 import org.epics.pvdata.pv.PVShort;
-import org.epics.pvdata.pv.PVShortArray;
-import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.ScalarType;
-import org.epics.pvdatabase.PVRecord;
 
 
 public class S7DBAoFactory extends DBBaseFactory {
@@ -55,7 +50,7 @@ public class S7DBAoFactory extends DBBaseFactory {
                 add("iMode", fieldCreate.createScalar(ScalarType.pvShort)).
                 add("iErrorCode", fieldCreate.createScalar(ScalarType.pvShort)).                
                 add("rValue", fieldCreate.createScalar(ScalarType.pvFloat)).  
-                add("rActiveValue", fieldCreate.createScalar(ScalarType.pvFloat)). 
+                add("rAutoValue", fieldCreate.createScalar(ScalarType.pvFloat)). 
                 add("rManualValue", fieldCreate.createScalar(ScalarType.pvFloat)).                
                 add("rEstopValue", fieldCreate.createScalar(ScalarType.pvFloat)).                 
                 add("bPB_ResetError", fieldCreate.createScalar(ScalarType.pvBoolean)).                                 
@@ -68,13 +63,20 @@ public class S7DBAoFactory extends DBBaseFactory {
         Field sts = fb.addNestedStructure("sts").                
                 add("bOutOfRange", fieldCreate.createScalar(ScalarType.pvBoolean)).                                 
                 add("bConfiguratonError", fieldCreate.createScalar(ScalarType.pvBoolean)).                  
+                createStructure(); 
+        
+        Field out =  fb.setId("output_t").   
+                add("iMode", fieldCreate.createScalar(ScalarType.pvShort)). 
+                add("rManualValue", fieldCreate.createScalar(ScalarType.pvFloat)).                  
+                add("bPB_ResetError", fieldCreate.createScalar(ScalarType.pvBoolean)).                  
                 createStructure();        
         
         PVStructure pvStructure = ntScalarBuilder.
             value(ScalarType.pvShort).
             addDescriptor().
             add("cmd", cmd).
-            add("sts", sts).                  
+            add("sts", sts).
+            add("out", out).                 
             add("id", fieldCreate.createScalar(ScalarType.pvString)).  
             add("offset", fieldCreate.createScalar(ScalarType.pvString)).                 
             add("scan_time", fieldCreate.createScalar(ScalarType.pvString)).

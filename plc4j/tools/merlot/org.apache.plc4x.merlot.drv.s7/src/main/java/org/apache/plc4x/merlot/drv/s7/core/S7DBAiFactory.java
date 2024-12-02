@@ -24,8 +24,6 @@ import org.apache.plc4x.merlot.api.PlcItemListener;
 import org.apache.plc4x.merlot.db.api.DBRecord;
 import org.apache.plc4x.merlot.db.core.DBBaseFactory;
 import org.epics.nt.NTScalar;
-import org.epics.nt.NTScalarArray;
-import org.epics.nt.NTScalarArrayBuilder;
 import org.epics.nt.NTScalarBuilder;
 import org.epics.pvdata.factory.FieldFactory;
 import org.epics.pvdata.pv.Field;
@@ -33,13 +31,9 @@ import org.epics.pvdata.pv.FieldBuilder;
 import org.epics.pvdata.pv.FieldCreate;
 import org.epics.pvdata.pv.PVBoolean;
 import org.epics.pvdata.pv.PVFloat;
-import org.epics.pvdata.pv.PVInt;
 import org.epics.pvdata.pv.PVShort;
-import org.epics.pvdata.pv.PVShortArray;
-import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.ScalarType;
-import org.epics.pvdatabase.PVRecord;
 
 
 public class S7DBAiFactory extends DBBaseFactory {
@@ -55,8 +49,9 @@ public class S7DBAiFactory extends DBBaseFactory {
                 add("iMode", fieldCreate.createScalar(ScalarType.pvShort)).
                 add("iErrorCode", fieldCreate.createScalar(ScalarType.pvShort)).                
                 add("iStatus", fieldCreate.createScalar(ScalarType.pvShort)). 
-                add("rActiveValue", fieldCreate.createScalar(ScalarType.pvFloat)). 
-                add("rInputValue", fieldCreate.createScalar(ScalarType.pvFloat)).                 
+                add("rActiveValue", fieldCreate.createScalar(ScalarType.pvFloat)).                 
+                add("rInputValue", fieldCreate.createScalar(ScalarType.pvFloat)).  
+                add("rManualValue", fieldCreate.createScalar(ScalarType.pvFloat)).                 
                 add("bPB_ResetError", fieldCreate.createScalar(ScalarType.pvBoolean)).                                 
                 add("bPBEN_ResetError", fieldCreate.createScalar(ScalarType.pvBoolean)).    
                 add("bError", fieldCreate.createScalar(ScalarType.pvBoolean)).                 
@@ -66,13 +61,20 @@ public class S7DBAiFactory extends DBBaseFactory {
                 add("bLowLowAlarm", fieldCreate.createScalar(ScalarType.pvBoolean)).                                 
                 add("bHighHighAlarm", fieldCreate.createScalar(ScalarType.pvBoolean)).    
                 add("bInvalid", fieldCreate.createScalar(ScalarType.pvBoolean)).                 
-                createStructure();        
+                createStructure();
+
+        Field out =  fb.setId("output_t").   
+                add("iMode", fieldCreate.createScalar(ScalarType.pvShort)).
+                add("rManualValue", fieldCreate.createScalar(ScalarType.pvFloat)).                 
+                add("bPB_ResetError", fieldCreate.createScalar(ScalarType.pvBoolean)). 
+                createStructure();
         
         PVStructure pvStructure = ntScalarBuilder.
             value(ScalarType.pvShort).
             addDescriptor().
             add("cmd", cmd).
-            add("sts", sts).                  
+            add("sts", sts).   
+            add("out", out).       
             add("id", fieldCreate.createScalar(ScalarType.pvString)).  
             add("offset", fieldCreate.createScalar(ScalarType.pvString)).                 
             add("scan_time", fieldCreate.createScalar(ScalarType.pvString)).
@@ -92,7 +94,7 @@ public class S7DBAiFactory extends DBBaseFactory {
     class DBS7DiRecord extends DBRecord implements PlcItemListener {   
     
         private int BUFFER_SIZE = 20;
-        private static final String MONITOR_TF_FIELDS = "field(bPBEN_ResetError)";         
+        private static final String MONITOR_TF_FIELDS = "field(write_enable, out{iMode, rManualValue, bPB_ResetError})";         
    
     
         private PVShort value; 
@@ -105,6 +107,7 @@ public class S7DBAiFactory extends DBBaseFactory {
         
         private PVFloat rActiveValue;
         private PVFloat rInputValue; 
+        private PVFloat rManualValue;         
         
         private PVBoolean bPB_ResetError;
         private PVBoolean bPBEN_ResetError;                
@@ -114,6 +117,9 @@ public class S7DBAiFactory extends DBBaseFactory {
         private PVBoolean bHighHighAlarm;
         private PVBoolean bInvalid; 
         
+        private PVShort out_iMode;         
+        private PVFloat out_rManualValue;         
+        private PVBoolean out_bPB_ResetError;        
         
         byte byTemp;
     
@@ -123,20 +129,26 @@ public class S7DBAiFactory extends DBBaseFactory {
             write_value = pvStructure.getShortField("write_value");
             write_enable = pvStructure.getBooleanField("write_enable");
             
-            iMode = pvStructure.getShortField("cmd/iMode");
-            iErrorCode = pvStructure.getShortField("cmd/iErrorCode");
-            iStatus = pvStructure.getShortField("cmd/iStatus");  
+            PVStructure pvStructureCmd = pvStructure.getStructureField("cmd");              
+            iMode = pvStructureCmd.getShortField("iMode");
+            iErrorCode = pvStructureCmd.getShortField("iErrorCode");
+            iStatus = pvStructureCmd.getShortField("iStatus");              
+            rActiveValue = pvStructureCmd.getFloatField("rActiveValue"); 
+            rInputValue = pvStructureCmd.getFloatField("rInputValue");                         
+            rManualValue = pvStructureCmd.getFloatField("rManualValue");
+            bPB_ResetError = pvStructureCmd.getBooleanField("bPB_ResetError");
+            bPBEN_ResetError = pvStructureCmd.getBooleanField("bPBEN_ResetError");
+            bError = pvStructureCmd.getBooleanField("bError");               
+
+            PVStructure pvStructureSts = pvStructure.getStructureField("sts");
+            bLowLowAlarm =  pvStructureSts.getBooleanField("bLowLowAlar");
+            bHighHighAlarm =  pvStructureSts.getBooleanField("bHighHighAlarm");
+            bInvalid =  pvStructureSts.getBooleanField("bInvalid");
             
-            rActiveValue = pvStructure.getFloatField("cmd/rActiveValue"); 
-            rInputValue = pvStructure.getFloatField("cmd/rInputValue");             
-            
-            bPB_ResetError = pvStructure.getBooleanField("cmd/bPB_ResetError");
-            bPBEN_ResetError = pvStructure.getBooleanField("cmd/bPBEN_ResetError");
-            bError = pvStructure.getBooleanField("cmd/bError");   
-            
-            bLowLowAlarm = pvStructure.getBooleanField("cmd/bLowLowAlarm"); 
-            bHighHighAlarm = pvStructure.getBooleanField("cmd/bHighHighAlarm"); 
-            bInvalid = pvStructure.getBooleanField("cmd/bInvalid");             
+            PVStructure pvStructureOut = pvStructure.getStructureField("out");
+            out_iMode = pvStructureOut.getShortField("iMode");     
+            out_rManualValue = pvStructureOut.getFloatField("rManualValue");  
+            out_bPB_ResetError = pvStructureOut.getBooleanField("bPB_ResetError");  
 
         }    
 
@@ -148,19 +160,16 @@ public class S7DBAiFactory extends DBBaseFactory {
         {
             if (null != plcItem) {               
                 if (write_enable.get()) {                          
-                    write_value.put(value.get());                           
-                    innerWriteBuffer.clear();                     
-//                    innerWriteBuffer.writeShort(intToBcd(write_value.get()));
+                    if (iMode.get() != out_iMode.get()) out_iMode.put(iMode.get());                     
                     super.process();                      
                 }
-            }               
+            }              
         }
 
         //udtHMI_DigitalInput
         @Override
         public void atach(final PlcItem plcItem) {
-            this.plcItem = plcItem;
-            //offset = this.getPVStructure().getIntField("offset").get() * Short.BYTES;  
+            this.plcItem = plcItem; 
             getOffset( this.getPVStructure().getStringField("offset").get());            
             innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
             innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);

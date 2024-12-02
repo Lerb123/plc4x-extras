@@ -65,7 +65,7 @@ public class DBRecord extends PVRecord   implements PlcItemListener {
     
     protected int byteOffset = -1;
     protected byte bitOffset = -1;  
-    protected  ArrayList<ImmutablePair<Integer, Integer>> fieldOffsets;    
+    protected  ArrayList<ImmutablePair<Integer, Byte>> fieldOffsets;    
     
     
     protected PlcItem plcItem = null; 
@@ -79,8 +79,9 @@ public class DBRecord extends PVRecord   implements PlcItemListener {
         super(recordName, pvStructure);           
             bFirtsRun = true;            
             fieldOffsets = new ArrayList<>();
-            fieldOffsets.add(0, null);
-            fieldOffsets.add(1, new ImmutablePair(0,-1));        
+            fieldOffsets.add(0, null);                      //All structure
+            fieldOffsets.add(1, null);                      //write_enable
+            fieldOffsets.add(2, new ImmutablePair(0,-1));   //scalar offset
     }
     
     public Optional<PlcItem> getPlcItem(){
@@ -106,7 +107,7 @@ public class DBRecord extends PVRecord   implements PlcItemListener {
         return bitOffset;
     }
     
-    public ArrayList<ImmutablePair<Integer, Integer>> getFieldOffsets(){
+    public ArrayList<ImmutablePair<Integer, Byte>> getFieldOffsets(){
         return fieldOffsets;
     }
             
@@ -118,9 +119,11 @@ public class DBRecord extends PVRecord   implements PlcItemListener {
         Matcher matcher;
         if ((matcher = BYTE_OFFSET_PATTERN.matcher(strOffset)).matches()){
             byteOffset = Integer.parseInt(matcher.group(BYTE_OFFSET ));
+            fieldOffsets.set(2, new ImmutablePair(byteOffset,-1));
         } else if ((matcher = BIT_OFFSET_PATTERN.matcher(strOffset)).matches()){
             byteOffset = Integer.parseInt(matcher.group(BYTE_OFFSET ));
-            bitOffset  = (byte) Integer.parseInt(matcher.group(BIT_OFFSET ));            
+            bitOffset  = (byte) Integer.parseInt(matcher.group(BIT_OFFSET )); 
+            fieldOffsets.set(2, new ImmutablePair(byteOffset, bitOffset));            
         }
     }
     

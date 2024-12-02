@@ -65,7 +65,7 @@ public class DBRecordsManagedService implements ManagedServiceFactory, Job {
     private String filter =  "(&(" + Constants.OBJECTCLASS + "=" + DBRecordFactory.class.getName() + ")"+
                            "(db.record.type=*))"; 
     private String filterWriterHandler =  "(&(" + Constants.OBJECTCLASS + "=" + DBWriterHandler.class.getName() + ")"+
-                           "(DEVICE_CATEGORY=*))"; 
+                           "(db.record.writehandler.category=*))"; 
     
     private final PlcGeneralFunction generalFunction;
     private final PVDatabase master;
@@ -117,8 +117,6 @@ public class DBRecordsManagedService implements ManagedServiceFactory, Job {
         List<DBRecord> dbRecords = new ArrayList();
         String filename = (String) props.get("felix.fileinstall.filename");
         
-  
-
         if (props.size() < 3){
             waitingConfigs.put(pid, props);  
             return;

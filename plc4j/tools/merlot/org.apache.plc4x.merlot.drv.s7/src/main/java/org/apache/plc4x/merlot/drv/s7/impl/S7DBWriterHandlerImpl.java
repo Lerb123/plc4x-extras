@@ -172,10 +172,9 @@ public class S7DBWriterHandlerImpl implements DBWriterHandler {
                                     break; 
                             }
                             
-                            ArrayList<ImmutablePair<Integer,Integer>> fieldOffsets = dbRecord.getFieldOffsets();
+                            ArrayList<ImmutablePair<Integer, Byte>> fieldOffsets = dbRecord.getFieldOffsets();
                             byteOffset = dbRecord.getByteOffset() + ((fieldOffsets.get(index) != null)?fieldOffsets.get(index).left:0);
-                            bitOffset = (byte) ((fieldOffsets.get(index) != null)?fieldOffsets.get(index).right:-1);
-                            
+                            bitOffset = ((fieldOffsets.get(index) != null)?fieldOffsets.get(index).right: -1);                               
                             if (optPlcItem.isPresent()) {
                                 optPlcItem.get().itemWrite(byteBuf, byteOffset, bitOffset);  
                             }                                                                                    
