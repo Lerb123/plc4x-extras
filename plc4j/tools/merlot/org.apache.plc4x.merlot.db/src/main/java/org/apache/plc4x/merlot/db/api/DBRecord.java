@@ -119,7 +119,7 @@ public class DBRecord extends PVRecord   implements PlcItemListener {
         Matcher matcher;
         if ((matcher = BYTE_OFFSET_PATTERN.matcher(strOffset)).matches()){
             byteOffset = Integer.parseInt(matcher.group(BYTE_OFFSET ));
-            fieldOffsets.set(2, new ImmutablePair(byteOffset,-1));
+            fieldOffsets.set(2, new ImmutablePair(byteOffset,(byte) -1));
         } else if ((matcher = BIT_OFFSET_PATTERN.matcher(strOffset)).matches()){
             byteOffset = Integer.parseInt(matcher.group(BYTE_OFFSET ));
             bitOffset  = (byte) Integer.parseInt(matcher.group(BIT_OFFSET )); 

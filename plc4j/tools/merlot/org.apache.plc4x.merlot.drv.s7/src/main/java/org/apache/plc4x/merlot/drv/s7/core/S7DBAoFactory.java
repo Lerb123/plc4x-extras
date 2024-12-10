@@ -119,7 +119,11 @@ public class S7DBAoFactory extends DBBaseFactory {
         private PVInt iEstopFunction;
         
         private PVBoolean bOutOfRange; 
-        private PVBoolean bConfiguratonError;         
+        private PVBoolean bConfiguratonError;
+        
+        private PVShort out_iMode;         
+        private PVFloat out_rManualValue;         
+        private PVBoolean out_bPBEN_ResetError;         
         
         byte byTemp;
     
@@ -129,24 +133,27 @@ public class S7DBAoFactory extends DBBaseFactory {
             write_value = pvStructure.getShortField("write_value");
             write_enable = pvStructure.getBooleanField("write_enable");
             
-            iMode = pvStructure.getShortField("cmd/iMode");
-            iErrorCode = pvStructure.getShortField("cmd/iErrorCode"); 
+            PVStructure pvStructureCmd = pvStructure.getStructureField("cmd");              
+            iMode = pvStructureCmd.getShortField("iMode");
+            iErrorCode = pvStructureCmd.getShortField("iErrorCode");             
+            rValue = pvStructureCmd.getFloatField("rValue");             
+            rActiveValue = pvStructureCmd.getFloatField("rActiveValue"); 
+            rManualValue = pvStructureCmd.getFloatField("rManualValue");
+            rEstopValue = pvStructureCmd.getFloatField("rEstopValue");                                 
+            bPB_ResetError = pvStructureCmd.getBooleanField("bPB_ResetError");
+            bPBEN_ResetError = pvStructureCmd.getBooleanField("bPBEN_ResetError");
+            bError = pvStructureCmd.getBooleanField("bError");
+            bInterlock = pvStructureCmd.getBooleanField("bInterlock");             
+            iEstopFunction =  pvStructureCmd.getIntField("iEstopFunction");
             
-            rValue = pvStructure.getFloatField("cmd/rValue");             
-            rActiveValue = pvStructure.getFloatField("cmd/rActiveValue"); 
-            rManualValue = pvStructure.getFloatField("cmd/rManualValue");
-            rEstopValue = pvStructure.getFloatField("cmd/rEstopValue");             
-                    
-            bPB_ResetError = pvStructure.getBooleanField("cmd/bPB_ResetError");
-            bPBEN_ResetError = pvStructure.getBooleanField("cmd/bPBEN_ResetError");
-            bError = pvStructure.getBooleanField("cmd/bError");
-            bInterlock = pvStructure.getBooleanField("cmd/bInterlock"); 
-            
-            iEstopFunction =  pvStructure.getIntField("cmd/iEstopFunction");
-            
-            bOutOfRange =  pvStructure.getBooleanField("sts/iEstopFunction");
-            bConfiguratonError =  pvStructure.getBooleanField("sts/ConfiguratonError");            
-            
+            PVStructure pvStructureSts = pvStructure.getStructureField("sts");            
+            bOutOfRange =  pvStructureSts.getBooleanField("sts/iEstopFunction");
+            bConfiguratonError =  pvStructureSts.getBooleanField("sts/ConfiguratonError");
+
+            PVStructure pvStructureOut = pvStructure.getStructureField("out");
+            out_iMode = pvStructureOut.getShortField("iMode");
+            out_rManualValue = pvStructureOut.getFloatField("rManualValue");
+            out_bPBEN_ResetError = pvStructureOut.getBooleanField("bPBEN_ResetError");
         }    
 
         /**
@@ -171,7 +178,7 @@ public class S7DBAoFactory extends DBBaseFactory {
             this.plcItem = plcItem;
             //offset = this.getPVStructure().getIntField("offset").get() * Short.BYTES;  
             getOffset( this.getPVStructure().getStringField("offset").get());            
-            innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, 3);
+            innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
             innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);
         }
 

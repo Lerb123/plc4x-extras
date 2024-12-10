@@ -164,10 +164,10 @@ public class S7PlcTagFunctionImpl implements PlcTagFunction {
                                             intBlockNumber,
                                             intByteOffset,
                                             bitOffset,
-                                            byteBuf.capacity());
+                                            byteBuf.readableBytes());
                         LOGGER.info("Write BOOL S7Tag: {}", s7PlcTag.toString());                         
                         byteBuf.resetReaderIndex();
-                        for (int i=0; i < byteBuf.capacity(); i++){
+                        for (int i=0; i < byteBuf.readableBytes(); i++){
                             objValues[i] = byteBuf.readBoolean();
                         }                        
                     break;

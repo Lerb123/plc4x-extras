@@ -47,6 +47,7 @@ import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.PVUByte;
 import org.epics.pvdata.pv.PVUInt;
+import org.epics.pvdata.pv.PVULong;
 import org.epics.pvdata.pv.PVUShort;
 import static org.epics.pvdata.pv.ScalarType.pvBoolean;
 import static org.epics.pvdata.pv.ScalarType.pvByte;
@@ -86,6 +87,7 @@ public class S7DBWriterHandlerImpl implements DBWriterHandler {
     public void monitorEvent(Monitor monitor) {
         int byteOffset = 0;
         byte bitOffset = -1;
+        Integer intTemp;
         try 
         {
             element = monitor.poll();
@@ -155,8 +157,7 @@ public class S7DBWriterHandlerImpl implements DBWriterHandler {
                                     byteBuf = Unpooled.buffer(l + 1); 
                                     byteBuf.resetWriterIndex();
                                     byteBuf.writeByte(l);
-                                    byteBuf.writeBytes(((PVString) f).get().getBytes());
-                                    
+                                    byteBuf.writeBytes(((PVString) f).get().getBytes());                                    
                                     break;  
                                 case pvUByte: 
                                     byteBuf.writeByte(((PVUByte) f).get());                                     
@@ -165,19 +166,28 @@ public class S7DBWriterHandlerImpl implements DBWriterHandler {
                                     byteBuf.writeInt(((PVUInt) f).get());                                     
                                     break;  
                                 case pvULong:
-                                    byteBuf.writeLong(((PVLong) f).get());                                     
+                                    byteBuf.writeLong(((PVULong) f).get());                                     
                                     break;  
                                 case pvUShort:                                   
                                     byteBuf.writeShort(((PVUShort) f).get());                                     
                                     break; 
                             }
                             
-                            ArrayList<ImmutablePair<Integer, Byte>> fieldOffsets = dbRecord.getFieldOffsets();
-                            byteOffset = dbRecord.getByteOffset() + ((fieldOffsets.get(index) != null)?fieldOffsets.get(index).left:0);
-                            bitOffset = ((fieldOffsets.get(index) != null)?fieldOffsets.get(index).right: -1);                               
+                            final ArrayList<ImmutablePair<Integer, Byte>> fieldOffsets = dbRecord.getFieldOffsets();
+                            byteOffset = ((fieldOffsets.get(index) != null)?fieldOffsets.get(index).left:0);
+                            bitOffset  = ((fieldOffsets.get(index) != null)?fieldOffsets.get(index).right.byteValue():(byte) -1);
+                            System.out.println("Paso por aqui 9: " + byteOffset);
+//                            if (fieldOffsets.get(index) != null) {
+//                                bitOffset = fieldOffsets.get(index).right.byteValue();  
+//                            } else {
+//                                bitOffset = (byte) -1;
+//                            }
+//                            System.out.println("Entero: " + bitOffset);
+
                             if (optPlcItem.isPresent()) {
                                 optPlcItem.get().itemWrite(byteBuf, byteOffset, bitOffset);  
-                            }                                                                                    
+                            }   
+                            System.out.println(">> ByteOffset: " + byteOffset + "  bitOffset: " + bitOffset + "BufLen: " + byteBuf.readableBytes());
                         };
                         
                         index = changedBitSet.nextSetBit(index);

@@ -113,9 +113,7 @@ public class DBShortFactory extends DBBaseFactory {
         {
             if (null != plcItem) {               
                 if (write_enable.get()) {                          
-                    write_value.put(value.get());                           
-                    innerWriteBuffer.clear();                     
-                    innerWriteBuffer.writeShort(write_value.get());                         
+                    write_value.put(value.get());                                                   
                     super.process();                      
                 }
             }               
@@ -126,7 +124,6 @@ public class DBShortFactory extends DBBaseFactory {
             this.plcItem = plcItem;
             getOffset( this.getPVStructure().getStringField("offset").get());            
             innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
-            innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);
         }
 
         @Override
