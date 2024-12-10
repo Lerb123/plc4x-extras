@@ -87,7 +87,7 @@ public class DemoCommand004  implements Action  {
                             optPlcDevice.get().getUid().toString(),
                             "S7ITEM_" + i,
                             "S7Item description _" + i,
-                            "%DB100:0:USINT[48]",
+                            "%DB100:0:USINT[100]",
                             "true");
                     if (optPlcItem.isPresent()){
                         optPlcItem.get().enable();
