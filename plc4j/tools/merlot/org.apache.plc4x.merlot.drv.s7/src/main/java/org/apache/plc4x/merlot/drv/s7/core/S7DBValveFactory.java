@@ -162,19 +162,18 @@ public class S7DBValveFactory extends DBBaseFactory {
             write_value = pvStructure.getShortField("write_value");
             write_enable = pvStructure.getBooleanField("write_enable");
             
+            //Read command values
             PVStructure pvStructureCmd = pvStructure.getStructureField("cmd");             
             iMode = pvStructureCmd.getShortField("iMode");
             iErrorCode = pvStructureCmd.getShortField("iErrorCode");            
-            iStatus = pvStructureCmd.getShortField("iStatus");
-                                              
+            iStatus = pvStructureCmd.getShortField("iStatus");                                              
             bPB_ResetError = pvStructureCmd.getBooleanField("bPB_ResetError");
             bPB_Home = pvStructureCmd.getBooleanField("bPB_Home");
             bPB_Work = pvStructureCmd.getBooleanField("bPB_Work");
             bPBEN_ResetError = pvStructureCmd.getBooleanField("bPBEN_ResetError");
             bPBEN_Home = pvStructureCmd.getBooleanField("bPBEN_Home");            
             bPBEN_Work = pvStructureCmd.getBooleanField("bPBEN_Work");
-            bPBEN_Stop = pvStructureCmd.getBooleanField("bPBEN_Stop");
-            
+            bPBEN_Stop = pvStructureCmd.getBooleanField("bPBEN_Stop");            
             bHomeOn = pvStructureCmd.getBooleanField("bHomeOn");            
             bWorkOn = pvStructureCmd.getBooleanField("bWorkOn");
             bSignalHome = pvStructureCmd.getBooleanField("bSignalHome");            
@@ -182,12 +181,14 @@ public class S7DBValveFactory extends DBBaseFactory {
             bError = pvStructureCmd.getBooleanField("bError");
             bInterlock = pvStructureCmd.getBooleanField("bInterlock");
             
+            //Read status values            
             PVStructure pvStructureSts = pvStructure.getStructureField("sts");            
             bNoHomeFeedback = pvStructureSts.getBooleanField("bNoHomeFeedback");
             bNoWorkFeedback = pvStructureSts.getBooleanField("bNoWorkFeedback");
             bHomeFeedbackStillActive = pvStructureSts.getBooleanField("bHomeFeedbackStillActive");  
             bWorkFeedbackStillActive = pvStructureSts.getBooleanField("bWorkFeedbackStillActive"); 
 
+            //Write command values            
             PVStructure pvStructureOut = pvStructure.getStructureField("out");
             out_iMode = pvStructureOut.getShortField("iMode");
             out_bPB_ResetError = pvStructureOut.getBooleanField("bPB_ResetError"); 
@@ -217,7 +218,7 @@ public class S7DBValveFactory extends DBBaseFactory {
         @Override
         public void atach(final PlcItem plcItem) {
             this.plcItem = plcItem;
-            getOffset( this.getPVStructure().getStringField("offset").get());             
+            ParseOffset( this.getPVStructure().getStringField("offset").get());             
             innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
             innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);
         }

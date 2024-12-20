@@ -127,7 +127,7 @@ public class DBBooleanFactory extends DBBaseFactory {
         public void atach(PlcItem plcItem) {
             try {
                 this.plcItem = plcItem;
-                getOffset( this.getPVStructure().getStringField("offset").get());
+                ParseOffset( this.getPVStructure().getStringField("offset").get());
                 innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);                
             } catch (Exception ex) {
                 LOGGER.error(this.getClass().getName() + " : " + ex.getMessage());

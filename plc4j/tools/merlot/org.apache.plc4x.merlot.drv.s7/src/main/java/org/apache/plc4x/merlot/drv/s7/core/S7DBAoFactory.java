@@ -133,6 +133,7 @@ public class S7DBAoFactory extends DBBaseFactory {
             write_value = pvStructure.getShortField("write_value");
             write_enable = pvStructure.getBooleanField("write_enable");
             
+            //Read command values
             PVStructure pvStructureCmd = pvStructure.getStructureField("cmd");              
             iMode = pvStructureCmd.getShortField("iMode");
             iErrorCode = pvStructureCmd.getShortField("iErrorCode");             
@@ -146,10 +147,12 @@ public class S7DBAoFactory extends DBBaseFactory {
             bInterlock = pvStructureCmd.getBooleanField("bInterlock");             
             iEstopFunction =  pvStructureCmd.getIntField("iEstopFunction");
             
+            //Read status values            
             PVStructure pvStructureSts = pvStructure.getStructureField("sts");            
             bOutOfRange =  pvStructureSts.getBooleanField("sts/iEstopFunction");
             bConfiguratonError =  pvStructureSts.getBooleanField("sts/ConfiguratonError");
 
+            //Write command values            
             PVStructure pvStructureOut = pvStructure.getStructureField("out");
             out_iMode = pvStructureOut.getShortField("iMode");
             out_rManualValue = pvStructureOut.getFloatField("rManualValue");
@@ -177,7 +180,7 @@ public class S7DBAoFactory extends DBBaseFactory {
         public void atach(final PlcItem plcItem) {
             this.plcItem = plcItem;
             //offset = this.getPVStructure().getIntField("offset").get() * Short.BYTES;  
-            getOffset( this.getPVStructure().getStringField("offset").get());            
+            ParseOffset( this.getPVStructure().getStringField("offset").get());            
             innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
             innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);
         }

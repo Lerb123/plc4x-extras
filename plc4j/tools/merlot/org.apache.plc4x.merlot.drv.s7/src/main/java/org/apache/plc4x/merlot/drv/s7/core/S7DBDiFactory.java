@@ -114,6 +114,7 @@ public class S7DBDiFactory extends DBBaseFactory {
             write_value = pvStructure.getShortField("write_value");
             write_enable = pvStructure.getBooleanField("write_enable");
             
+            //Read command values
             PVStructure pvStructureCmd = pvStructure.getStructureField("cmd");                        
             iMode = pvStructureCmd.getShortField("iMode");            
             bOn = pvStructureCmd.getBooleanField("bOn");            
@@ -123,6 +124,9 @@ public class S7DBDiFactory extends DBBaseFactory {
             bPBEN_On = pvStructureCmd.getBooleanField("bPBEN_On");
             bPBEN_Off = pvStructureCmd.getBooleanField("bPBEN_Off");
             
+            //Read status values
+
+            //Write command values            
             PVStructure pvStructureOut = pvStructure.getStructureField("out");             
             out_iMode = pvStructureOut.getShortField("iMode");
             out_bPB_On = pvStructureOut.getBooleanField("bPB_On");
@@ -150,7 +154,7 @@ public class S7DBDiFactory extends DBBaseFactory {
         @Override
         public void atach(final PlcItem plcItem) {
             this.plcItem = plcItem;
-            getOffset( this.getPVStructure().getStringField("offset").get());            
+            ParseOffset( this.getPVStructure().getStringField("offset").get());            
             innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
             innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);
         }

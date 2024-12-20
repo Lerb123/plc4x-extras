@@ -164,7 +164,7 @@ public class S7DBStringFactory extends DBBaseFactory {
         @Override
         public void atach(final PlcItem plcItem) {
             this.plcItem = plcItem;  
-            getOffset( this.getPVStructure().getStringField("offset").get()); 
+            ParseOffset( this.getPVStructure().getStringField("offset").get()); 
             k = plcItem.getItemByteBuf().getByte(byteOffset);
             innerBuffer = plcItem.getItemByteBuf().slice(byteOffset + 1, k + 1);
             innerWriteBuffer = Unpooled.buffer(k + 1);

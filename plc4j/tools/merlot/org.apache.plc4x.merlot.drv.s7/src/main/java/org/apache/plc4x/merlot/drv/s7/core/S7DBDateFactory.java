@@ -148,7 +148,7 @@ public class S7DBDateFactory extends DBBaseFactory {
         @Override
         public void atach(final PlcItem plcItem) {
             this.plcItem = plcItem;  
-            getOffset( this.getPVStructure().getStringField("offset").get());            
+            ParseOffset( this.getPVStructure().getStringField("offset").get());            
             innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
         }
 

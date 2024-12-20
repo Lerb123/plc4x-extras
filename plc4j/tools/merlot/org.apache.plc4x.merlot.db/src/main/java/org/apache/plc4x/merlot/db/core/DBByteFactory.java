@@ -121,7 +121,7 @@ public class DBByteFactory extends DBBaseFactory {
         @Override
         public void atach(PlcItem plcItem) {
             this.plcItem = plcItem;
-            getOffset( this.getPVStructure().getStringField("offset").get());            
+            ParseOffset( this.getPVStructure().getStringField("offset").get());            
             innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
         }
 

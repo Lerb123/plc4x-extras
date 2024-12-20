@@ -114,7 +114,7 @@ public class DBStringFactory extends DBBaseFactory {
         @Override
         public void atach(PlcItem plcItem) {
             this.plcItem = plcItem;
-            getOffset( this.getPVStructure().getStringField("offset").get());            
+            ParseOffset( this.getPVStructure().getStringField("offset").get());            
             innerBuffer = Unpooled.wrappedBuffer(plcItem.getInnerBuffer(), 0, offset);
         }
 

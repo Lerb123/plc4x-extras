@@ -171,11 +171,11 @@ public class S7DBMotorFactory extends DBBaseFactory {
             write_value = pvStructure.getShortField("write_value");
             write_enable = pvStructure.getBooleanField("write_enable");
             
+            //Read command values
             PVStructure pvStructureCmd = pvStructure.getStructureField("cmd");            
             iMode = pvStructureCmd.getShortField("iMode");
             iErrorCode = pvStructureCmd.getShortField("iErrorCode");            
-            iStatus = pvStructureCmd.getShortField("iStatus");
-          
+            iStatus = pvStructureCmd.getShortField("iStatus");          
             bPB_ResetError = pvStructureCmd.getBooleanField("bPB_ResetError");            
             bPB_Forward = pvStructureCmd.getBooleanField("bPB_Forward");
             bPB_Reverse = pvStructureCmd.getBooleanField("bPB_Reverse");            
@@ -191,6 +191,7 @@ public class S7DBMotorFactory extends DBBaseFactory {
             bError = pvStructureCmd.getBooleanField("bError");
             bInterlock = pvStructureCmd.getBooleanField("bInterlock"); 
             
+            //Read status values            
             PVStructure pvStructureSts = pvStructure.getStructureField("sts");
             bMotorProtectorTripped = pvStructureSts.getBooleanField("bMotorProtectorTripped");
             bLocalDisconnectOff = pvStructureSts.getBooleanField("bLocalDisconnectOff"); 
@@ -199,6 +200,7 @@ public class S7DBMotorFactory extends DBBaseFactory {
             bNoSignalReverse = pvStructureSts.getBooleanField("bNoSignalReverse");
             bMotorNotStopped = pvStructureSts.getBooleanField("bMotorNotStopped"); 
             
+            //Write command values            
             PVStructure pvStructureOut = pvStructure.getStructureField("out"); 
             out_iMode = pvStructureOut.getShortField("iMode");
             out_bPB_ResetError = pvStructureOut.getBooleanField("bPB_ResetError"); 
@@ -230,7 +232,7 @@ public class S7DBMotorFactory extends DBBaseFactory {
         @Override
         public void atach(final PlcItem plcItem) {
             this.plcItem = plcItem;
-            getOffset( this.getPVStructure().getStringField("offset").get());            
+            ParseOffset( this.getPVStructure().getStringField("offset").get());            
             innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
             innerWriteBuffer = Unpooled.copiedBuffer(innerBuffer);
         }

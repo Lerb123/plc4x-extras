@@ -115,7 +115,7 @@ public class DBRecord extends PVRecord   implements PlcItemListener {
         return MONITOR_VALUE_FIELD;
     };
     
-    public void getOffset(String strOffset){
+    public void ParseOffset(String strOffset){
         Matcher matcher;
         if ((matcher = BYTE_OFFSET_PATTERN.matcher(strOffset)).matches()){
             byteOffset = Integer.parseInt(matcher.group(BYTE_OFFSET ));
