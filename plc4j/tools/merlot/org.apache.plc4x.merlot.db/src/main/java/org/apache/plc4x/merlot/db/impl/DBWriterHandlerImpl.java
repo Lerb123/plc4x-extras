@@ -71,7 +71,10 @@ import org.slf4j.LoggerFactory;
 * the associated PlcItem.
 */
 public class DBWriterHandlerImpl implements DBWriterHandler {
-
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
     private static final Logger LOGGER = LoggerFactory.getLogger(DBWriterHandlerImpl.class);
     private  CreateRequest createRequest = CreateRequest.create();
     private Map<Monitor, DBRecord> recordMonitors = new HashMap<>();
