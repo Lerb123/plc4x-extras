@@ -117,20 +117,20 @@ public class S7DBAiTest {
         assertNull(fieldOffsets.get(1));
         assertNull(fieldOffsets.get(2));
 
-        assertEquals(fieldOffsets.get(3).left, 0); assertEquals(fieldOffsets.get(3).right, (byte) -1);
-        assertEquals(fieldOffsets.get(4).left, 14); assertEquals(fieldOffsets.get(4).right, (byte) -1);        
-        assertEquals(fieldOffsets.get(5).left, 18); assertEquals(fieldOffsets.get(5).right, (byte) 0); 
-        assertEquals(fieldOffsets.get(6).left, 22); assertEquals(fieldOffsets.get(6).right, (byte) -1); 
-        assertEquals(fieldOffsets.get(7).left, 24); assertEquals(fieldOffsets.get(7).right, (byte) -1); 
-        assertEquals(fieldOffsets.get(8).left, 28); assertEquals(fieldOffsets.get(8).right, (byte) -1); 
-        assertEquals(fieldOffsets.get(9).left, 32); assertEquals(fieldOffsets.get(9).right, (byte) -1); 
-        assertEquals(fieldOffsets.get(10).left, 36); assertEquals(fieldOffsets.get(10).right, (byte) -1); 
-        assertEquals(fieldOffsets.get(11).left, 40); assertEquals(fieldOffsets.get(11).right, (byte) -1); 
-        assertEquals(fieldOffsets.get(12).left, 44); assertEquals(fieldOffsets.get(12).right, (byte) -1); 
-        assertEquals(fieldOffsets.get(13).left, 48); assertEquals(fieldOffsets.get(13).right, (byte) -1); 
-        assertEquals(fieldOffsets.get(14).left, 52); assertEquals(fieldOffsets.get(14).right, (byte) -1); 
-        assertEquals(fieldOffsets.get(15).left, 56); assertEquals(fieldOffsets.get(15).right, (byte) -1); 
-        assertEquals(fieldOffsets.get(16).left, 60); assertEquals(fieldOffsets.get(16).right, (byte) -1); 
+        assertEquals(0, fieldOffsets.get(3).left);      assertEquals((byte) -1,fieldOffsets.get(3).right);
+        assertEquals(14, fieldOffsets.get(4).left);     assertEquals((byte) -1, fieldOffsets.get(4).right);        
+        assertEquals(18, fieldOffsets.get(5).left);     assertEquals((byte) 0, fieldOffsets.get(5).right); 
+        assertEquals(22, fieldOffsets.get(6).left);     assertEquals((byte) -1, fieldOffsets.get(6).right); 
+        assertEquals(24, fieldOffsets.get(7).left);     assertEquals((byte) -1, fieldOffsets.get(7).right); 
+        assertEquals(28, fieldOffsets.get(8).left);     assertEquals((byte) -1, fieldOffsets.get(8).right); 
+        assertEquals(32, fieldOffsets.get(9).left);     assertEquals((byte) -1, fieldOffsets.get(9).right); 
+        assertEquals(36, fieldOffsets.get(10).left);    assertEquals((byte) -1, fieldOffsets.get(10).right); 
+        assertEquals(40, fieldOffsets.get(11).left);    assertEquals((byte) -1, fieldOffsets.get(11).right); 
+        assertEquals(44, fieldOffsets.get(12).left);    assertEquals((byte) -1, fieldOffsets.get(12).right); 
+        assertEquals(48, fieldOffsets.get(13).left);    assertEquals((byte) -1, fieldOffsets.get(13).right); 
+        assertEquals(52, fieldOffsets.get(14).left);    assertEquals((byte) -1, fieldOffsets.get(14).right); 
+        assertEquals(56, fieldOffsets.get(15).left);    assertEquals((byte) -1, fieldOffsets.get(15).right); 
+        assertEquals(60, fieldOffsets.get(16).left);    assertEquals((byte) -1, fieldOffsets.get(16).right); 
         
         PVString pvStrOffset = AI.getPVRecordStructure().getPVStructure().getStringField("offset");
         pvStrOffset.put("1255");
@@ -240,46 +240,46 @@ public class S7DBAiTest {
         rInHighHighDeadband = pvStructurePar.getFloatField("rInHighHighDeadband");          
         
                     
-        assertEquals(iMode.get(), 1234);
-        assertEquals(iErrorCode.get(), 4321);
-        assertEquals(iStatus.get(), 1010);        
-        assertEquals(rActiveValue.get(), 3.1416F);
-        assertEquals(rInputValue.get(), 3.1416F * 2);        
-        assertEquals(rManualValue.get(), 3.1416F * 4); 
-        assertEquals(iSensorType.get(), 123);         
-        assertEquals(rInEngUnitsMin.get(), 3.1416F * 8);         
-        assertEquals(rInEngUnitsMax.get(), 3.1416F * 10);
-        assertEquals(rInLowLow.get(), 3.1416F * 12);
-        assertEquals(rInLow.get(), 3.1416F * 14);         
-        assertEquals(rInHigh.get(), 3.1416F * 16);
-        assertEquals(rInHighHigh.get(), 3.1416F * 18); 
-        assertEquals(rInLowLowDeadband.get(), 3.1416F * 20); 
-        assertEquals(rInLowDeadband.get(), 3.1416F * 22); 
-        assertEquals(rInHighDeadband.get(), 3.1416F * 24); 
-        assertEquals(rInHighHighDeadband.get(), 3.1416F * 28);  
+        assertEquals(1234, iMode.get());
+        assertEquals(4321, iErrorCode.get());
+        assertEquals(101, iStatus.get());        
+        assertEquals(3.1416F, rActiveValue.get());
+        assertEquals(3.1416F * 2, rInputValue.get());        
+        assertEquals(3.1416F * 4, rManualValue.get()); 
+        assertEquals(123, iSensorType.get());         
+        assertEquals(3.1416F * 8, rInEngUnitsMin.get());         
+        assertEquals(3.1416F * 10, rInEngUnitsMax.get());
+        assertEquals(3.1416F * 12, rInLowLow.get());
+        assertEquals(3.1416F * 14, rInLow.get());         
+        assertEquals(3.1416F * 16, rInHigh.get());
+        assertEquals(3.1416F * 18, rInHighHigh.get()); 
+        assertEquals(3.1416F * 20, rInLowLowDeadband.get()); 
+        assertEquals(3.1416F * 22, rInLowDeadband.get()); 
+        assertEquals(3.1416F * 24, rInHighDeadband.get()); 
+        assertEquals(3.1416F * 28, rInHighHighDeadband.get());  
         
         //Test bits        
         byteBuf.setByte(18,0x07);               //bPB_resetError = bPBEN_ResetError = bError = true;
         byteBuf.setByte(20,0x07);               //LowLowAlarm = HighHighAlarm=Invalid
         plcItem.setPlcValue(plcValue); 
         
-        assertEquals(bPB_ResetError.get(), true);
-        assertEquals(bPBEN_ResetError.get(), true); 
-        assertEquals(bError.get(), true);  
-        assertEquals(bLowLowAlarm.get(), true);
-        assertEquals(bHighHighAlarm.get(), true); 
-        assertEquals(bInvalid.get(), true); 
+        assertEquals(true, bPB_ResetError.get());
+        assertEquals(true, bPBEN_ResetError.get()); 
+        assertEquals(true, bError.get());  
+        assertEquals(true, bLowLowAlarm.get());
+        assertEquals(true, bHighHighAlarm.get()); 
+        assertEquals(true, bInvalid.get()); 
         
         byteBuf.setByte(18,0x05);               //bPB_resetError =  bError = true; bPBEN_ResetError = false;
         byteBuf.setByte(20,0x05);               //LowLowAlarm = Invalid; HighHighAlarm= = false;
         plcItem.setPlcValue(plcValue); 
 
-        assertEquals(bPB_ResetError.get(), true);
-        assertEquals(bPBEN_ResetError.get(), false); 
-        assertEquals(bError.get(), true);  
-        assertEquals(bLowLowAlarm.get(), true);
-        assertEquals(bHighHighAlarm.get(), false); 
-        assertEquals(bInvalid.get(), true);         
+        assertEquals(true, bPB_ResetError.get());
+        assertEquals(false, bPBEN_ResetError.get()); 
+        assertEquals(true, bError.get());  
+        assertEquals(true, bLowLowAlarm.get());
+        assertEquals(false, bHighHighAlarm.get()); 
+        assertEquals(true, bInvalid.get());         
         
      }
 }
