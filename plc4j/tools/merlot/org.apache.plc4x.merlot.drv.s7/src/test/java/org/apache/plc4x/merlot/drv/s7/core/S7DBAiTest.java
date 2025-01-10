@@ -207,25 +207,6 @@ public class S7DBAiTest {
     @Order(1)
     public void DBRecordTest() {
 
-        byteBuf.setShort(0, 1234);               //iMOde
-        byteBuf.setShort(2, 4321);               //iErrorCode
-        byteBuf.setShort(4, 1010);               //iStatus
-        byteBuf.setFloat(6, 3.1416F);           //iActiveValue
-        byteBuf.setFloat(10, 3.1416F * 2);      //rInputValue
-        byteBuf.setFloat(14, 3.1416F * 4);      //rManualValue
-        byteBuf.setShort(22, 123);              //iSensorType
-        byteBuf.setFloat(24, 3.1416F * 8);      //rInEngUnitsMin
-        byteBuf.setFloat(28, 3.1416F * 10);     //rInEngUnitsMax         
-        byteBuf.setFloat(32, 3.1416F * 12);     //rInLowLow         
-        byteBuf.setFloat(36, 3.1416F * 14);     //rInLow
-        byteBuf.setFloat(40, 3.1416F * 16);     //rInHigh
-        byteBuf.setFloat(44, 3.1416F * 18);     //rInHighHigh
-        byteBuf.setFloat(48, 3.1416F * 20);     //rInLowLowDeadband
-        byteBuf.setFloat(52, 3.1416F * 22);     //rInLowDeadband
-        byteBuf.setFloat(56, 3.1416F * 24);     //rInHighDeadband
-        byteBuf.setFloat(60, 3.1416F * 28);     //rInHighHighDeadband        
-
-        byteBuf.setByte(511, 123);
 
         S7DBAiFactory AIFactory = new S7DBAiFactory();
         DBRecord AI_00 = AIFactory.create("AI_00");
