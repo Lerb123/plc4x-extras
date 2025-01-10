@@ -17,19 +17,14 @@
 package org.apache.plc4x.merlot.drv.s7.core;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import static io.netty.buffer.Unpooled.buffer;
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.UUID;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.java.api.value.PlcValue;
-import org.apache.plc4x.java.spi.values.PlcBYTE;
-import org.apache.plc4x.java.spi.values.PlcList;
 import org.apache.plc4x.java.spi.values.PlcRawByteArray;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.api.impl.PlcItemImpl;
-import org.apache.plc4x.merlot.api.impl.PlcItemImpl.PlcItemBuilder;
 import org.apache.plc4x.merlot.db.api.DBRecord;
 import org.apache.plc4x.merlot.db.core.DBBaseFactory;
 import org.epics.pvdata.pv.PVBoolean;
@@ -207,7 +202,6 @@ public class S7DBAiTest {
     @Order(1)
     public void DBRecordTest() {
 
-
         S7DBAiFactory AIFactory = new S7DBAiFactory();
         DBRecord AI_00 = AIFactory.create("AI_00");
         PVString pvStrOffset = AI_00.getPVRecordStructure().getPVStructure().getStringField("offset");
@@ -259,7 +253,7 @@ public class S7DBAiTest {
         rInHighDeadband = pvStructurePar.getFloatField("rInHighDeadband");
         rInHighHighDeadband = pvStructurePar.getFloatField("rInHighHighDeadband");
 
-         logger.info("STARTING TEST DBRECORD AI");
+        logger.info("\n--------------STARTING TEST DBRECORD AI----------");
         logger.info(String.format("Prueba en Ai:\n (iMode esperado: 1234 == (iMode actual): %d)", iMode.get()));
         assertEquals(1234, iMode.get());
         logger.info(String.format("Prueba en Ai:\n (iErrorCode esperado: 4321 == (iErrorCode actual): %d)", iErrorCode.get()));
@@ -284,7 +278,7 @@ public class S7DBAiTest {
         assertEquals(3.1416F * 14, rInLow.get());
         logger.info(String.format("Prueba en Ai:\n (rInHigh esperado: 50.2656F == (rInHigh actual): %f)", rInHigh.get()));
         assertEquals(3.1416F * 16, rInHigh.get());
-       logger.info(String.format("Prueba en Ai:\n (rInHighHigh esperado: 56.5488F == (rInHighHigh actual): %f)", rInHighHigh.get()));
+        logger.info(String.format("Prueba en Ai:\n (rInHighHigh esperado: 56.5488F == (rInHighHigh actual): %f)", rInHighHigh.get()));
         assertEquals(3.1416F * 18, rInHighHigh.get());
         logger.info(String.format("Prueba en Ai:\n (rInLowLowDeadband esperado: 62.832F == (rInLowLowDeadband actual): %f)", rInLowLowDeadband.get()));
         assertEquals(3.1416F * 20, rInLowLowDeadband.get());
@@ -294,28 +288,47 @@ public class S7DBAiTest {
         assertEquals(3.1416F * 24, rInHighDeadband.get());
         logger.info(String.format("Prueba en Ai:\n (rInHighHighDeadband esperado: 87.9648F == (rInHighHighDeadband actual): %f)", rInHighHighDeadband.get()));
         assertEquals(3.1416F * 28, rInHighHighDeadband.get());
-
+        
+        logger.info(String.format("bPB_resetError = bPBEN_ResetError = bError = true (value %s)", "0x07"));
         //Test bits        
         byteBuf.setByte(18, 0x07);               //bPB_resetError = bPBEN_ResetError = bError = true;
+        logger.info(String.format("bLowLowAlarm = bHighHighAlarm = bInvalid (value %s)", "0x07"));
         byteBuf.setByte(20, 0x07);               //LowLowAlarm = HighHighAlarm=Invalid
         plcItem.setPlcValue(plcValue);
 
+        
+        logger.info("----------Test bits---------");
+        logger.info(String.format("Prueba en Ai:\n (bPB_ResetError esperado: true == (bPB_ResetError actual): %b)", bPB_ResetError.get()));
         assertEquals(true, bPB_ResetError.get());
+        logger.info(String.format("Prueba en Ai:\n (bPBEN_ResetError esperado: true == (bPBEN_ResetError actual): %b)", bPBEN_ResetError.get()));
         assertEquals(true, bPBEN_ResetError.get());
+        logger.info(String.format("Prueba en Ai:\n (bError esperado: true == (bError actual): %b)", bError.get()));
         assertEquals(true, bError.get());
+        logger.info(String.format("Prueba en Ai:\n (bLowLowAlarm esperado: true == (bLowLowAlarm actual): %b)", bLowLowAlarm.get()));
         assertEquals(true, bLowLowAlarm.get());
+        logger.info(String.format("Prueba en Ai:\n (bHighHighAlarm esperado: true == (bHighHighAlarm actual): %b)", bHighHighAlarm.get()));
         assertEquals(true, bHighHighAlarm.get());
+        logger.info(String.format("Prueba en Ai:\n (bInvalid esperado: true == (bInvalid actual): %b)", bInvalid.get()));
         assertEquals(true, bInvalid.get());
 
+        logger.info(String.format("bPB_resetError = bPBEN_ResetError = bError = true (value %s)", "0x05"));
         byteBuf.setByte(18, 0x05);               //bPB_resetError =  bError = true; bPBEN_ResetError = false;
+        logger.info(String.format("LowLowAlarm = HighHighAlarm=Invalid (value %s)", "0x05"));
         byteBuf.setByte(20, 0x05);               //LowLowAlarm = Invalid; HighHighAlarm= = false;
         plcItem.setPlcValue(plcValue);
 
+        
+        logger.info(String.format("Prueba en Ai:\n (bPB_ResetError esperado: true == (bPB_ResetError actual): %b)", bPB_ResetError.get()));
         assertEquals(true, bPB_ResetError.get());
+        logger.info(String.format("Prueba en Ai:\n (bPBEN_ResetError esperado: true == (bPBEN_ResetError actual): %b)", bPBEN_ResetError.get()));
         assertEquals(false, bPBEN_ResetError.get());
+        logger.info(String.format("Prueba en Ai:\n (bError esperado: true == (bError actual): %b)", bError.get()));
         assertEquals(true, bError.get());
+        logger.info(String.format("Prueba en Ai:\n (bLowLowAlarm esperado: true == (bLowLowAlarm actual): %b)", bLowLowAlarm.get()));
         assertEquals(true, bLowLowAlarm.get());
+        logger.info(String.format("Prueba en Ai:\n (bHighHighAlarm esperado: true == (bHighHighAlarm actual): %b)", bHighHighAlarm.get()));
         assertEquals(false, bHighHighAlarm.get());
+        logger.info(String.format("Prueba en Ai:\n (bInvalid esperado: true == (bInvalid actual): %b)", bInvalid.get()));
         assertEquals(true, bInvalid.get());
 
         logger.info("TEST SUCCESSFULLY COMPLETED ");
