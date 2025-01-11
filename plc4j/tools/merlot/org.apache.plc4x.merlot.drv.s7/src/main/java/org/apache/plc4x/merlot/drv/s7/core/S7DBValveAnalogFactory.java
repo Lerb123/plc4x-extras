@@ -95,7 +95,7 @@ public class S7DBValveAnalogFactory extends DBBaseFactory {
 
     class DBS7ValveRecord extends DBRecord implements PlcItemListener {
 
-        private int BUFFER_SIZE = 31;
+        private int BUFFER_SIZE = 32;
         private static final String MONITOR_TF_FIELDS = "field(write_enable, par{tTimeOut})";
 
         private PVShort value;
@@ -160,8 +160,8 @@ public class S7DBValveAnalogFactory extends DBBaseFactory {
             InvalidFeedback = pvStructureSts.getBooleanField("InvalidFeedback");
 
             //Write command values            
-            PVStructure pvStructureOut = pvStructure.getStructureField("par");
-            tTimeOut = pvStructureOut.getIntField("tTimeOut");
+            PVStructure pvStructurePar = pvStructure.getStructureField("par");
+            tTimeOut = pvStructurePar.getIntField("tTimeOut");
 
         }
 

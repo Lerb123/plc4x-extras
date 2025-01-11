@@ -88,15 +88,13 @@ public class S7DBAiTest {
     private PVFloat rInHighDeadband;
     private PVFloat rInHighHighDeadband;
 
-    public S7DBAiTest() {
-    }
-
+   
     @BeforeAll
     public static void setUpClass() {
         logger.info("Starting the testing of the analog input class");
         logger.info("Test Analog inputs for S7 plc");
         logger.info("Creating buffer to plcValue");
-        byteBuf = buffer(512);
+        byteBuf = buffer(100);
         byteBuf.setShort(0, 1234);               //iMOde
         byteBuf.setShort(2, 4321);               //iErrorCode
         byteBuf.setShort(4, 1010);               //iStatus
@@ -133,6 +131,9 @@ public class S7DBAiTest {
                 setItemId(uuid).
                 setItemUid(UUID.fromString(uuid)).
                 build();
+        assertNotNull(plcItem);
+        assertNotNull(plcValue);
+        
     }
 
     @AfterEach
@@ -207,7 +208,6 @@ public class S7DBAiTest {
         PVString pvStrOffset = AI_00.getPVRecordStructure().getPVStructure().getStringField("offset");
         pvStrOffset.put("0");
 
-        AI_00.atach(plcItem);
 
         plcItem.addItemListener(AI_00);
         plcItem.setPlcValue(plcValue);
@@ -254,84 +254,82 @@ public class S7DBAiTest {
         rInHighHighDeadband = pvStructurePar.getFloatField("rInHighHighDeadband");
 
         logger.info("\n--------------STARTING TEST DBRECORD AI----------");
-        logger.info(String.format("Prueba en Ai:\n (iMode esperado: 1234 == (iMode actual): %d)", iMode.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (iMode esperado: 1234 == (iMode actual): %d)", iMode.get()));
         assertEquals(1234, iMode.get());
-        logger.info(String.format("Prueba en Ai:\n (iErrorCode esperado: 4321 == (iErrorCode actual): %d)", iErrorCode.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (iErrorCode esperado: 4321 == (iErrorCode actual): %d)", iErrorCode.get()));
         assertEquals(4321, iErrorCode.get());
-        logger.info(String.format("Prueba en Ai:\n (iStatus esperado: 1010 == (iStatus actual): %d)", iStatus.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (iStatus esperado: 1010 == (iStatus actual): %d)", iStatus.get()));
         assertEquals(1010, iStatus.get());
-        logger.info(String.format("Prueba en Ai:\n (rActiveValue esperado: 3.1416F == (rActiveValue actual): %f)", rActiveValue.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (rActiveValue esperado: 3.1416F == (rActiveValue actual): %f)", rActiveValue.get()));
         assertEquals(3.1416F, rActiveValue.get());
-        logger.info(String.format("Prueba en Ai:\n (rInputValue esperado: 6.2832F == (rInputValue actual): %f)", rInputValue.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (rInputValue esperado: 6.2832F == (rInputValue actual): %f)", rInputValue.get()));
         assertEquals(3.1416F * 2, rInputValue.get());
-        logger.info(String.format("Prueba en Ai:\n (rManualValue esperado: 12.5654F == (rManualValue actual): %f)", rManualValue.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (rManualValue esperado: 12.5654F == (rManualValue actual): %f)", rManualValue.get()));
         assertEquals(3.1416F * 4, rManualValue.get());
-        logger.info(String.format("Prueba en Ai:\n (iSensorType esperado: 123 == (iSensorType actual): %d)", iSensorType.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (iSensorType esperado: 123 == (iSensorType actual): %d)", iSensorType.get()));
         assertEquals(123, iSensorType.get());
-        logger.info(String.format("Prueba en Ai:\n (rInEngUnitsMin esperado: 25.1328F == (rInEngUnitsMin actual): %f)", rInEngUnitsMin.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (rInEngUnitsMin esperado: 25.1328F == (rInEngUnitsMin actual): %f)", rInEngUnitsMin.get()));
         assertEquals(3.1416F * 8, rInEngUnitsMin.get());
-        logger.info(String.format("Prueba en Ai:\n (rInEngUnitsMax esperado: 31.416F == (rInEngUnitsMax actual): %f)", rInEngUnitsMax.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (rInEngUnitsMax esperado: 31.416F == (rInEngUnitsMax actual): %f)", rInEngUnitsMax.get()));
         assertEquals(3.1416F * 10, rInEngUnitsMax.get());
-        logger.info(String.format("Prueba en Ai:\n (rInLowLow esperado: 37.6992F == (rInLowLow actual): %f)", rInLowLow.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (rInLowLow esperado: 37.6992F == (rInLowLow actual): %f)", rInLowLow.get()));
         assertEquals(3.1416F * 12, rInLowLow.get());
-        logger.info(String.format("Prueba en Ai:\n (rInLow esperado: 43.9824F == (rInLow actual): %f)", rInLow.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (rInLow esperado: 43.9824F == (rInLow actual): %f)", rInLow.get()));
         assertEquals(3.1416F * 14, rInLow.get());
-        logger.info(String.format("Prueba en Ai:\n (rInHigh esperado: 50.2656F == (rInHigh actual): %f)", rInHigh.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (rInHigh esperado: 50.2656F == (rInHigh actual): %f)", rInHigh.get()));
         assertEquals(3.1416F * 16, rInHigh.get());
-        logger.info(String.format("Prueba en Ai:\n (rInHighHigh esperado: 56.5488F == (rInHighHigh actual): %f)", rInHighHigh.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (rInHighHigh esperado: 56.5488F == (rInHighHigh actual): %f)", rInHighHigh.get()));
         assertEquals(3.1416F * 18, rInHighHigh.get());
-        logger.info(String.format("Prueba en Ai:\n (rInLowLowDeadband esperado: 62.832F == (rInLowLowDeadband actual): %f)", rInLowLowDeadband.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (rInLowLowDeadband esperado: 62.832F == (rInLowLowDeadband actual): %f)", rInLowLowDeadband.get()));
         assertEquals(3.1416F * 20, rInLowLowDeadband.get());
-        logger.info(String.format("Prueba en Ai:\n (rInLowDeadband esperado: 69.1152F == (rInLowDeadband actual): %f)", rInLowDeadband.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (rInLowDeadband esperado: 69.1152F == (rInLowDeadband actual): %f)", rInLowDeadband.get()));
         assertEquals(3.1416F * 22, rInLowDeadband.get());
-        logger.info(String.format("Prueba en Ai:\n (rInHighDeadband esperado: 75.3984F == (rInHighDeadband actual): %f)", rInHighDeadband.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (rInHighDeadband esperado: 75.3984F == (rInHighDeadband actual): %f)", rInHighDeadband.get()));
         assertEquals(3.1416F * 24, rInHighDeadband.get());
-        logger.info(String.format("Prueba en Ai:\n (rInHighHighDeadband esperado: 87.9648F == (rInHighHighDeadband actual): %f)", rInHighHighDeadband.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (rInHighHighDeadband esperado: 87.9648F == (rInHighHighDeadband actual): %f)", rInHighHighDeadband.get()));
         assertEquals(3.1416F * 28, rInHighHighDeadband.get());
         
-        logger.info(String.format("bPB_resetError = bPBEN_ResetError = bError = true (value %s)", "0x07"));
+        
         //Test bits        
         byteBuf.setByte(18, 0x07);               //bPB_resetError = bPBEN_ResetError = bError = true;
-        logger.info(String.format("bLowLowAlarm = bHighHighAlarm = bInvalid (value %s)", "0x07"));
+      
         byteBuf.setByte(20, 0x07);               //LowLowAlarm = HighHighAlarm=Invalid
         plcItem.setPlcValue(plcValue);
 
         
-        logger.info("----------Test bits---------");
-        logger.info(String.format("Prueba en Ai:\n (bPB_ResetError esperado: true == (bPB_ResetError actual): %b)", bPB_ResetError.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (bPB_ResetError esperado: true == (bPB_ResetError actual): %b)", bPB_ResetError.get()));
         assertEquals(true, bPB_ResetError.get());
-        logger.info(String.format("Prueba en Ai:\n (bPBEN_ResetError esperado: true == (bPBEN_ResetError actual): %b)", bPBEN_ResetError.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (bPBEN_ResetError esperado: true == (bPBEN_ResetError actual): %b)", bPBEN_ResetError.get()));
         assertEquals(true, bPBEN_ResetError.get());
-        logger.info(String.format("Prueba en Ai:\n (bError esperado: true == (bError actual): %b)", bError.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (bError esperado: true == (bError actual): %b)", bError.get()));
         assertEquals(true, bError.get());
-        logger.info(String.format("Prueba en Ai:\n (bLowLowAlarm esperado: true == (bLowLowAlarm actual): %b)", bLowLowAlarm.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (bLowLowAlarm esperado: true == (bLowLowAlarm actual): %b)", bLowLowAlarm.get()));
         assertEquals(true, bLowLowAlarm.get());
-        logger.info(String.format("Prueba en Ai:\n (bHighHighAlarm esperado: true == (bHighHighAlarm actual): %b)", bHighHighAlarm.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (bHighHighAlarm esperado: true == (bHighHighAlarm actual): %b)", bHighHighAlarm.get()));
         assertEquals(true, bHighHighAlarm.get());
-        logger.info(String.format("Prueba en Ai:\n (bInvalid esperado: true == (bInvalid actual): %b)", bInvalid.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (bInvalid esperado: true == (bInvalid actual): %b)", bInvalid.get()));
         assertEquals(true, bInvalid.get());
 
-        logger.info(String.format("bPB_resetError = bPBEN_ResetError = bError = true (value %s)", "0x05"));
+        
         byteBuf.setByte(18, 0x05);               //bPB_resetError =  bError = true; bPBEN_ResetError = false;
-        logger.info(String.format("LowLowAlarm = HighHighAlarm=Invalid (value %s)", "0x05"));
+        
         byteBuf.setByte(20, 0x05);               //LowLowAlarm = Invalid; HighHighAlarm= = false;
         plcItem.setPlcValue(plcValue);
 
-        
-        logger.info(String.format("Prueba en Ai:\n (bPB_ResetError esperado: true == (bPB_ResetError actual): %b)", bPB_ResetError.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (bPB_ResetError esperado: true == (bPB_ResetError actual): %b)", bPB_ResetError.get()));
         assertEquals(true, bPB_ResetError.get());
-        logger.info(String.format("Prueba en Ai:\n (bPBEN_ResetError esperado: true == (bPBEN_ResetError actual): %b)", bPBEN_ResetError.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (bPBEN_ResetError esperado: false == (bPBEN_ResetError actual): %b)", bPBEN_ResetError.get()));
         assertEquals(false, bPBEN_ResetError.get());
-        logger.info(String.format("Prueba en Ai:\n (bError esperado: true == (bError actual): %b)", bError.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (bError esperado: true == (bError actual): %b)", bError.get()));
         assertEquals(true, bError.get());
-        logger.info(String.format("Prueba en Ai:\n (bLowLowAlarm esperado: true == (bLowLowAlarm actual): %b)", bLowLowAlarm.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (bLowLowAlarm esperado: true == (bLowLowAlarm actual): %b)", bLowLowAlarm.get()));
         assertEquals(true, bLowLowAlarm.get());
-        logger.info(String.format("Prueba en Ai:\n (bHighHighAlarm esperado: true == (bHighHighAlarm actual): %b)", bHighHighAlarm.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (bHighHighAlarm esperado: false == (bHighHighAlarm actual): %b)", bHighHighAlarm.get()));
         assertEquals(false, bHighHighAlarm.get());
-        logger.info(String.format("Prueba en Ai:\n (bInvalid esperado: true == (bInvalid actual): %b)", bInvalid.get()));
+        logger.info(String.format("Prueba en Analog inputs:\n (bInvalid esperado: true == (bInvalid actual): %b)", bInvalid.get()));
         assertEquals(true, bInvalid.get());
 
-        logger.info("TEST SUCCESSFULLY COMPLETED ");
+        logger.info("\nTEST Ai analog inputs SUCCESSFULLY COMPLETED ");
 
     }
 }

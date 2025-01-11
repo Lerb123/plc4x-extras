@@ -89,7 +89,7 @@ public class S7DBValveSolenoidFactory extends DBBaseFactory {
 
     class DBS7ValSolenoidRecord extends DBRecord implements PlcItemListener {
 
-        private int BUFFER_SIZE = 13;
+        private int BUFFER_SIZE = 14;
         private static final String MONITOR_TF_FIELDS = "field(write_enable, par{tTimeOut})";
 
         /*
@@ -162,7 +162,7 @@ public class S7DBValveSolenoidFactory extends DBBaseFactory {
             bWorkFeedbackStillActive = pvStructureSts.getBooleanField("bWorkFeedbackStillActive");
 
             PVStructure pvStructurePar = pvStructure.getStructureField("par");
-            tTimeOut = pvStructurePar.getIntField("bWorkFeedbackStillActive");
+            tTimeOut = pvStructurePar.getIntField("tTimeOut");
         }
 
         @Override
@@ -190,11 +190,11 @@ public class S7DBValveSolenoidFactory extends DBBaseFactory {
                 /*
                 cmd
                  */
-                iMode.put(innerBuffer.readShort());
-                iErrorCode.put(innerBuffer.readShort());
-                iStatus.put(innerBuffer.readShort());
+                iMode.put(innerBuffer.getShort(0));
+                iErrorCode.put(innerBuffer.getShort(2));
+                iStatus.put(innerBuffer.getShort(4));
 
-                byTemp = innerBuffer.readByte();
+                byTemp = innerBuffer.getByte(6);
                 bPB_ResetError.put(isBitSet(byTemp, 0));
                 bPB_Home.put(isBitSet(byTemp, 1));
                 bPB_Work.put(isBitSet(byTemp, 2));
@@ -204,7 +204,7 @@ public class S7DBValveSolenoidFactory extends DBBaseFactory {
                 bHomeOn.put(isBitSet(byTemp, 6));
                 bWorkOn.put(isBitSet(byTemp, 7));
 
-                byTemp = innerBuffer.readByte();
+                byTemp = innerBuffer.getByte(7);
                 bSignalHome.put(isBitSet(byTemp, 0));
                 bSignalWork.put(isBitSet(byTemp, 1));
                 bError.put(isBitSet(byTemp, 2));
@@ -213,7 +213,7 @@ public class S7DBValveSolenoidFactory extends DBBaseFactory {
                 /*
                 sts
                  */
-                byTemp = innerBuffer.readByte();
+                byTemp = innerBuffer.getByte(8);
                 bNoHomeFeedback.put(isBitSet(byTemp, 0));
                 bNoWorkFeedback.put(isBitSet(byTemp, 1));
                 bHomeFeedbackStillActive.put(isBitSet(byTemp, 2));
@@ -221,7 +221,7 @@ public class S7DBValveSolenoidFactory extends DBBaseFactory {
                 /*
                 par
                  */
-                tTimeOut.put(innerBuffer.readInt());
+                tTimeOut.put(innerBuffer.getInt(10));
             }
         }
     }

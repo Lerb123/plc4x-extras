@@ -1,6 +1,18 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.plc4x.merlot.drv.s7.core;
 
@@ -73,7 +85,7 @@ public class S7DBAoTest {
         logger.info("Starting the testing of the analog output class");
         logger.info("Test Analog output for S7 plc");
         logger.info("Creating buffer to plcValue to Ao");
-        byteBuf = buffer(512);
+        byteBuf = buffer(100);
 
         byteBuf.setShort(0, 1234);   //imode
         byteBuf.setShort(2, 4321);   //iErrorCode
@@ -101,14 +113,14 @@ public class S7DBAoTest {
          */
         logger.info("Creating  plcValue and plcItem to Ao");
         String uuid = UUID.randomUUID().toString();
-
+        plcValue = new PlcRawByteArray(byteBuf.array());
         plcItem = new PlcItemImpl.PlcItemBuilder("ITEM_DB42").
                 setItemDescription("SIM DB42 S7").
                 setItemId(uuid).
                 setItemUid(UUID.fromString(uuid)).
                 build();
-
-        plcValue = new PlcRawByteArray(byteBuf.array());
+        assertNotNull(plcItem);
+        assertNotNull(plcValue);
     }
 
     @AfterEach
@@ -125,8 +137,6 @@ public class S7DBAoTest {
         DBRecord AO_00 = AIFactory.create("AO_00");
         PVString pvStrOffset = AO_00.getPVRecordStructure().getPVStructure().getStringField("offset");
         pvStrOffset.put("0");
-
-        AO_00.atach(plcItem);
 
         plcItem.addItemListener(AO_00);
         plcItem.setPlcValue(plcValue);
@@ -166,23 +176,38 @@ public class S7DBAoTest {
         bySpare = pvStructurePar.getByteField("bySpare");
 
         //Assertions
+        logger.info("\n--------------STARTING TEST DBRECORD   Analog Outputs----------");
+        logger.info(String.format("Prueba en  Analog outputs:\n (iMode esperado: 1234 == (iMode actual): %d)", iMode.get()));
         assertEquals(1234, iMode.get());
+        logger.info(String.format("Prueba en  Analog outputs:\n (iErrorCode esperado: 4321 == (iErrorCode actual): %d)", iErrorCode.get()));
         assertEquals(4321, iErrorCode.get());
+        logger.info(String.format("Prueba en  Analog outputs:\n (rValue esperado: 3.1416F == (rValue actual): %f)", rValue.get()));
         assertEquals(3.1416F, rValue.get());
+        logger.info(String.format("Prueba en  Analog outputs:\n (rAutoValue esperado: 6.2832F == (rAutoValue actual): %f)", rAutoValue.get()));
         assertEquals(3.1416F * 2, rAutoValue.get());
+        logger.info(String.format("Prueba en  Analog outputs:\n (rManualValue esperado: 9.4248F == (rManualValue actual): %f)", rManualValue.get()));
         assertEquals(3.1416F * 3, rManualValue.get());
+        logger.info(String.format("Prueba en  Analog outputs:\n (rEstopValue esperado: 12.5664F == (rEstopValue actual): %f)", rEstopValue.get()));
         assertEquals(3.1416F * 4, rEstopValue.get());
+        logger.info(String.format("Prueba en  Analog outputs:\n (bPB_ResetError esperado: true == (bPB_ResetError actual): %b)", bPB_ResetError.get()));
         assertEquals(true, bPB_ResetError.get());
+        logger.info(String.format("Prueba en  Analog outputs:\n (bPBEN_ResetError esperado: true == (bPBEN_ResetError actual): %b)", bPBEN_ResetError.get()));
         assertEquals(true, bPBEN_ResetError.get());
+        logger.info(String.format("Prueba en  Analog outputs:\n (bError esperado: true == (bError actual): %b)", bError.get()));
         assertEquals(true, bError.get());
+        logger.info(String.format("Prueba en  Analog outputs:\n (bInterlock esperado: true == (bInterlock actual): %b)", bInterlock.get()));
         assertEquals(true, bInterlock.get());
+        logger.info(String.format("Prueba en  Analog outputs:\n (iEstopFunction esperado: 1234 == (iEstopFunction actual): %d)", iEstopFunction.get()));
         assertEquals(1234, iEstopFunction.get());
+        logger.info(String.format("Prueba en  Analog outputs:\n (bOutOfRange esperado: true == (bOutOfRange actual): %b)", bOutOfRange.get()));
         assertEquals(true, bOutOfRange.get());
+        logger.info(String.format("Prueba en  Analog outputs:\n (bConfigurationError esperado: true == (bConfigurationError actual): %b)", bConfigurationError.get()));
         assertEquals(true, bConfigurationError.get());
+        logger.info(String.format("Prueba en  Analog outputs:\n (bySpare esperado: 111 == (bySpare actual): %d)", bySpare.get()));
         assertEquals(111, bySpare.get());
 
         plcItem.setPlcValue(plcValue);
-        
-        logger.info("TEST SUCCESSFULLY COMPLETED ");
+
+        logger.info("\nTEST Ao analog outputs SUCCESSFULLY COMPLETED ");
     }
 }

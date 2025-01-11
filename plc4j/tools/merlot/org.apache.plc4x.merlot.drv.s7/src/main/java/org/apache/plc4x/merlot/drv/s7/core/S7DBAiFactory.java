@@ -47,7 +47,7 @@ public class S7DBAiFactory extends DBBaseFactory {
         NTScalarBuilder ntScalarBuilder = NTScalar.createBuilder();
         FieldBuilder fb = fieldCreate.createFieldBuilder();
         
-        Field cmd = fb.setId("cmd_t").
+        Field cmd = fb.setId("cmd").
                 add("iMode", fieldCreate.createScalar(ScalarType.pvShort)).
                 add("iErrorCode", fieldCreate.createScalar(ScalarType.pvShort)).                
                 add("iStatus", fieldCreate.createScalar(ScalarType.pvShort)). 
@@ -59,13 +59,13 @@ public class S7DBAiFactory extends DBBaseFactory {
                 add("bError", fieldCreate.createScalar(ScalarType.pvBoolean)).
                 createStructure();
         
-        Field sts = fb.setId("sts_t").              
+        Field sts = fb.setId("sts").              
                 add("bLowLowAlarm", fieldCreate.createScalar(ScalarType.pvBoolean)).                                 
                 add("bHighHighAlarm", fieldCreate.createScalar(ScalarType.pvBoolean)).    
                 add("bInvalid", fieldCreate.createScalar(ScalarType.pvBoolean)).  
                 createStructure();
 
-        Field par =  fb.setId("par_t"). 
+        Field par =  fb.setId("par"). 
                 add("iMode", fieldCreate.createScalar(ScalarType.pvShort)).
                 add("rManualValue", fieldCreate.createScalar(ScalarType.pvFloat)).                 
                 add("bPB_ResetError", fieldCreate.createScalar(ScalarType.pvBoolean)).
