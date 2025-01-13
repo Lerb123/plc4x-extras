@@ -110,7 +110,7 @@ public class S7DBCounterFactory extends DBBaseFactory {
             fieldOffsets = new ArrayList<>();
             fieldOffsets.add(0, null);
             fieldOffsets.add(1, new ImmutablePair(0,-1));
-            fieldOffsets.add(2, new ImmutablePair(0,-1)); //modifique aqui
+//            fieldOffsets.add(2, new ImmutablePair(0,-1)); //REVISAR EL POR QUÑE DE LA EXCEPCION
             
             value = pvStructure.getShortField("value");
             write_value = pvStructure.getShortField("write_value");
@@ -156,15 +156,7 @@ public class S7DBCounterFactory extends DBBaseFactory {
                     value.put(bcd);
             }
         }
-        // byte 0 : 250 & 0x0F
-        //byte 1: 15 & 0xF0 >> 4
-        
-        /*
-        b = 10;
-        c= 0
-        d= 15
-        */
-        //value = (10 * 100) + (0 * 10) + (15) = 1015
+       
         @Override
         public String getFieldsToMonitor() {
             return MONITOR_TF_FIELDS;
