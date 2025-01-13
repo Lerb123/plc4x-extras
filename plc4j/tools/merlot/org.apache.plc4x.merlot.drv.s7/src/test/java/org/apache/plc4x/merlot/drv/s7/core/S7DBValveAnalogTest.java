@@ -166,37 +166,37 @@ public class S7DBValveAnalogTest {
         tTimeOut = pvStructurePar.getIntField("tTimeOut");
 
         logger.info("\n--------------STARTING TEST DBRECORD  Valve Analog----------");
-        logger.info(String.format("Prueba en Valve Analog:\n (iMode esperado: 1234 == (iMode actual): %d)", iMode.get()));
+        logger.info(String.format("Test in Valve Analog:(expected iMode: 1234 == (current iMode): %d)", iMode.get()));
         assertEquals(1234, iMode.get());
-        logger.info(String.format("Prueba en Valve Analog:\n (iErrorCode esperado: 4321 == (iErrorCode actual): %d)", iErrorCode.get()));
+        logger.info(String.format("Test in Valve Analog:(expected iErrorCode: 4321 == (current iErrorCode): %d)", iErrorCode.get()));
         assertEquals(4321, iErrorCode.get());
-        logger.info(String.format("Prueba en Valve Analog:\n (iStatus esperado: 1010 == (iStatus actual): %d)", iStatus.get()));
+        logger.info(String.format("Test in Valve Analog:(expected iStatus: 1010 == (current iStatus): %d)", iStatus.get()));
         assertEquals(1010, iStatus.get());
-        logger.info(String.format("Prueba en Valve Analog:\n (rManualSP esperado: 3.1416F == (rManualSP actual): %f)", rManualSP.get()));
+        logger.info(String.format("Test in Valve Analog:(expected rManualSP: 3.1416F == (actual rManualSP): %f)", rManualSP.get()));
         assertEquals(3.1416F, rManualSP.get());
-        logger.info(String.format("Prueba en Valve Analog:\n (rAutoSP esperado: 6.2832F == (rAutoSP actual): %f)", rAutoSP.get()));
+        logger.info(String.format("Test in Valve Analog:(expected rAutoSP: 6.2832F == (actual rAutoSP): %f)", rAutoSP.get()));
         assertEquals(6.2832F, rAutoSP.get());
-        logger.info(String.format("Prueba en Valve Analog:\n (rEstopSP esperado: 12.5664F == (rEstopSP actual): %f)", rEstopSP.get()));
+        logger.info(String.format("Test in Valve Analog:(expected rEstopSP: 12.5664F == (actual rEstopSP): %f)", rEstopSP.get()));
         assertEquals(12.5664F, rEstopSP.get());
-        logger.info(String.format("Prueba en Valve Analog:\n (rActual esperado: 18.8496F == (rActual actual): %f)", rActual.get()));
+        logger.info(String.format("Test in Valve Analog:(rActual expected: 18.8496F == (rActual actual): %f)", rActual.get()));
         assertEquals(18.8496F, rActual.get());
         
-        logger.info(String.format("Prueba en Valve Analog:\n (bPB_ResetError esperado: true == (bPB_ResetError actual): %b)", bPB_ResetError.get()));
+        logger.info(String.format("Test in Valve Analog:(bPB_ResetError expected: true == (bPB_ResetError actual): %b)", bPB_ResetError.get()));
         assertEquals(true, bPB_ResetError.get());
-        logger.info(String.format("Prueba en Valve Analog:\n (bPBEN_ResetError esperado: true == (bPBEN_ResetError actual): %b)", bPBEN_ResetError.get()));
+        logger.info(String.format("Test in Valve Analog:(bPBEN_ResetError expected: true == (bPBEN_ResetError actual): %b)", bPBEN_ResetError.get()));
         assertEquals(true, bPBEN_ResetError.get());
-        logger.info(String.format("Prueba en Valve Analog:\n (bError esperado: true == (bError actual): %b)", bError.get()));
+        logger.info(String.format("Test in Valve Analog:(bError expected: true == (bError actual): %b)", bError.get()));
         assertEquals(true, bError.get());
-        logger.info(String.format("Prueba en Valve Analog:\n (bInterlock esperado: true == (bInterlock actual): %b)", bInterlock.get()));
+        logger.info(String.format("Test in Valve Analog:(bInterlock expected: true == (bInterlock actual): %b)", bInterlock.get()));
         assertEquals(true, bInterlock.get());
         
-        logger.info(String.format("Prueba en Valve Analog:\n (iEstopFunction esperado: 1234 == (iEstopFunction actual): %d)", iEstopFunction.get()));
+        logger.info(String.format("Test in Valve Analog:(expected iEstopFunction: 1234 == (current iEstopFunction): %d)", iEstopFunction.get()));
         assertEquals(1234, iEstopFunction.get());
         
-        logger.info(String.format("Prueba en Valve Analog:\n (InvalidFeedback esperado: true == (InvalidFeedback actual): %b)", InvalidFeedback.get()));
+        logger.info(String.format("Test in Valve Analog:(Expected InvalidFeedback: true == (Current InvalidFeedback): %b)", InvalidFeedback.get()));
         assertEquals(true, InvalidFeedback.get());
         
-        logger.info(String.format("Prueba en Valve Analog:\n (tTimeOut esperado: 1330 == (tTimeOut actual): %d)", tTimeOut.get()));
+        logger.info(String.format("Test on Valve Analog:(expected tTimeOut: 1330 == (actual tTimeOut): %d)", tTimeOut.get()));
         assertEquals(1330, tTimeOut.get());
 
         logger.info("\nTEST Analog Valve SUCCESSFULLY COMPLETED ");

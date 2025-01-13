@@ -182,48 +182,48 @@ public class S7DBSolenoidValveTest {
 
         //Assertions
         logger.info("\n--------------STARTING TEST DBRECORD   Solenoid Valve----------");
-        logger.info(String.format("Prueba en Valve Solenoid:\n (iMode esperado: 1234 == (iMode actual): %d)", iMode.get()));
+        logger.info(String.format("Test in Valve Solenoid:(expected iMode: 1234 == (current iMode): %d)", iMode.get()));
         assertEquals(1234, iMode.get());
-        logger.info(String.format("Prueba en Valve Solenoid:\n (iErrorCode esperado: 4321 == (iErrorCode actual): %d)", iErrorCode.get()));
+        logger.info(String.format("Test in Valve Solenoid:(expected iErrorCode: 4321 == (current iErrorCode): %d)", iErrorCode.get()));
         assertEquals(4321, iErrorCode.get());
-        logger.info(String.format("Prueba en Valve Solenoid:\n (iStatus esperado: 4321 == (iStatus actual): %d)", iStatus.get()));
+        logger.info(String.format("Test in Valve Solenoid:(expected iStatus: 4321 == (current iStatus): %d)", iStatus.get()));
         assertEquals(1234, iStatus.get());
-       logger.info(String.format("Prueba en Valve solenoid:\n (bPB_ResetError esperado: true == (bPB_ResetError actual): %b)", bPB_ResetError.get()));
+       logger.info(String.format("Test on Valve solenoid:(bPB_ResetError expected: true == (bPB_ResetError actual): %b)", bPB_ResetError.get()));
         assertEquals(true, bPB_ResetError.get()); 
-        logger.info(String.format("Prueba en Valve solenoid:\n (bPB_Home esperado: true == (bPB_Home actual): %b)", bPB_Home.get()));
+        logger.info(String.format("Test in Valve solenoid:(bPB_Home expected: true == (bPB_Home actual): %b)", bPB_Home.get()));
         assertEquals(true, bPB_Home.get()); 
-        logger.info(String.format("Prueba en Valve solenoid:\n (bPB_Work esperado: true == (bPB_Work actual): %b)", bPB_Work.get()));
+        logger.info(String.format("Test in Valve solenoid:(expected bPB_Work: true == (actual bPB_Work): %b)", bPB_Work.get()));
         assertEquals(true, bPB_Work.get()); 
-        logger.info(String.format("Prueba en Valve solenoid:\n (bPBEN_ResetError esperado: true == (bPBEN_ResetError actual): %b)", bPBEN_ResetError.get()));
+        logger.info(String.format("Test on Valve solenoid:(bPBEN_ResetError expected: true == (bPBEN_ResetError actual): %b)", bPBEN_ResetError.get()));
         assertEquals(true, bPBEN_ResetError.get()); 
-        logger.info(String.format("Prueba en Valve solenoid:\n (bPBEN_Home esperado: true == (bPBEN_Home actual): %b)", bPBEN_Home.get()));
+        logger.info(String.format("Test in Valve solenoid:(expected bPBEN_Home: true == (current bPBEN_Home): %b)", bPBEN_Home.get()));
         assertEquals(true, bPBEN_Home.get()); 
-        logger.info(String.format("Prueba en Valve solenoid:\n (bPBEN_Work esperado: true == (bPBEN_Work actual): %b)", bPBEN_Work.get()));
+        logger.info(String.format("Test in Valve solenoid:(bPBEN_Work expected: true == (bPBEN_Work actual): %b)", bPBEN_Work.get()));
         assertEquals(true, bPBEN_Work.get()); 
-        logger.info(String.format("Prueba en Valve solenoid:\n (bHomeOn esperado: true == (bHomeOn actual): %b)", bHomeOn.get()));
+        logger.info(String.format("Test in Valve solenoid:(expected bHomeOn: true == (current bHomeOn): %b)", bHomeOn.get()));
         assertEquals(true, bHomeOn.get()); 
-        logger.info(String.format("Prueba en Valve solenoid:\n (bWorkOn esperado: true == (bWorkOn actual): %b)", bWorkOn.get()));
+        logger.info(String.format("Test in Valve solenoid:(expected bWorkOn: true == (current bWorkOn): %b)", bWorkOn.get()));
         assertEquals(true, bWorkOn.get()); 
         
-        logger.info(String.format("Prueba en Valve solenoid:\n (bSignalHome esperado: true == (bSignalHome actual): %b)", bSignalHome.get()));
+        logger.info(String.format("Test in Valve solenoid:(bSignalHome expected: true == (bSignalHome actual): %b)", bSignalHome.get()));
         assertEquals(true, bSignalHome.get()); 
-        logger.info(String.format("Prueba en Valve solenoid:\n (bSignalWork esperado: true == (bSignalWork actual): %b)", bSignalWork.get()));
+        logger.info(String.format("Test in Valve solenoid:(bSignalWork expected: true == (bSignalWork actual): %b)", bSignalWork.get()));
         assertEquals(true, bSignalWork.get()); 
-        logger.info(String.format("Prueba en Valve solenoid:\n (bError esperado: true == (bError actual): %b)", bError.get()));
+        logger.info(String.format("Test in Valve solenoid:(bError expected: true == (bError actual): %b)", bError.get()));
         assertEquals(true, bError.get()); 
-        logger.info(String.format("Prueba en Valve solenoid:\n (bInterlock esperado: true == (bInterlock actual): %b)", bInterlock.get()));
+        logger.info(String.format("Test in Valve solenoid:(expected bInterlock: true == (current bInterlock): %b)", bInterlock.get()));
         assertEquals(true, bInterlock.get()); 
         
-        logger.info(String.format("Prueba en Valve solenoid:\n (bNoHomeFeedback esperado: true == (bNoHomeFeedback actual): %b)", bNoHomeFeedback.get()));
+        logger.info(String.format("Test in Valve solenoid:(bNoHomeFeedback expected: true == (bNoHomeFeedback actual): %b)", bNoHomeFeedback.get()));
         assertEquals(true, bNoHomeFeedback.get()); 
-        logger.info(String.format("Prueba en Valve solenoid:\n (bNoWorkFeedback esperado: true == (bNoWorkFeedback actual): %b)", bNoWorkFeedback.get()));
+        logger.info(String.format("Test in Valve solenoid:(bNoWorkFeedback expected: true == (bNoWorkFeedback actual): %b)", bNoWorkFeedback.get()));
         assertEquals(true, bNoWorkFeedback.get()); 
-        logger.info(String.format("Prueba en Valve solenoid:\n (bHomeFeedbackStillActive esperado: true == (bHomeFeedbackStillActive actual): %b)", bHomeFeedbackStillActive.get()));
+        logger.info(String.format("Test in Valve solenoid:(bHomeFeedbackStillActive expected: true == (bHomeFeedbackStillActive actual): %b)", bHomeFeedbackStillActive.get()));
         assertEquals(true, bHomeFeedbackStillActive.get()); 
-        logger.info(String.format("Prueba en Valve solenoid:\n (bWorkFeedbackStillActive esperado: true == (bWorkFeedbackStillActive actual): %b)", bWorkFeedbackStillActive.get()));
+        logger.info(String.format("Test in Valve solenoid:(bWorkFeedbackStillActive expected: true == (bWorkFeedbackStillActive actual): %b)", bWorkFeedbackStillActive.get()));
         assertEquals(true, bWorkFeedbackStillActive.get()); 
         
-        logger.info(String.format("Prueba en Valve solenoid:\n (tTimeOut esperado: true == (tTimeOut actual): %d)", tTimeOut.get()));
+        logger.info(String.format("Test on Valve solenoid:(expected tTimeOut: true == (current tTimeOut): %d)", tTimeOut.get()));
         assertEquals(1330, tTimeOut.get()); 
          logger.info("\nTEST Solenoid SUCCESSFULLY COMPLETED ");
         

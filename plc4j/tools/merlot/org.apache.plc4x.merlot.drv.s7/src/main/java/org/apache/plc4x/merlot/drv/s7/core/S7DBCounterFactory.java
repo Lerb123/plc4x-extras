@@ -19,6 +19,7 @@
 package org.apache.plc4x.merlot.drv.s7.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.api.PlcItemListener;
@@ -36,9 +37,10 @@ import org.epics.pvdata.pv.PVShort;
 import org.epics.pvdata.pv.PVShortArray;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.ScalarType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class S7DBCounterFactory extends DBBaseFactory {
-    
     private static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
        
     @Override
@@ -108,14 +110,18 @@ public class S7DBCounterFactory extends DBBaseFactory {
             fieldOffsets = new ArrayList<>();
             fieldOffsets.add(0, null);
             fieldOffsets.add(1, new ImmutablePair(0,-1));
-                        
+            fieldOffsets.add(2, new ImmutablePair(0,-1)); //modifique aqui
+            
             value = pvStructure.getShortField("value");
             write_value = pvStructure.getShortField("write_value");
             write_enable = pvStructure.getBooleanField("write_enable");            
         }    
 
         /**
-         * Implement real time data to the record.
+         * Implement real time data to the record.private PVShort value; 
+        private PVShort write_value;
+        private PVBoolean write_enable;  
+        short b, c, d, bcd;
          * The main code is here.
          */
         public void process()
@@ -130,7 +136,7 @@ public class S7DBCounterFactory extends DBBaseFactory {
         @Override
         public void atach(final PlcItem plcItem) {
             this.plcItem = plcItem;  
-            ParseOffset( this.getPVStructure().getStringField("offset").get());            
+            ParseOffset( this.getPVStructure().getStringField("offset").get());    
             innerBuffer = plcItem.getItemByteBuf().slice(byteOffset, BUFFER_SIZE);
         }
 
@@ -142,23 +148,28 @@ public class S7DBCounterFactory extends DBBaseFactory {
         @Override
         public void update() {    
             if (null != plcItem) {
-                b = (short)(innerBuffer.getByte(0) & 0x0F);
-                c = (short)((innerBuffer.getByte(1) & 0xF0) >> 4);
+                b = (short)(innerBuffer.getByte(0) & 0x0F); //0x0F = 00001111
+                c = (short)((innerBuffer.getByte(1) & 0xF0) >> 4);//0xF0 = 11110000 y >> desplaza 4 bits a la derecha
                 d = (short)(innerBuffer.getByte(1) & 0x0F);
                 bcd = (short)(b*100 + c*10 + d);
                 if (value.get() != bcd)
                     value.put(bcd);
             }
         }
+        // byte 0 : 250 & 0x0F
+        //byte 1: 15 & 0xF0 >> 4
         
+        /*
+        b = 10;
+        c= 0
+        d= 15
+        */
+        //value = (10 * 100) + (0 * 10) + (15) = 1015
         @Override
         public String getFieldsToMonitor() {
             return MONITOR_TF_FIELDS;
         }
 
-
-                
-  
 
         
     }

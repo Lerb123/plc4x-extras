@@ -177,33 +177,33 @@ public class S7DBAoTest {
 
         //Assertions
         logger.info("\n--------------STARTING TEST DBRECORD   Analog Outputs----------");
-        logger.info(String.format("Prueba en  Analog outputs:\n (iMode esperado: 1234 == (iMode actual): %d)", iMode.get()));
+        logger.info(String.format("Test on Analog outputs:(expected iMode: 1234 == (current iMode): %d)", iMode.get()));
         assertEquals(1234, iMode.get());
-        logger.info(String.format("Prueba en  Analog outputs:\n (iErrorCode esperado: 4321 == (iErrorCode actual): %d)", iErrorCode.get()));
+        logger.info(String.format("Test on Analog outputs:(expected iErrorCode: 4321 == (current iErrorCode): %d)", iErrorCode.get()));
         assertEquals(4321, iErrorCode.get());
-        logger.info(String.format("Prueba en  Analog outputs:\n (rValue esperado: 3.1416F == (rValue actual): %f)", rValue.get()));
+        logger.info(String.format("Test in Analog outputs:(expected rValue: 3.1416F == (actual rValue): %f)", rValue.get()));
         assertEquals(3.1416F, rValue.get());
-        logger.info(String.format("Prueba en  Analog outputs:\n (rAutoValue esperado: 6.2832F == (rAutoValue actual): %f)", rAutoValue.get()));
+        logger.info(String.format("Test in Analog outputs:(expected rAutoValue: 6.2832F == (actual rAutoValue): %f)", rAutoValue.get()));
         assertEquals(3.1416F * 2, rAutoValue.get());
-        logger.info(String.format("Prueba en  Analog outputs:\n (rManualValue esperado: 9.4248F == (rManualValue actual): %f)", rManualValue.get()));
+        logger.info(String.format("Test in Analog outputs:(expected rManualValue: 9.4248F == (actual rManualValue): %f)", rManualValue.get()));
         assertEquals(3.1416F * 3, rManualValue.get());
-        logger.info(String.format("Prueba en  Analog outputs:\n (rEstopValue esperado: 12.5664F == (rEstopValue actual): %f)", rEstopValue.get()));
+        logger.info(String.format("Test in Analog outputs:(expected rEstopValue: 12.5664F == (actual rEstopValue): %f)", rEstopValue.get()));
         assertEquals(3.1416F * 4, rEstopValue.get());
-        logger.info(String.format("Prueba en  Analog outputs:\n (bPB_ResetError esperado: true == (bPB_ResetError actual): %b)", bPB_ResetError.get()));
+        logger.info(String.format("Test on Analog outputs:(bPB_ResetError expected: true == (bPB_ResetError actual): %b)", bPB_ResetError.get()));
         assertEquals(true, bPB_ResetError.get());
-        logger.info(String.format("Prueba en  Analog outputs:\n (bPBEN_ResetError esperado: true == (bPBEN_ResetError actual): %b)", bPBEN_ResetError.get()));
+        logger.info(String.format("Test on Analog outputs:(bPBEN_ResetError expected: true == (bPBEN_ResetError actual): %b)", bPBEN_ResetError.get()));
         assertEquals(true, bPBEN_ResetError.get());
-        logger.info(String.format("Prueba en  Analog outputs:\n (bError esperado: true == (bError actual): %b)", bError.get()));
+        logger.info(String.format("Test on Analog outputs:(expected bError: true == (actual bError): %b)", bError.get()));
         assertEquals(true, bError.get());
-        logger.info(String.format("Prueba en  Analog outputs:\n (bInterlock esperado: true == (bInterlock actual): %b)", bInterlock.get()));
+        logger.info(String.format("Test in Analog outputs:(expected bInterlock: true == (current bInterlock): %b)", bInterlock.get()));
         assertEquals(true, bInterlock.get());
-        logger.info(String.format("Prueba en  Analog outputs:\n (iEstopFunction esperado: 1234 == (iEstopFunction actual): %d)", iEstopFunction.get()));
+        logger.info(String.format("Test in Analog outputs:(expected iEstopFunction: 1234 == (current iEstopFunction): %d)", iEstopFunction.get()));
         assertEquals(1234, iEstopFunction.get());
-        logger.info(String.format("Prueba en  Analog outputs:\n (bOutOfRange esperado: true == (bOutOfRange actual): %b)", bOutOfRange.get()));
+        logger.info(String.format("Test in Analog outputs:(expected bOutOfRange: true == (current bOutOfRange): %b)", bOutOfRange.get()));
         assertEquals(true, bOutOfRange.get());
-        logger.info(String.format("Prueba en  Analog outputs:\n (bConfigurationError esperado: true == (bConfigurationError actual): %b)", bConfigurationError.get()));
+        logger.info(String.format("Test on Analog outputs:(bConfigurationError expected: true == (bConfigurationError actual): %b)", bConfigurationError.get()));
         assertEquals(true, bConfigurationError.get());
-        logger.info(String.format("Prueba en  Analog outputs:\n (bySpare esperado: 111 == (bySpare actual): %d)", bySpare.get()));
+        logger.info(String.format("Test in Analog outputs:(expected bySpare: 111 == (current bySpare): %d)", bySpare.get()));
         assertEquals(111, bySpare.get());
 
         plcItem.setPlcValue(plcValue);
