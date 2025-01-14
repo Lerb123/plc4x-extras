@@ -51,6 +51,7 @@ public class S7DBAiTest {
     private static ByteBuf byteBuf;
     private PlcValue plcValue;
     private PlcItem plcItem;
+    private DBRecord AI;
 
     private PVShort value;
     private PVShort write_value;
@@ -134,6 +135,9 @@ public class S7DBAiTest {
         assertNotNull(plcItem);
         assertNotNull(plcValue);
         
+        DBBaseFactory AIFactory = new S7DBAiFactory();
+         AI = AIFactory.create("AI_00");
+        
     }
 
     @AfterEach
@@ -145,8 +149,7 @@ public class S7DBAiTest {
     @Test
     @Order(2)
     public void FieldOffsetTest() {
-        DBBaseFactory AIFactory = new S7DBAiFactory();
-        DBRecord AI = AIFactory.create("AI_00");
+        
         ArrayList<ImmutablePair<Integer, Byte>> fieldOffsets = AI.getFieldOffsets();
 
         assertNull(fieldOffsets.get(0));
@@ -203,22 +206,21 @@ public class S7DBAiTest {
     @Order(1)
     public void DBRecordTest() {
 
-        S7DBAiFactory AIFactory = new S7DBAiFactory();
-        DBRecord AI_00 = AIFactory.create("AI_00");
-        PVString pvStrOffset = AI_00.getPVRecordStructure().getPVStructure().getStringField("offset");
+       
+        PVString pvStrOffset = AI.getPVRecordStructure().getPVStructure().getStringField("offset");
         pvStrOffset.put("0");
 
 
-        plcItem.addItemListener(AI_00);
+        plcItem.addItemListener(AI);
         plcItem.setPlcValue(plcValue);
 
-        PVStructure pvStructureCmd = AI_00.getPVRecordStructure().getPVStructure().getStructureField("cmd");
-        PVStructure pvStructureSts = AI_00.getPVRecordStructure().getPVStructure().getStructureField("sts");
-        PVStructure pvStructurePar = AI_00.getPVRecordStructure().getPVStructure().getStructureField("par");
+        PVStructure pvStructureCmd = AI.getPVRecordStructure().getPVStructure().getStructureField("cmd");
+        PVStructure pvStructureSts = AI.getPVRecordStructure().getPVStructure().getStructureField("sts");
+        PVStructure pvStructurePar = AI.getPVRecordStructure().getPVStructure().getStructureField("par");
 
-        value = AI_00.getPVRecordStructure().getPVStructure().getShortField("value");
-        write_value = AI_00.getPVRecordStructure().getPVStructure().getShortField("write_value");
-        write_enable = AI_00.getPVRecordStructure().getPVStructure().getBooleanField("write_enable");
+        value = AI.getPVRecordStructure().getPVStructure().getShortField("value");
+        write_value = AI.getPVRecordStructure().getPVStructure().getShortField("write_value");
+        write_enable = AI.getPVRecordStructure().getPVStructure().getBooleanField("write_enable");
 
         //Read command values            
         iMode = pvStructureCmd.getShortField("iMode");

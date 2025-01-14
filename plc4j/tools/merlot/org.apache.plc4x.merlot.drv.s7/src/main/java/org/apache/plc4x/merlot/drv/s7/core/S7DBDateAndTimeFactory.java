@@ -116,11 +116,12 @@ public class S7DBDateAndTimeFactory extends DBBaseFactory {
             fieldOffsets = new ArrayList<>();
             fieldOffsets.add(0, null);
             fieldOffsets.add(1, new ImmutablePair(0,-1));
-                        
+                      
             value = pvStructure.getIntField("value");
             write_value = pvStructure.getIntField("write_value");
             write_enable = pvStructure.getBooleanField("write_enable");
             strValue = pvStructure.getStringField("strValue");
+            
         }    
 
         /**
@@ -164,6 +165,7 @@ public class S7DBDateAndTimeFactory extends DBBaseFactory {
                 if (value.get() != tempValue) {
                     value.put(tempValue);
                     lastDAT = S7DBStaticHelper.s7DateTimeToLocalDateTime(innerBuffer);
+                  
                     if (bFirtsRun ){
                         bFirtsRun = false;
                     }
@@ -176,6 +178,8 @@ public class S7DBDateAndTimeFactory extends DBBaseFactory {
         public String getFieldsToMonitor() {
             return MONITOR_TF_FIELDS;
         }
+
+       
         
     }
            

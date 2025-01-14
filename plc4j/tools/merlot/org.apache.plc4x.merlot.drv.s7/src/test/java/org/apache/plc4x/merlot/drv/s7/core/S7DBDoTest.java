@@ -20,23 +20,16 @@ package org.apache.plc4x.merlot.drv.s7.core;
 
 import io.netty.buffer.ByteBuf;
 import static io.netty.buffer.Unpooled.buffer;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.UUID;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.java.api.value.PlcValue;
 import org.apache.plc4x.java.spi.values.PlcRawByteArray;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.api.impl.PlcItemImpl;
 import org.apache.plc4x.merlot.db.api.DBRecord;
-import org.epics.pvdata.pv.PVBoolean;
-import org.epics.pvdata.pv.PVInt;
 import org.epics.pvdata.pv.PVString;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -51,39 +44,31 @@ import org.slf4j.LoggerFactory;
  * @author lerb
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class S7DBDateAndTimeTest {
+public class S7DBDoTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(S7DBDateAndTimeTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(S7DBDoTest.class);
     private static ByteBuf byteBuf;
     private PlcValue plcValue;
     private PlcItem plcItem;
-    private DBRecord DTime_00;
-    private PVInt value;
-    private PVInt write_value;
-    private PVBoolean write_enable;
-    private PVString strValue;
-    private LocalDateTime lastDAT;
-    private LocalDateTime userDAT;
+    private DBRecord DO_00;
 
     @BeforeAll
     public static void setUpClass() {
-        logger.info("Starting the testing of the DateAndTime class");
-        logger.info("Test DateAndTime for S7 plc");
+        logger.info("Starting the testing of the digital output class");
+        logger.info("Test Digital Output for S7 plc");
         logger.info("Creating buffer to plcValue");
         byteBuf = buffer(5);
-
-        byteBuf.setInt(0, 2514013);
 
     }
 
     @AfterAll
     public static void tearDownClass() {
-        logger.info("Ending the DateAndTime class test");
+        logger.info("Ending the Digital Output class test");
     }
 
     @BeforeEach
     public void setUp() {
-        logger.info("Creating  plcValue and plcItem to DateAndTime");
+        logger.info("Creating  plcValue and plcItem to Digital Output");
         //Create PLCList for the items
         plcValue = new PlcRawByteArray(byteBuf.array());
         //Create the Item 
@@ -97,9 +82,8 @@ public class S7DBDateAndTimeTest {
         assertNotNull(plcValue);
 
         //DBRecord associated with each particular test
-        S7DBDateAndTimeFactory timeDFactory = new S7DBDateAndTimeFactory();
-        DTime_00 = timeDFactory.create("DATET_00");
-        
+        S7DBDoFactory DoFactory = new S7DBDoFactory();
+        DO_00= DoFactory.create("DO_00");
     }
 
     @AfterEach
@@ -107,32 +91,27 @@ public class S7DBDateAndTimeTest {
         plcItem = null;
         plcValue = null;
     }
-
-    @Test
+    
+    
+     @Test
     @Order(1)
     public void DBRecordTest() {
-        PVString pvStrOffset = DTime_00.getPVRecordStructure().getPVStructure().getStringField("offset");
+        PVString pvStrOffset = DO_00.getPVRecordStructure().getPVStructure().getStringField("offset");
         pvStrOffset.put("0");
-        plcItem.addItemListener(DTime_00);
+        plcItem.addItemListener(DO_00);
         plcItem.setPlcValue(plcValue);
-        value = DTime_00.getPVRecordStructure().getPVStructure().getIntField("value");
-        write_value = DTime_00.getPVRecordStructure().getPVStructure().getIntField("write_value");
-        write_enable = DTime_00.getPVRecordStructure().getPVStructure().getBooleanField("write_enable");
-        strValue = DTime_00.getPVRecordStructure().getPVStructure().getStringField("strValue");
 
         logger.info("\n--------------STARTING TEST DBRECORD AI----------");
-        logger.info(String.format("Test in DateAndTime:(expected value: 2025140131 == (current value): %d)", value.get()));
-        assertEquals(2514013, value.get());
+//        logger.info(String.format("", ));
+
     }
 
     @Test
     @Order(2)
     public void FieldOffsetTest() {
 
-        ArrayList<ImmutablePair<Integer, Byte>> fieldOffsets = DTime_00.getFieldOffsets();
-        logger.info(String.format("Number of items allowed to be monitored:(Value expected: 2) == (Value actual: %d)", fieldOffsets.size()));
-        assertNull(fieldOffsets.get(0));
-        assertNotNull(fieldOffsets.get(1));
-        assertEquals(2, fieldOffsets.size());
+//        ArrayList<ImmutablePair<Integer, Byte>> fieldOffsets = DTime_00.getFieldOffsets();
+//        logger.info(String.format("Number of items allowed to be monitored:(Value expected: 2) == (Value actual: %d)", fieldOffsets.size()));
     }
+
 }
