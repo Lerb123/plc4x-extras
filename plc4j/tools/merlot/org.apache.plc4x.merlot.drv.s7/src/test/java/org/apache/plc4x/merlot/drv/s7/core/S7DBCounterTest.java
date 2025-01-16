@@ -67,8 +67,7 @@ public class S7DBCounterTest {
         logger.info("Creating buffer to plcValue");
         byteBuf = buffer(5);
 
-        byteBuf.setByte(0, 250);
-        byteBuf.setByte(1, 15);
+        byteBuf.setByte(0, 2000);
     }
 
     @AfterAll

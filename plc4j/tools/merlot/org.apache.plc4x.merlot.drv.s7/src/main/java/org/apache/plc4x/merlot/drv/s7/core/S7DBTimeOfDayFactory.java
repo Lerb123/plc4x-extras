@@ -115,6 +115,7 @@ public class S7DBTimeOfDayFactory extends DBBaseFactory {
             fieldOffsets = new ArrayList<>();
             fieldOffsets.add(0, null);
             fieldOffsets.add(1, new ImmutablePair(0,-1));
+                 fieldOffsets.add(2, new ImmutablePair(0,-1));
                         
             value = pvStructure.getIntField("value");
             write_value = pvStructure.getIntField("write_value");
