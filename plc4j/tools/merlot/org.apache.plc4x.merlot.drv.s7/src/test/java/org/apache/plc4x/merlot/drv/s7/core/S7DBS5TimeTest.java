@@ -1,18 +1,20 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.apache.plc4x.merlot.drv.s7.core;
 
@@ -48,32 +50,31 @@ import org.slf4j.LoggerFactory;
  * @author lerb
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class S7DBCounterTest {
+public class S7DBS5TimeTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(S7DBCounterTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(S7DBS5TimeTest.class);
     private static ByteBuf byteBuf;
     private PlcValue plcValue;
     private PlcItem plcItem;
-    private DBRecord CNT_00;
+    private DBRecord S5T_00;
     private PVShort value;
     private PVShort write_value;
     private PVBoolean write_enable;
-    short b, c, d, bcd;
+    private PVString strValue;
 
     @BeforeAll
     public static void setUpClass() {
-        logger.info("Starting the testing of the counter class");
-        logger.info("Test Counters for S7 plc");
+        logger.info("Starting the testing of the s5 time class");
+        logger.info("Test S5 Time for S7 plc");
         logger.info("Creating buffer to plcValue");
-        byteBuf = buffer(5);
+        byteBuf = buffer(3);
+        byteBuf.setShort(0, 2000);
 
-        byteBuf.setByte(0, 250);
-        byteBuf.setByte(1, 15);
     }
 
     @AfterAll
     public static void tearDownClass() {
-        logger.info("Ending the counter class test");
+        logger.info("Ending the S5 Time class test");
     }
 
     @BeforeEach
@@ -89,9 +90,10 @@ public class S7DBCounterTest {
                 build();
         assertNotNull(plcItem);
         assertNotNull(plcValue);
-        S7DBCounterFactory CounterFactory = new S7DBCounterFactory();
-        CNT_00 = CounterFactory.create("CNT_00");
 
+        //DBRecord associated with each particular test
+        S7DBS5TimeFactory S5TFactory = new S7DBS5TimeFactory();
+        S5T_00 = S5TFactory.create("S5T_00");
     }
 
     @AfterEach
@@ -103,32 +105,30 @@ public class S7DBCounterTest {
     @Test
     @Order(1)
     public void DBRecordTest() {
-
-        PVString pvStrOffset = CNT_00.getPVRecordStructure().getPVStructure().getStringField("offset");
+        PVString pvStrOffset = S5T_00.getPVRecordStructure().getPVStructure().getStringField("offset");
         pvStrOffset.put("0");
-
-        plcItem.addItemListener(CNT_00);
+        plcItem.addItemListener(S5T_00);
         plcItem.setPlcValue(plcValue);
 
-        value = CNT_00.getPVRecordStructure().getPVStructure().getShortField("value");
-        write_value = CNT_00.getPVRecordStructure().getPVStructure().getShortField("write_value");
-        write_enable = CNT_00.getPVRecordStructure().getPVStructure().getBooleanField("write_enable");
+        value = S5T_00.getPVRecordStructure().getPVStructure().getShortField("value");
+        write_value = S5T_00.getPVRecordStructure().getPVStructure().getShortField("write_value");
+        write_enable = S5T_00.getPVRecordStructure().getPVStructure().getBooleanField("write_enable");
+        strValue = S5T_00.getPVRecordStructure().getPVStructure().getStringField("strValue");
 
-        logger.info("\n--------------STARTING TEST DBRECORD COUNTER----------");
-        logger.info(String.format("Counter test:(expected value: 1015 == (actual value): %d)", value.get()));
-        assertEquals(1015, value.get());
+        logger.info("\n--------------STARTING TEST DBRECORD Do----------");
+        logger.info(String.format("Test in S5 Time:(expected value: 2000== (current value): %d)", value.get()));
+        assertEquals(2000, value.get());
+        logger.info(String.format("Test in S5 Time:(expected strValue: PT8.3S == (current strValue): %s)\n", strValue.get()));
+        assertEquals("PT8.3S", strValue.get());
     }
 
     @Test
     @Order(2)
     public void FieldOffsetTest() {
-
-        ArrayList<ImmutablePair<Integer, Byte>> fieldOffsets = CNT_00.getFieldOffsets();
+        ArrayList<ImmutablePair<Integer, Byte>> fieldOffsets = S5T_00.getFieldOffsets();
         logger.info(String.format("Number of items allowed to be monitored:(Value expected: 2) == (Value actual: %d)", fieldOffsets.size()));
         assertEquals(2, fieldOffsets.size());
         Assertions.assertNull(fieldOffsets.get(0));
         Assertions.assertNotNull(fieldOffsets.get(1));
-        logger.info(String.format("Monitoring fields were validated, a total of %s", String.valueOf(fieldOffsets.size())));
-
     }
 }

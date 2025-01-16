@@ -18,7 +18,9 @@ package org.apache.plc4x.merlot.drv.s7.core;
 
 import io.netty.buffer.ByteBuf;
 import static io.netty.buffer.Unpooled.buffer;
+import java.util.ArrayList;
 import java.util.UUID;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.java.api.value.PlcValue;
 import org.apache.plc4x.java.spi.values.PlcRawByteArray;
 import org.apache.plc4x.merlot.api.PlcItem;
@@ -32,6 +34,7 @@ import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,6 +57,7 @@ public class S7DBValveAnalogTest {
     private static ByteBuf byteBuf;
     private PlcValue plcValue;
     private PlcItem plcItem;
+    private DBRecord ValveAng_00;
 
     private PVShort value;
     private PVShort write_value;
@@ -103,7 +107,6 @@ public class S7DBValveAnalogTest {
 
     @BeforeEach
     public void setUp() {
-        logger.info("Creating  plcValue and plcItem to Analog Valve");
         //Create PLCList for the items
         plcValue = new PlcRawByteArray(byteBuf.array());
         //Create the Item 
@@ -116,6 +119,9 @@ public class S7DBValveAnalogTest {
 
         assertNotNull(plcItem);
         assertNotNull(plcValue);
+
+        S7DBValveAnalogFactory ValveAnalog = new S7DBValveAnalogFactory();
+        ValveAng_00 = ValveAnalog.create("ValveAnf_00");
     }
 
     @AfterEach
@@ -127,10 +133,6 @@ public class S7DBValveAnalogTest {
     @Test
     @Order(1)
     public void DBRecordTest() {
-
-        S7DBValveAnalogFactory ValveAnalog = new S7DBValveAnalogFactory();
-
-        DBRecord ValveAng_00 = ValveAnalog.create("ValveAnf_00");
 
         PVString pvStrOffset = ValveAng_00.getPVRecordStructure().getPVStructure().getStringField("offset");
         pvStrOffset.put("0");
@@ -180,7 +182,7 @@ public class S7DBValveAnalogTest {
         assertEquals(12.5664F, rEstopSP.get());
         logger.info(String.format("Test in Valve Analog:(rActual expected: 18.8496F == (rActual actual): %f)", rActual.get()));
         assertEquals(18.8496F, rActual.get());
-        
+
         logger.info(String.format("Test in Valve Analog:(bPB_ResetError expected: true == (bPB_ResetError actual): %b)", bPB_ResetError.get()));
         assertEquals(true, bPB_ResetError.get());
         logger.info(String.format("Test in Valve Analog:(bPBEN_ResetError expected: true == (bPBEN_ResetError actual): %b)", bPBEN_ResetError.get()));
@@ -189,16 +191,34 @@ public class S7DBValveAnalogTest {
         assertEquals(true, bError.get());
         logger.info(String.format("Test in Valve Analog:(bInterlock expected: true == (bInterlock actual): %b)", bInterlock.get()));
         assertEquals(true, bInterlock.get());
-        
+
         logger.info(String.format("Test in Valve Analog:(expected iEstopFunction: 1234 == (current iEstopFunction): %d)", iEstopFunction.get()));
         assertEquals(1234, iEstopFunction.get());
-        
+
         logger.info(String.format("Test in Valve Analog:(Expected InvalidFeedback: true == (Current InvalidFeedback): %b)", InvalidFeedback.get()));
         assertEquals(true, InvalidFeedback.get());
-        
+
         logger.info(String.format("Test on Valve Analog:(expected tTimeOut: 1330 == (actual tTimeOut): %d)", tTimeOut.get()));
         assertEquals(1330, tTimeOut.get());
 
         logger.info("\nTEST Analog Valve SUCCESSFULLY COMPLETED ");
+    }
+
+    @Test
+    @Order(2)
+    public void FieldOffsetTest() {
+
+        ArrayList<ImmutablePair<Integer, Byte>> fieldOffsets = ValveAng_00.getFieldOffsets();
+        logger.info(String.format("Number of items allowed to be monitored:(Value expected: 2) == (Value actual: %d)", fieldOffsets.size()));
+        assertEquals(2, fieldOffsets.size());
+        Assertions.assertNull(fieldOffsets.get(0));
+        Assertions.assertNull(fieldOffsets.get(1));
+        Assertions.assertNull(fieldOffsets.get(2));
+        Assertions.assertNotNull(fieldOffsets.get(3));
+        Assertions.assertNotNull(fieldOffsets.get(4));
+        Assertions.assertNotNull(fieldOffsets.get(5));
+        Assertions.assertNotNull(fieldOffsets.get(6));
+        logger.info(String.format("Monitoring fields were validated, a total of %s", String.valueOf(fieldOffsets.size())));
+
     }
 }

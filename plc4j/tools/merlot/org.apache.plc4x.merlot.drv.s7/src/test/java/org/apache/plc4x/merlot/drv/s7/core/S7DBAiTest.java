@@ -122,7 +122,6 @@ public class S7DBAiTest {
 
     @BeforeEach
     public void setUp() {
-        logger.info("Creating  plcValue and plcItem to Ai");
         //Create PLCList for the items
         plcValue = new PlcRawByteArray(byteBuf.array());
         //Create the Item 

@@ -100,12 +100,12 @@ public class S7DBAiFactory extends DBBaseFactory {
             addDisplay().
             addControl(). 
             createPVStructure();          
-        DBRecord dbRecord = new DBS7DiRecord(recordName,pvStructure);      
+        DBRecord dbRecord = new DBS7AiRecord(recordName,pvStructure);      
         return dbRecord;
     }
 
            
-    class DBS7DiRecord extends DBRecord implements PlcItemListener {   
+    class DBS7AiRecord extends DBRecord implements PlcItemListener {   
     
         private int BUFFER_SIZE = 64;
         private static final String MONITOR_TF_FIELDS = "field(write_enable, "
@@ -154,7 +154,7 @@ public class S7DBAiFactory extends DBBaseFactory {
         
         byte byTemp;
     
-        public DBS7DiRecord(String recordName,PVStructure pvStructure) {
+        public DBS7AiRecord(String recordName,PVStructure pvStructure) {
             super(recordName, pvStructure);
             fieldOffsets.clear();      
             value = pvStructure.getShortField("value"); 

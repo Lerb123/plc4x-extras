@@ -20,16 +20,23 @@ package org.apache.plc4x.merlot.drv.s7.core;
 
 import io.netty.buffer.ByteBuf;
 import static io.netty.buffer.Unpooled.buffer;
+import java.util.ArrayList;
 import java.util.UUID;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.java.api.value.PlcValue;
 import org.apache.plc4x.java.spi.values.PlcRawByteArray;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.api.impl.PlcItemImpl;
 import org.apache.plc4x.merlot.db.api.DBRecord;
+import org.epics.pvdata.pv.PVBoolean;
+import org.epics.pvdata.pv.PVShort;
 import org.epics.pvdata.pv.PVString;
+import org.epics.pvdata.pv.PVStructure;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -52,13 +59,30 @@ public class S7DBDoTest {
     private PlcItem plcItem;
     private DBRecord DO_00;
 
+    private PVShort value;
+    private PVShort write_value;
+    private PVBoolean write_enable;
+
+    private PVShort iMode;
+    private PVBoolean bOn;
+    private PVBoolean bOnActual;
+    private PVBoolean bPB_On;
+    private PVBoolean bPB_Off;
+    private PVBoolean bPBEN_On;
+    private PVBoolean bPBEN_Off;
+
+    private PVShort out_iMode;
+    private PVBoolean out_bPB_On;
+    private PVBoolean out_bPB_Off;
+
     @BeforeAll
     public static void setUpClass() {
         logger.info("Starting the testing of the digital output class");
         logger.info("Test Digital Output for S7 plc");
         logger.info("Creating buffer to plcValue");
         byteBuf = buffer(5);
-
+        byteBuf.setShort(0, 1234);
+        byteBuf.setByte(2, 63);
     }
 
     @AfterAll
@@ -68,7 +92,6 @@ public class S7DBDoTest {
 
     @BeforeEach
     public void setUp() {
-        logger.info("Creating  plcValue and plcItem to Digital Output");
         //Create PLCList for the items
         plcValue = new PlcRawByteArray(byteBuf.array());
         //Create the Item 
@@ -83,7 +106,7 @@ public class S7DBDoTest {
 
         //DBRecord associated with each particular test
         S7DBDoFactory DoFactory = new S7DBDoFactory();
-        DO_00= DoFactory.create("DO_00");
+        DO_00 = DoFactory.create("DO_00");
     }
 
     @AfterEach
@@ -91,9 +114,8 @@ public class S7DBDoTest {
         plcItem = null;
         plcValue = null;
     }
-    
-    
-     @Test
+
+    @Test
     @Order(1)
     public void DBRecordTest() {
         PVString pvStrOffset = DO_00.getPVRecordStructure().getPVStructure().getStringField("offset");
@@ -101,8 +123,51 @@ public class S7DBDoTest {
         plcItem.addItemListener(DO_00);
         plcItem.setPlcValue(plcValue);
 
-        logger.info("\n--------------STARTING TEST DBRECORD AI----------");
-//        logger.info(String.format("", ));
+        value = DO_00.getPVRecordStructure().getPVStructure().getShortField("value");
+        write_value = DO_00.getPVRecordStructure().getPVStructure().getShortField("write_value");
+        write_enable = DO_00.getPVRecordStructure().getPVStructure().getBooleanField("write_enable");
+
+        PVStructure pvStructureCmd = DO_00.getPVRecordStructure().getPVStructure().getStructureField("cmd");
+        PVStructure pvStructureSts = DO_00.getPVRecordStructure().getPVStructure().getStructureField("sts");
+        PVStructure pvStructureOut = DO_00.getPVRecordStructure().getPVStructure().getStructureField("out");
+
+        //cmd
+        iMode = pvStructureCmd.getShortField("iMode");
+        bOn = pvStructureCmd.getBooleanField("bOn");
+        bOnActual = pvStructureCmd.getBooleanField("bOnActual");
+        bPB_On = pvStructureCmd.getBooleanField("bPB_On");
+        bPB_Off = pvStructureCmd.getBooleanField("bPB_Off");
+        bPBEN_On = pvStructureCmd.getBooleanField("bPBEN_On");
+        bPBEN_Off = pvStructureCmd.getBooleanField("bPBEN_Off");
+
+        //sts
+        //out
+        out_iMode = pvStructureOut.getShortField("iMode");
+        out_bPB_On = pvStructureOut.getBooleanField("bPB_On");
+        out_bPB_Off = pvStructureOut.getBooleanField("bPB_Off");
+
+        logger.info("\n--------------STARTING TEST DBRECORD Do----------");
+        logger.info(String.format("Test in Digital Output:(expected iMode: 1234 == (current iMode): %d)", iMode.get()));
+        assertEquals(1234, iMode.get());
+        logger.info(String.format("Test in Digital Output:(expected bOn: true == (current bOn): %b)", bOn.get()));
+        assertEquals(true, bOn.get());
+        logger.info(String.format("Test in Digital Output:(expected bOnActual: true == (current bOnActual): %b)", bOnActual.get()));
+        assertEquals(true, bOnActual.get());
+        logger.info(String.format("Test in Digital Output:(expected bPB_On: true == (current bPB_On): %b)", bPB_On.get()));
+        assertEquals(true, bPB_On.get());
+        logger.info(String.format("Test in Digital Output:(expected bPB_Off: true == (current bPB_Off): %b)", bPB_Off.get()));
+        assertEquals(true, bPB_Off.get());
+        logger.info(String.format("Test in Digital Output:(expected bPBEN_On: true == (current bPBEN_On): %b)", bPBEN_On.get()));
+        assertEquals(true, bPBEN_On.get());
+        logger.info(String.format("Test in Digital Output:(expected bPBEN_Off: true == (current bPBEN_Off): %b)", bPBEN_Off.get()));
+        assertEquals(true, bPBEN_Off.get());
+
+        logger.info(String.format("Test in Digital Output:(expected out_iMode: true == (current out_iMode): %b)", out_iMode.get()));
+        assertEquals(true, out_iMode.get());
+        logger.info(String.format("Test in Digital Output:(expected out_bPB_On: true == (current out_bPB_On): %b)", out_bPB_On.get()));
+        assertEquals(true, out_bPB_On.get());
+        logger.info(String.format("Test in Digital Output:(expected out_bPB_Off: true == (current out_bPB_Off): %b)", out_bPB_Off.get()));
+        assertEquals(true, out_bPB_Off.get());
 
     }
 
@@ -110,8 +175,13 @@ public class S7DBDoTest {
     @Order(2)
     public void FieldOffsetTest() {
 
-//        ArrayList<ImmutablePair<Integer, Byte>> fieldOffsets = DTime_00.getFieldOffsets();
-//        logger.info(String.format("Number of items allowed to be monitored:(Value expected: 2) == (Value actual: %d)", fieldOffsets.size()));
+        ArrayList<ImmutablePair<Integer, Byte>> fieldOffsets = DO_00.getFieldOffsets();
+        logger.info(String.format("Number of items allowed to be monitored:(Value expected: 3) == (Value actual: %d)", fieldOffsets.size()));
+        assertEquals(3, fieldOffsets.size());
+        assertNull(fieldOffsets.get(0));
+        assertNull(fieldOffsets.get(1));
+        assertNotNull(fieldOffsets.get(2));
+
     }
 
 }

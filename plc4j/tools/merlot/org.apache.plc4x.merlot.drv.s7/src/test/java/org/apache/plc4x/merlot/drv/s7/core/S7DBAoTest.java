@@ -18,7 +18,9 @@ package org.apache.plc4x.merlot.drv.s7.core;
 
 import io.netty.buffer.ByteBuf;
 import static io.netty.buffer.Unpooled.buffer;
+import java.util.ArrayList;
 import java.util.UUID;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.java.api.value.PlcValue;
 import org.apache.plc4x.java.spi.values.PlcRawByteArray;
 import org.apache.plc4x.merlot.api.PlcItem;
@@ -32,6 +34,7 @@ import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +56,7 @@ public class S7DBAoTest {
     private PlcValue plcValue;
     private static ByteBuf byteBuf;
     private PlcItem plcItem;
+    private DBRecord AO_00;
     private PVShort value;
     private PVShort write_value;
     private PVBoolean write_enable;
@@ -111,7 +115,6 @@ public class S7DBAoTest {
         /*
         defining an id and PlcItem
          */
-        logger.info("Creating  plcValue and plcItem to Ao");
         String uuid = UUID.randomUUID().toString();
         plcValue = new PlcRawByteArray(byteBuf.array());
         plcItem = new PlcItemImpl.PlcItemBuilder("ITEM_DB42").
@@ -121,6 +124,8 @@ public class S7DBAoTest {
                 build();
         assertNotNull(plcItem);
         assertNotNull(plcValue);
+        S7DBAoFactory AIFactory = new S7DBAoFactory();
+        AO_00 = AIFactory.create("AO_00");
     }
 
     @AfterEach
@@ -131,10 +136,8 @@ public class S7DBAoTest {
 
     @Test
     @Order(1)
-    public void dbAoRecord() {
+    public void DBRecordTest() {
 
-        S7DBAoFactory AIFactory = new S7DBAoFactory();
-        DBRecord AO_00 = AIFactory.create("AO_00");
         PVString pvStrOffset = AO_00.getPVRecordStructure().getPVStructure().getStringField("offset");
         pvStrOffset.put("0");
 
@@ -209,5 +212,20 @@ public class S7DBAoTest {
         plcItem.setPlcValue(plcValue);
 
         logger.info("\nTEST Ao analog outputs SUCCESSFULLY COMPLETED ");
+    }
+
+    @Test
+    @Order(2)
+    public void FieldOffsetTest() {
+
+        ArrayList<ImmutablePair<Integer, Byte>> fieldOffsets = AO_00.getFieldOffsets();
+        logger.info(String.format("Number of items allowed to be monitored:(Value expected: 3) == (Value actual: %d)", fieldOffsets.size()));
+
+        assertEquals(3, fieldOffsets.size());
+
+        Assertions.assertNull(fieldOffsets.get(0));
+        Assertions.assertNull(fieldOffsets.get(1));
+        Assertions.assertNotNull(fieldOffsets.get(2));
+        logger.info(String.format("Monitoring fields were validated, a total of %s", String.valueOf(fieldOffsets.size())));
     }
 }

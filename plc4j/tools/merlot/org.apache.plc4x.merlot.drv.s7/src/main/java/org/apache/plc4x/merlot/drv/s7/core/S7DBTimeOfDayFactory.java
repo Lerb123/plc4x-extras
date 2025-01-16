@@ -64,7 +64,7 @@ public class S7DBTimeOfDayFactory extends DBBaseFactory {
             addDisplay().
             addControl(). 
             createPVStructure();          
-        DBRecord dbRecord = new DBS7CounterRecord(recordName,pvStructure);      
+        DBRecord dbRecord = new DBS7TimeOfDayRecord(recordName,pvStructure);      
         return dbRecord;
     }
 
@@ -90,11 +90,11 @@ public class S7DBTimeOfDayFactory extends DBBaseFactory {
         PVShortArray pvValue = (PVShortArray) pvStructure.getScalarArrayField("value", ScalarType.pvShort);
         pvValue.setCapacity(length);
         pvValue.setLength(length);
-        DBRecord dbRecord = new DBS7CounterRecord(recordName,pvStructure);
+        DBRecord dbRecord = new DBS7TimeOfDayRecord(recordName,pvStructure);
         return dbRecord;
     }
            
-    class DBS7CounterRecord extends DBRecord implements PlcItemListener {    
+    class DBS7TimeOfDayRecord extends DBRecord implements PlcItemListener {    
     
         private int BUFFER_SIZE = 2;
         private static final String MONITOR_TF_FIELDS = "field(write_enable, write_value)";        
@@ -107,7 +107,7 @@ public class S7DBTimeOfDayFactory extends DBBaseFactory {
         
         int tempValue;
     
-        public DBS7CounterRecord(String recordName,PVStructure pvStructure) {
+        public DBS7TimeOfDayRecord(String recordName,PVStructure pvStructure) {
             super(recordName, pvStructure);
             
              bFirtsRun = true;

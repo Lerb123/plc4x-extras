@@ -117,7 +117,6 @@ public class S7DBSolenoidValveTest {
         /*
         defining an id and PlcItem
          */
-        logger.info("Creating  plcValue and plcItem to solenoid ");
         String uuid = UUID.randomUUID().toString();
         plcValue = new PlcRawByteArray(byteBuf.array());
         plcItem = new PlcItemImpl.PlcItemBuilder("ITEM_DB42").

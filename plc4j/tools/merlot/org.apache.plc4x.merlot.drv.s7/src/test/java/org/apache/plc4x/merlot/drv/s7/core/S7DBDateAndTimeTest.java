@@ -34,6 +34,7 @@ import org.epics.pvdata.pv.PVInt;
 import org.epics.pvdata.pv.PVString;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -83,7 +84,6 @@ public class S7DBDateAndTimeTest {
 
     @BeforeEach
     public void setUp() {
-        logger.info("Creating  plcValue and plcItem to DateAndTime");
         //Create PLCList for the items
         plcValue = new PlcRawByteArray(byteBuf.array());
         //Create the Item 
@@ -99,7 +99,7 @@ public class S7DBDateAndTimeTest {
         //DBRecord associated with each particular test
         S7DBDateAndTimeFactory timeDFactory = new S7DBDateAndTimeFactory();
         DTime_00 = timeDFactory.create("DATET_00");
-        
+
     }
 
     @AfterEach
@@ -131,8 +131,8 @@ public class S7DBDateAndTimeTest {
 
         ArrayList<ImmutablePair<Integer, Byte>> fieldOffsets = DTime_00.getFieldOffsets();
         logger.info(String.format("Number of items allowed to be monitored:(Value expected: 2) == (Value actual: %d)", fieldOffsets.size()));
-        assertNull(fieldOffsets.get(0));
-        assertNotNull(fieldOffsets.get(1));
         assertEquals(2, fieldOffsets.size());
+        Assertions.assertNull(fieldOffsets.get(0));
+        Assertions.assertNotNull(fieldOffsets.get(1));
     }
 }

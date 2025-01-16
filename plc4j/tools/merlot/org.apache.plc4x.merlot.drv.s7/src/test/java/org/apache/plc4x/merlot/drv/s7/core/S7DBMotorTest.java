@@ -18,7 +18,9 @@ package org.apache.plc4x.merlot.drv.s7.core;
 
 import io.netty.buffer.ByteBuf;
 import static io.netty.buffer.Unpooled.buffer;
+import java.util.ArrayList;
 import java.util.UUID;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.java.api.value.PlcValue;
 import org.apache.plc4x.java.spi.values.PlcRawByteArray;
 import org.apache.plc4x.merlot.api.PlcItem;
@@ -31,6 +33,7 @@ import org.epics.pvdata.pv.PVString;
 import org.epics.pvdata.pv.PVStructure;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeAll;
@@ -56,6 +59,7 @@ public class S7DBMotorTest {
     private PVShort value;
     private PVShort write_value;
     private PVBoolean write_enable;
+    private DBRecord Motor_00;
 
     private PVShort iMode;
     private PVShort iErrorCode;
@@ -108,7 +112,6 @@ public class S7DBMotorTest {
 
     @BeforeEach
     public void setUp() {
-        logger.info("Creating  plcValue and plcItem to Motor");
         //Create PLCList for the items
         plcValue = new PlcRawByteArray(byteBuf.array());
         //Create the Item 
@@ -120,6 +123,8 @@ public class S7DBMotorTest {
                 build();
         assertNotNull(plcItem);
         assertNotNull(plcValue);
+        S7DBMotorFactory MotorFactory = new S7DBMotorFactory();
+        Motor_00 = MotorFactory.create("Motor_00");
     }
 
     @AfterEach
@@ -131,13 +136,10 @@ public class S7DBMotorTest {
     @Test
     @Order(1)
     public void DBRecordTest() {
-        S7DBMotorFactory MotorFactory = new S7DBMotorFactory();
-        DBRecord Motor_00 = MotorFactory.create("Motor_00");
 
         PVString pvStrOffset = Motor_00.getPVRecordStructure().getPVStructure().getStringField("offset");
         pvStrOffset.put("0");
 
-        
         plcItem.addItemListener(Motor_00);
         plcItem.setPlcValue(plcValue);
 
@@ -232,5 +234,25 @@ public class S7DBMotorTest {
         assertEquals(1330, tTimeOut.get());
 
         logger.info("\nTEST Motor SUCCESSFULLY COMPLETED ");
+    }
+
+    @Test
+    @Order(2)
+    public void FieldOffsetTest() {
+
+        ArrayList<ImmutablePair<Integer, Byte>> fieldOffsets = Motor_00.getFieldOffsets();
+        logger.info(String.format("Number of items allowed to be monitored:(Value expected: 8) == (Value actual: %d)", fieldOffsets.size()));
+
+        assertEquals(8, fieldOffsets.size());
+        
+        Assertions.assertNull(fieldOffsets.get(0));
+        Assertions.assertNull(fieldOffsets.get(1));
+        Assertions.assertNull(fieldOffsets.get(2));
+        Assertions.assertNotNull(fieldOffsets.get(3));
+        Assertions.assertNotNull(fieldOffsets.get(4));
+        Assertions.assertNotNull(fieldOffsets.get(5));
+        Assertions.assertNotNull(fieldOffsets.get(6));
+        Assertions.assertNotNull(fieldOffsets.get(7));
+        logger.info(String.format("Monitoring fields were validated, a total of %s",String.valueOf(fieldOffsets.size())));
     }
 }
