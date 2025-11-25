@@ -530,7 +530,11 @@ var rootCommand = Command{
 							Name:        "on",
 							Description: "debug on",
 							action: func(ctx context.Context, _ Command, _ string) error {
-								plc4xBrowserLog = zerolog.New(zerolog.ConsoleWriter{Out: tview.ANSIWriter(consoleOutput)})
+								out := consoleOutput
+								if IsLegacyUI() {
+									out = tview.ANSIWriter(out)
+								}
+								plc4xBrowserLog = zerolog.New(zerolog.ConsoleWriter{Out: out})
 								return nil
 							},
 						},
@@ -640,14 +644,22 @@ func init() {
 		Name:        "help",
 		Description: "prints out this help",
 		action: func(_ context.Context, _ Command, _ string) error {
-			_, _ = fmt.Fprintf(commandOutput, "[#0000ff]Available commands[white]\n")
+			if IsLegacyUI() {
+				_, _ = fmt.Fprintf(commandOutput, "[#0000ff]Available commands[white]\n")
+			} else {
+				_, _ = fmt.Fprintln(commandOutput, "Available commands")
+			}
 			rootCommand.visit(0, func(currentIndent int, command Command) {
 				indentString := strings.Repeat("  ", currentIndent)
 				description := command.Description
 				if description == "" {
 					description = command.Name + "s"
 				}
-				_, _ = fmt.Fprintf(commandOutput, "%s [#00ff00]%s[white]: %s\n", indentString, command.Name, description)
+				if IsLegacyUI() {
+					_, _ = fmt.Fprintf(commandOutput, "%s [#00ff00]%s[white]: %s\n", indentString, command.Name, description)
+				} else {
+					_, _ = fmt.Fprintf(commandOutput, "%s%s: %s\n", indentString, command.Name, description)
+				}
 			})
 			return nil
 		},

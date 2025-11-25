@@ -20,16 +20,28 @@
 package main
 
 import (
+	"flag"
 	"github.com/apache/plc4x-extras/plc4go/tools/plc4xbrowser/ui"
 )
 
 func main() {
+	flag.Parse()
 	ui.LoadConfig()
-	application := ui.SetupApplication()
-	ui.InitSubsystem()
 
-	if err := application.Run(); err != nil {
+	if ui.IsLegacyUI() {
+		application := ui.SetupApplication()
+		ui.InitSubsystem()
+		defer ui.Shutdown()
+		if err := application.Run(); err != nil {
+			panic(err)
+		}
+		return
+	}
+
+	program := ui.SetupProgram()
+	ui.InitSubsystem()
+	defer ui.Shutdown()
+	if _, err := program.Run(); err != nil {
 		panic(err)
 	}
-	ui.Shutdown()
 }

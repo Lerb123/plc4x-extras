@@ -20,6 +20,7 @@
 package ui
 
 import (
+	"flag"
 	"io"
 	"strings"
 	"sync"
@@ -30,9 +31,20 @@ import (
 	"github.com/rs/zerolog"
 )
 
+var legacyUI = flag.Bool("legacy-ui", true, "Use the legacy tview-based UI")
+
+func IsLegacyUI() bool {
+	if legacyUI == nil {
+		return false
+	}
+	return *legacyUI
+}
+
 const protocols = "ads,bacnetip,c-bus,opcua,s7"
 
 var protocolList = strings.Split(protocols, ",")
+
+var dispatcher = newDispatcher()
 
 var plc4xBrowserLog = zerolog.Nop()
 
