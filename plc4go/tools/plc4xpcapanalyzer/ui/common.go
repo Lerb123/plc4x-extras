@@ -33,14 +33,23 @@ import (
 	"github.com/rs/zerolog"
 )
 
+var LegacyUI bool
+
+func IsLegacyUI() bool {
+	return LegacyUI
+}
+
 const protocols = "ads,bacnetip,c-bus,s7"
 
 var protocolList = strings.Split(protocols, ",")
+
+var dispatcher = newDispatcher()
 
 var plc4xpcapanalyzerLog = zerolog.Nop()
 
 var driverManager plc4go.PlcDriverManager
 var driverAdded func(string)
+var registeredDriverNames []string
 
 type loadedPcapFile struct {
 	name string

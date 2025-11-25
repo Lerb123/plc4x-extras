@@ -62,10 +62,18 @@ var rootCommand = Command{
 					isDir := dirEntry.IsDir()
 					name := dirEntry.Name()
 					name = strings.TrimPrefix(name, dir)
-					if isDir {
-						name = fmt.Sprintf("[#0000ff]%s[white]", name)
-					} else if strings.HasSuffix(name, ".pcap") || strings.HasSuffix(name, ".pcapng") {
-						name = fmt.Sprintf("[#00ff00]%s[white]", name)
+					if IsLegacyUI() {
+						if isDir {
+							name = fmt.Sprintf("[#0000ff]%s[white]", name)
+						} else if strings.HasSuffix(name, ".pcap") || strings.HasSuffix(name, ".pcapng") {
+							name = fmt.Sprintf("[#00ff00]%s[white]", name)
+						}
+					} else {
+						if isDir {
+							name = fmt.Sprintf("[dir] %s", name)
+						} else if strings.HasSuffix(name, ".pcap") || strings.HasSuffix(name, ".pcapng") {
+							name = fmt.Sprintf("[pcap] %s", name)
+						}
 					}
 					_, _ = fmt.Fprintf(commandOutput, "%s\n", name)
 				}
@@ -171,7 +179,13 @@ var rootCommand = Command{
 				cliConfig.RootConfigInstance.HideProgressBar = true
 				// disabled as we get this output anyway with the message call back
 				//cliConfig.RootConfigInstance.Verbosity = 4
-				return analyzer.AnalyzeWithOutputAndCallback(ctx, pcapFile, protocolType, tview.ANSIWriter(messageOutput), tview.ANSIWriter(messageOutput), func(parsed spi.Message) {
+				if IsLegacyUI() {
+					return analyzer.AnalyzeWithOutputAndCallback(ctx, pcapFile, protocolType, tview.ANSIWriter(messageOutput), tview.ANSIWriter(messageOutput), func(parsed spi.Message) {
+						spiNumberOfMessagesReceived++
+						spiMessageReceived(spiNumberOfMessagesReceived, time.Now(), parsed)
+					})
+				}
+				return analyzer.AnalyzeWithOutputAndCallback(ctx, pcapFile, protocolType, newANSIStrippingWriter(messageOutput), newANSIStrippingWriter(messageOutput), func(parsed spi.Message) {
 					spiNumberOfMessagesReceived++
 					spiMessageReceived(spiNumberOfMessagesReceived, time.Now(), parsed)
 				})
@@ -198,7 +212,10 @@ var rootCommand = Command{
 				cliConfig.PcapConfigInstance.Client = config.HostIp
 				cliConfig.RootConfigInstance.HideProgressBar = true
 				cliConfig.RootConfigInstance.Verbosity = 4
-				return extractor.ExtractWithOutput(ctx, pcapFile, protocolType, tview.ANSIWriter(messageOutput), tview.ANSIWriter(messageOutput))
+				if IsLegacyUI() {
+					return extractor.ExtractWithOutput(ctx, pcapFile, protocolType, tview.ANSIWriter(messageOutput), tview.ANSIWriter(messageOutput))
+				}
+				return extractor.ExtractWithOutput(ctx, pcapFile, protocolType, newANSIStrippingWriter(messageOutput), newANSIStrippingWriter(messageOutput))
 			},
 			parameterSuggestions: func(currentText string) (entries []string) {
 				for _, file := range loadedPcapFiles {

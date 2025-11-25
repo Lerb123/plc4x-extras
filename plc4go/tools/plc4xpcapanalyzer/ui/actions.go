@@ -52,7 +52,11 @@ func InitSubsystem() {
 		//With().Caller().Logger().
 		Output(zerolog.NewConsoleWriter(
 			func(w *zerolog.ConsoleWriter) {
-				w.Out = tview.ANSIWriter(consoleOutput)
+				out := consoleOutput
+				if IsLegacyUI() {
+					out = tview.ANSIWriter(out)
+				}
+				w.Out = out
 			},
 			func(w *zerolog.ConsoleWriter) {
 				w.FormatFieldValue = func(i interface{}) string {
@@ -77,7 +81,9 @@ func InitSubsystem() {
 
 	// We offset the commands executed with the last commands
 	commandsExecuted = len(config.History.Last10Commands)
-	outputCommandHistory()
+	if IsLegacyUI() {
+		outputCommandHistory()
+	}
 
 	for _, driver := range config.AutoRegisterDrivers {
 		log.Info().Str("driver", driver).Msg("Auto register driver")
@@ -117,9 +123,16 @@ func OpenFile(pcapFile string) error {
 }
 
 func outputCommandHistory() {
-	_, _ = fmt.Fprintln(commandOutput, "[#0000ff]Last 10 commands[white]")
+	if IsLegacyUI() {
+		_, _ = fmt.Fprintln(commandOutput, "[#0000ff]Last 10 commands[white]")
+		for i, command := range config.History.Last10Commands {
+			_, _ = fmt.Fprintf(commandOutput, "   [#00ff00]%d[white]: [\"%d\"]%s[\"\"]\n", i, i, tview.Escape(command))
+		}
+		return
+	}
+	_, _ = fmt.Fprintln(commandOutput, "Last 10 commands")
 	for i, command := range config.History.Last10Commands {
-		_, _ = fmt.Fprintf(commandOutput, "   [#00ff00]%d[white]: [\"%d\"]%s[\"\"]\n", i, i, tview.Escape(command))
+		_, _ = fmt.Fprintf(commandOutput, "  %d: %s\n", i, command)
 	}
 }
 
@@ -146,6 +159,13 @@ func registerDriver(driver string) error {
 		return errors.Errorf("Unknown driver %s", driver)
 	}
 	driverManager.(spi.TransportAware).RegisterTransport(pcap.NewTransport())
+	for _, existing := range registeredDriverNames {
+		if existing == driver {
+			go driverAdded(driver)
+			return nil
+		}
+	}
+	registeredDriverNames = append(registeredDriverNames, driver)
 	go driverAdded(driver)
 	return nil
 }

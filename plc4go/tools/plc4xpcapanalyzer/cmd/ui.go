@@ -29,6 +29,8 @@ import (
 	"github.com/apache/plc4x-extras/plc4go/tools/plc4xpcapanalyzer/ui"
 )
 
+var legacyUI bool
+
 // uiCmd represents the ui command
 var uiCmd = &cobra.Command{
 	Use:   "ui [pcapfile]",
@@ -48,20 +50,40 @@ TODO: document me
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		ui.LoadConfig()
-		application := ui.SetupApplication()
+
+		if legacyUI {
+			application := ui.SetupApplication()
+			ui.InitSubsystem()
+			ui.LegacyUI = true
+			if len(args) > 0 {
+				pcapFile := args[0]
+				go func() {
+					if err := ui.OpenFile(pcapFile); err != nil {
+						log.Error().Err(err).Msg("Error opening argument file")
+					}
+				}()
+			}
+
+			defer ui.Shutdown()
+			if err := application.Run(); err != nil {
+				panic(err)
+			}
+			return
+		}
+
+		program := ui.SetupProgram()
 		ui.InitSubsystem()
 		if len(args) > 0 {
 			pcapFile := args[0]
 			go func() {
-				err := ui.OpenFile(pcapFile)
-				if err != nil {
+				if err := ui.OpenFile(pcapFile); err != nil {
 					log.Error().Err(err).Msg("Error opening argument file")
 				}
 			}()
 		}
 
 		defer ui.Shutdown()
-		if err := application.Run(); err != nil {
+		if _, err := program.Run(); err != nil {
 			panic(err)
 		}
 	},
@@ -69,4 +91,5 @@ TODO: document me
 
 func init() {
 	rootCmd.AddCommand(uiCmd)
+	uiCmd.Flags().BoolVar(&legacyUI, "legacy-ui", true, "Use the legacy tview-based UI")
 }
