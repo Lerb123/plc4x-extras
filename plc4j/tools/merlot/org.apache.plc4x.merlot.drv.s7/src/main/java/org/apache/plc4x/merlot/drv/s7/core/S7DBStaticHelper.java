@@ -24,9 +24,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import static org.apache.plc4x.java.s7.readwrite.utils.StaticHelper.s5TimeToDuration;
-import org.apache.plc4x.java.spi.generation.ParseException;
-import org.apache.plc4x.java.spi.generation.ReadBuffer;
 
 /**
  *

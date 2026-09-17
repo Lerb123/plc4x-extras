@@ -23,21 +23,17 @@
     <parent>
     <artifactId>merlot</artifactId>
     <groupId>org.apache.plc4x</groupId>
-    <version>0.13.0-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
   </parent>
 
     <groupId>org.apache.plc4x.merlot.drv.s7</groupId>
     <artifactId>org.apache.plc4x.merlot.drv.s7</artifactId>
-    <version>0.13.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <name>PLC4J: Merlot :: s7 :: Support for Plc4x S7 driver</name>
     <description>org.apache.plc4x.merlot.drv.s7 OSGi blueprint bundle project.</description>
 
-    <properties>
-        <dependency.karaf.version>4.4.7</dependency.karaf.version>
-    </properties>
-
+ 
     <build>
         <plugins>
             <plugin>
@@ -58,11 +54,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
+                <version>${maven-compiler-plugin.version}</version>
+<!--                <configuration>
                     <source>11</source>
                     <target>11</target>
                     <maxmem>256M</maxmem>
-                </configuration>
+                </configuration>-->
             </plugin>
             
             <plugin>
@@ -122,27 +119,12 @@
             <artifactId>org.apache.plc4x.merlot.db</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
-<!--        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.12.2</version>
-            <scope>test</scope>
-            <type>jar</type>
-        </dependency> -->
-                
-<!--        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.12.2</version>
-            <scope>test</scope>
-        </dependency>                      -->
-        
+
        <!-- Provide the KarafTestSupport -->
         <dependency>
             <groupId>org.apache.karaf.itests</groupId>
             <artifactId>common</artifactId>
-            <version>4.4.7</version>
+            <version>${karaf.itests.common.version}</version>
             <type>jar</type>
             <scope>test</scope>
         </dependency> 
@@ -151,7 +133,7 @@
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>apache-karaf</artifactId>
-            <version>${dependency.karaf.version}</version>  
+            <version>${apache-karaf.version}</version>  
             <scope>test</scope>
             <type>tar.gz</type>
             <exclusions>
@@ -165,15 +147,15 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>compile</scope>
-            <version>4.13.2</version>
+            <scope>test</scope>
+            <version>${junit.version}</version>
         </dependency>        
         
         <!-- Required to use shell commands in the tests -->
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>
             <artifactId>org.apache.karaf.shell.core</artifactId>
-            <version>${dependency.karaf.version}</version>            
+            <version>${karaf.version}</version>            
             <scope>test</scope>
         </dependency>
         
@@ -181,7 +163,7 @@
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam-container-karaf</artifactId>
-            <version>4.14.0</version>              
+            <version>${pax.exam.container.karaf.version}</version>              
             <scope>test</scope>
         </dependency>
         
@@ -189,20 +171,20 @@
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam-junit4</artifactId>
-            <version>4.14.0</version>              
+            <version>${pax.exam.junit4.version}</version>              
             <scope>test</scope>
         </dependency>
         
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
             <artifactId>geronimo-atinject_1.0_spec</artifactId>
-            <version>1.2</version>
+            <version>${geronimo.atinject.1.0.spec.version}</version>
             <scope>test</scope>
         </dependency>        
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.hamcrest</artifactId>
-            <version>1.3_1</version>
+            <version>${org.apache.servicemix.bundles.hamcrest.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -213,19 +195,21 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>2.0.13</version>
+            <version>${slf4j-simple.version}</version>
         </dependency>
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
-            <version>3.1.6</version>
+            <version>${awaitility.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-buffer</artifactId>
-            <version>4.1.119.Final</version>
+            <version>${netty.version}</version>
+            <!--<version>4.1.119.Final</version>-->
             <scope>compile</scope>
         </dependency>
+
     </dependencies>
 </project>

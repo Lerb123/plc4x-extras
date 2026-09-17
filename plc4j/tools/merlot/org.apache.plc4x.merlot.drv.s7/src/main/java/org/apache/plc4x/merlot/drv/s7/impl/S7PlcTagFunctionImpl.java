@@ -29,7 +29,7 @@ import static org.apache.plc4x.java.s7.readwrite.MemoryArea.FLAGS_MARKERS;
 import static org.apache.plc4x.java.s7.readwrite.MemoryArea.INPUTS;
 import static org.apache.plc4x.java.s7.readwrite.MemoryArea.OUTPUTS;
 import org.apache.plc4x.java.s7.readwrite.TransportSize;
-import org.apache.plc4x.java.s7.readwrite.tag.S7Tag;
+import org.apache.plc4x.java.s7.tag.S7Tag;
 import org.apache.plc4x.merlot.api.PlcTagFunction;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.dal.OperationMetadata;

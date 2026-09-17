@@ -23,10 +23,10 @@
         interface="org.apache.plc4x.merlot.api.PlcGeneralFunction" availability="mandatory" timeout="1200"/>      
     
     <reference id="S7Plc4xDriverRef"
-        interface="org.apache.plc4x.java.api.PlcDriver"
-        filter="(org.apache.plc4x.driver.code=s7)" 
-        timeout="10000"
-        availability="mandatory">
+               interface="org.apache.plc4x.java.api.PlcDriver"
+               filter="(org.apache.plc4x.driver.code=s7)" 
+               timeout="10000"
+               availability="mandatory">
     </reference>       
     
     

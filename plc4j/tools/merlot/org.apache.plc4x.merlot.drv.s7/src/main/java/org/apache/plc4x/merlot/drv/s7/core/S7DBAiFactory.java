@@ -20,7 +20,7 @@ package org.apache.plc4x.merlot.drv.s7.core;
 
 import io.netty.buffer.Unpooled;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.plc4x.java.s7.readwrite.tag.S7Tag;
+import org.apache.plc4x.java.s7.tag.S7Tag;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.api.PlcItemListener;
 import org.apache.plc4x.merlot.db.api.DBRecord;

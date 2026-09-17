@@ -257,6 +257,7 @@
             <!--<entry key="alias" value="/request/rt/bpl/searchPVNameOnRuntime"/>-->
             <entry key="alias" value="/request/rt/bpl/searchForPVsRegex"/>
             <entry key="servlet-name" value="RTSearchPVNames"/>
+            <entry key="osgi.http.whiteboard.servlet.asyncSupported" value="true"/>
         </service-properties>
         <bean class="org.apache.plc4x.merlot.archiver.impl.MerlotDataBrowserRTSearchPVImpl">
             <argument ref="MerlotHtcRTBean" />
@@ -267,6 +268,7 @@
             <!--<entry key="alias" value="/request/iotdb/bpl/searchPVNameOntoIoTDB"/>-->
             <entry key="alias" value="/request/iotdb/bpl/searchForPVsRegex"/>
             <entry key="servlet-name" value="IoTDBSearchPVNames"/>
+            <entry key="osgi.http.whiteboard.servlet.asyncSupported" value="true"/>
         </service-properties>
         <bean class="org.apache.plc4x.merlot.archiver.impl.MerlotDataBrowserIoTDBSearchPVImpl">
             <argument ref="MerlotHtcIoTDBBean"/>
@@ -278,6 +280,7 @@
         <service-properties>            
             <entry key="alias" value="/request/rt/data/getData.raw"/>
             <entry key="servlet-name" value="RTGetDataForPVs"/>
+            <entry key="osgi.http.whiteboard.servlet.asyncSupported" value="true"/>
         </service-properties>
         <bean class="org.apache.plc4x.merlot.archiver.impl.MerlotDataBrowserRTGetDataPVImpl">
             <argument ref="MerlotHtcRTBean" />
@@ -287,6 +290,7 @@
         <service-properties>            
             <entry key="alias" value="/request/iotdb/data/getData.raw"/>
             <entry key="servlet-name" value="IoTDBGetDataForPVs"/>
+            <entry key="osgi.http.whiteboard.servlet.asyncSupported" value="true"/>
         </service-properties>
         <bean class="org.apache.plc4x.merlot.archiver.impl.MerlotDataBrowserIoTDBGetDataPVImpl">
             <argument ref="MerlotHtcIoTDBBean"/>

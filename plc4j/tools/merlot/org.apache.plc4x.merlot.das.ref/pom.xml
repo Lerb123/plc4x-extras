@@ -21,14 +21,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-    <artifactId>merlot</artifactId>
-    <groupId>org.apache.plc4x</groupId>
-    <version>0.13.0-SNAPSHOT</version>
-  </parent>
+        <artifactId>merlot</artifactId>
+        <groupId>org.apache.plc4x</groupId>
+        <version>1.1.0-SNAPSHOT</version>
+    </parent>
 
     <groupId>org.apache.plc4x.merlot.das.ref</groupId>
     <artifactId>org.apache.plc4x.merlot.das.ref</artifactId>
-    <version>0.13.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <name>PLC4J: Merlot :: das :: Referring driver</name>
@@ -39,13 +38,13 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>5.1.8</version>
+                <version>${maven-bundle-plugin.version}</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Bundle-Version>0.13.0-SNAPSHOT</Bundle-Version>
-                        <Export-Package>org.apache.plc4x.merlot.das.ref*;version=0.13.0-SNAPSHOT</Export-Package>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Export-Package>org.apache.plc4x.merlot.das.ref*;version=${project.version}</Export-Package>
                         <Import-Package>*</Import-Package>
                         <_removeheaders>Import-Service,Export-Service</_removeheaders>                          
                     </instructions>
@@ -54,11 +53,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
+                <version>${maven-compiler-plugin.version}</version>
+                <!--                <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
                     <maxmem>256M</maxmem>
-                </configuration>
+                </configuration>-->
             </plugin>
         </plugins>
     </build>

@@ -79,17 +79,35 @@ public final class MerlotPBRawSerializer {
                 .setPvname(pvName)
                 .setType(type)
                 .setYear(year)
-                .setElementCount(1)
+                .setElementCount(events.size())
                 .build();
         info.writeTo(out);
         out.write('\n');
 
-        for (int i = 0; i < events.size(); i++) {
-//            byte[] data = serializeIoTDBToBytes(events.get(i));
-            serializeIoTDBToBytes(events.get(i), out);
+        for (VType event : events) {
+            byte[] msgBytes = serializeIoTDBToBytes(event);
+            writeEscapedMessage(out, msgBytes);
         }
 
         out.flush();
+    }
+
+    private static void writeEscapedMessage(OutputStream out, byte[] msgBytes) throws IOException {
+        for (byte b : msgBytes) {
+            if (b == 0x1B) {
+                out.write(0x1B);
+                out.write(0x1B);
+            } else if (b == 0x0A) {
+                out.write(0x1B);
+                out.write(0x0A);
+            } else if (b == 0x0D) {
+                out.write(0x1B);
+                out.write(0x0D);
+            } else {
+                out.write(b);
+            }
+        }
+        out.write('\n');   // delimitador final, sin escapar
     }
 
     /**
@@ -181,20 +199,14 @@ public final class MerlotPBRawSerializer {
         if (pbEvent instanceof com.google.protobuf.MessageLite) {
             ((com.google.protobuf.MessageLite) pbEvent).writeDelimitedTo(out);
         } else {
-            // Manejo manual de varint si no es un mensaje directo de Protobuf
             byte[] bytes = serializeToBytes(pbEvent);
             if (bytes != null) {
-//                writeVarint32(out, bytes.length);
                 out.write(bytes);
                 out.write(0x0A);
             }
         }
     }
 
-    /**
-     * Utilidad para escribir el prefijo de tamaño (Varint32) requerido por el
-     * protocolo.
-     */
     private static void writeVarint32(OutputStream out, int value) throws IOException {
         while (true) {
             if ((value & ~0x7F) == 0) {
@@ -207,9 +219,6 @@ public final class MerlotPBRawSerializer {
         }
     }
 
-    /**
-     * Convierte el objeto del evento en su representación de bytes.
-     */
     private static byte[] serializeToBytes(Object pbEvent) {
         if (pbEvent instanceof EPICSEvent.ScalarDouble) {
             return ((EPICSEvent.ScalarDouble) pbEvent).toByteArray();
@@ -220,71 +229,67 @@ public final class MerlotPBRawSerializer {
         } else if (pbEvent instanceof EPICSEvent.ScalarByte) {
             return ((EPICSEvent.ScalarByte) pbEvent).toByteArray();
         }
-        // Añadir otros tipos según sea necesario
         return null;
     }
 
-    private static void serializeIoTDBToBytes(VType event, OutputStream out) throws IOException {
+    private static byte[] serializeIoTDBToBytes(VType event) throws IOException {
         if (event == null) {
-            throw new IllegalArgumentException("Eventt is null");
+            throw new IllegalArgumentException("Event is null");
         }
-        
+
         Time eventTime = ((TimeProvider) event).getTime();
         OffsetDateTime time = eventTime.getTimestamp().atOffset(ZoneOffset.UTC);
-        int secondsIntoYear = (int) (time.toEpochSecond()
-                - time.withDayOfYear(1).withHour(0).withMinute(0).withSecond(0).toEpochSecond());
+        OffsetDateTime startOfYear = OffsetDateTime.of(time.getYear(), 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+        int secondsIntoYear = (int) (time.toEpochSecond() - startOfYear.toEpochSecond());
         int nanos = eventTime.getTimestamp().getNano();
         int severity = ((AlarmProvider) event).getAlarm().getSeverity().ordinal();
 
         if (event instanceof VDouble) {
-            EPICSEvent.ScalarDouble.newBuilder()
+            return EPICSEvent.ScalarDouble.newBuilder()
                     .setSecondsintoyear(secondsIntoYear)
                     .setNano(nanos)
                     .setVal(((VDouble) event).getValue())
                     .setSeverity(severity)
                     .build()
-                    .writeTo(out);
-            out.write('\n');
+                    .toByteArray();
 
         } else if (event instanceof VInt) {
-            EPICSEvent.ScalarInt.newBuilder()
+            return EPICSEvent.ScalarInt.newBuilder()
                     .setSecondsintoyear(secondsIntoYear)
                     .setNano(nanos)
                     .setVal(((VInt) event).getValue())
                     .setSeverity(severity)
                     .build()
-                    .writeTo(out);
-            out.write('\n');
+                    .toByteArray();
 
         } else if (event instanceof VFloat) {
-            EPICSEvent.ScalarFloat.newBuilder()
+            return EPICSEvent.ScalarFloat.newBuilder()
                     .setSecondsintoyear(secondsIntoYear)
                     .setNano(nanos)
                     .setVal(((VFloat) event).getValue())
                     .setSeverity(severity)
                     .build()
-                    .writeTo(out);
-            out.write('\n');
+                    .toByteArray();
 
         } else if (event instanceof VString) {
-            EPICSEvent.ScalarString.newBuilder()
+            return EPICSEvent.ScalarString.newBuilder()
                     .setSecondsintoyear(secondsIntoYear)
                     .setNano(nanos)
                     .setVal(((VString) event).getValue())
                     .setSeverity(severity)
                     .build()
-                    .writeTo(out);
-            out.write('\n');
+                    .toByteArray();
 
         } else if (event instanceof VByte) {
-            EPICSEvent.ScalarByte.newBuilder()
+            return EPICSEvent.ScalarByte.newBuilder()
                     .setSecondsintoyear(secondsIntoYear)
                     .setNano(nanos)
                     .setVal(ByteString.copyFrom(new byte[]{((VByte) event).getValue()}))
                     .setSeverity(severity)
                     .build()
-                    .writeTo(out);
-            out.write('\n');
+                    .toByteArray();
         }
+        throw new UnsupportedOperationException("VType not supported: " + event.getClass().getName());
     }
+
 }

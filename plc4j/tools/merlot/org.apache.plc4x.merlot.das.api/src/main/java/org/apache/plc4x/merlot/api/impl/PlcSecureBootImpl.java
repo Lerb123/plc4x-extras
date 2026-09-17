@@ -307,7 +307,7 @@ public class PlcSecureBootImpl implements PlcSecureBoot, Job {
 
                         if (optPlcDevice.isPresent()) {
                             LOGGER.info("Created PlcDevice [{}].", optPlcDevice.get().getDeviceKey());
-
+                            System.out.println(optPlcDevice.get());
                             //PlcGroups
                             groups.addAll(createGroup(optPlcDevice.get().getUid().toString()));
 
@@ -318,6 +318,7 @@ public class PlcSecureBootImpl implements PlcSecureBoot, Job {
                         }
 
                         if (isDeviceEnable.equals("true")) {
+                            System.out.println("El dispositivo fue habilitado");
                             optPlcDevice.get().enable();
                         }
 

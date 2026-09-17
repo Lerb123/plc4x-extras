@@ -117,29 +117,29 @@ public class MerlotHtcIoTDBImpl implements MerlotHtc, ManagedService {
     @Override
     public Set<String> getPVs() {
         Set<String> pvs = new HashSet<>();
-
         String pvNameQuery = "SHOW TIMESERIES root.**";
 
         try (SessionDataSetWrapper ds = getIoTDBConnection().executeQueryStatement(pvNameQuery)) {
             while (ds.hasNext()) {
-
                 String fullPath = ds.next().getFields().get(0).getStringValue();
-
-                pvs.add(fullPath.replaceFirst("^[^.]+\\.(.*)", "$1"));
+                String pvaPath = fullPath.replaceFirst("^root\\.", "pva://")
+                        .replaceAll("\\.(?=[^.]*\\.)", "/");
+                pvs.add(pvaPath);
             }
         } catch (Exception ex) {
             LOGGER.error("Error retrieving PVs from IoTDB: {}", ex.getMessage());
         }
-
         return pvs;
     }
 
     @Override
     public List<VType> getPVs(String strPV, String init, String end) {
+
+        String adjusmentVariable = strPV.replaceFirst("^pva://", "").replaceAll("/", ".");
         List<VType> listResult = new ArrayList<>(5000);
         try {
-            String device = getBasePath(strPV);
-            String measurement = getTimeserieNameSimple(strPV);
+            String device = getBasePath(adjusmentVariable);
+            String measurement = getTimeserieNameSimple(adjusmentVariable);
 
             long startT = Instant.parse(init).toEpochMilli();
             long endT = Instant.parse(end).toEpochMilli();
@@ -147,6 +147,7 @@ public class MerlotHtcIoTDBImpl implements MerlotHtc, ManagedService {
             String sql = String.format("SELECT %s FROM root.%s WHERE time >= %d AND time <= %d",
                     measurement, device, startT, endT);
 
+            System.out.println("SQL: "+sql);
             SessionPool pool = getIoTDBConnection();
             if (pool == null) {
                 return listResult;
@@ -238,7 +239,10 @@ public class MerlotHtcIoTDBImpl implements MerlotHtc, ManagedService {
         if (pvName == null || pvName.isEmpty()) {
             return "";
         }
-        return pvName.replaceFirst("^(?:root\\.)?(.*)\\.[^.]+$", "$1");
+
+        int limitDot = pvName.lastIndexOf('.');
+        String devicePath = (limitDot != -1) ? pvName.substring(0, limitDot) : pvName;
+        return devicePath;
     }
 
     public void updated(Dictionary<String, ?> properties) throws ConfigurationException {

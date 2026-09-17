@@ -33,8 +33,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.apache.plc4x.merlot.logrecorder.appender.MerlotLogRecorderJDBCAppender;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -357,8 +355,7 @@ public class MerlotLogRecorderSearch extends HttpServlet {
         return extensionFinal;
     }
 
-    @Getter
-    @AllArgsConstructor
+
     class Data {
 
         private long id;
@@ -370,6 +367,54 @@ public class MerlotLogRecorderSearch extends HttpServlet {
         private String title;
         private long createdDate;
         private String description;
+
+        public Data(long id, String owner, String level, String tags, String logbooks, String attachments, String title, long createdDate, String description) {
+            this.id = id;
+            this.owner = owner;
+            this.level = level;
+            this.tags = tags;
+            this.logbooks = logbooks;
+            this.attachments = attachments;
+            this.title = title;
+            this.createdDate = createdDate;
+            this.description = description;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public String getOwner() {
+            return owner;
+        }
+
+        public String getLevel() {
+            return level;
+        }
+
+        public String getTags() {
+            return tags;
+        }
+
+        public String getLogbooks() {
+            return logbooks;
+        }
+
+        public String getAttachments() {
+            return attachments;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public long getCreatedDate() {
+            return createdDate;
+        }
+
+        public String getDescription() {
+            return description;
+        }
 
     }
 

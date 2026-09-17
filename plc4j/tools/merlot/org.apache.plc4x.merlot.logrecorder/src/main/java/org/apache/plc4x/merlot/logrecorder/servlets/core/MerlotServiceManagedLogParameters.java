@@ -21,15 +21,11 @@ import java.util.Dictionary;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.slf4j.LoggerFactory;
 
-@Getter
+
 public class MerlotServiceManagedLogParameters implements ManagedService {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(MerlotServiceManagedLogParameters.class);
@@ -47,6 +43,27 @@ public class MerlotServiceManagedLogParameters implements ManagedService {
         this.templates = new ArrayList<>();
     }
 
+    public List<Level> getLevels() {
+        return levels;
+    }
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public List<LogBook> getLogbooks() {
+        return logbooks;
+    }
+
+    public List<Property> getProperties() {
+        return properties;
+    }
+
+    public List<String> getTemplates() {
+        return templates;
+    }
+
+    
     @Override
     public void updated(Dictionary<String, ?> properties) throws ConfigurationException {
         LOGGER.info("Reading properties");
@@ -112,47 +129,149 @@ public class MerlotServiceManagedLogParameters implements ManagedService {
         this.templates.clear();
     }
 
-    @Getter
-    @Setter
-    @ToString
-    @AllArgsConstructor
+ 
     public class Level {
-
         private String key;
         private String description;
+
+        public Level(String key, String description) {
+            this.key = key;
+            this.description = description;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public void setKey(String key) {
+            this.key = key;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+        
+        
     }
 
-    @Getter
-    @Setter
-    @ToString
-    @AllArgsConstructor
+
     public class LogBook {
 
         private String key;
         private String owner;
         private String state;
+
+        public LogBook(String key, String owner, String state) {
+            this.key = key;
+            this.owner = owner;
+            this.state = state;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public void setKey(String key) {
+            this.key = key;
+        }
+
+        public String getOwner() {
+            return owner;
+        }
+
+        public void setOwner(String owner) {
+            this.owner = owner;
+        }
+
+        public String getState() {
+            return state;
+        }
+
+        public void setState(String state) {
+            this.state = state;
+        }    
     }
 
-    @Getter
-    @Setter
-    @ToString
-    @AllArgsConstructor
+    
     public class Tag {
 
         private String key;
         private String state;
+
+        public Tag(String key, String state) {
+            this.key = key;
+            this.state = state;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public void setKey(String key) {
+            this.key = key;
+        }
+
+        public String getState() {
+            return state;
+        }
+
+        public void setState(String state) {
+            this.state = state;
+        }
+        
+        
     }
 
-    @Getter
-    @Setter
-    @ToString
-    @AllArgsConstructor
+
     public class Property {
 
         private String name;
         private String owner;
         private String state;
         private String[] attributes;
+
+        public Property(String name, String owner, String state) {
+            this.name = name;
+            this.owner = owner;
+            this.state = state;
+            this.attributes = new String[20];
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getOwner() {
+            return owner;
+        }
+
+        public void setOwner(String owner) {
+            this.owner = owner;
+        }
+
+        public String getState() {
+            return state;
+        }
+
+        public void setState(String state) {
+            this.state = state;
+        }
+
+        public String[] getAttributes() {
+            return attributes;
+        }
+
+        public void setAttributes(String[] attributes) {
+            this.attributes = attributes;
+        }     
     }
 
 }

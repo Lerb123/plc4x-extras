@@ -17,7 +17,7 @@
 package org.apache.plc4x.merlot.drv.s7.core;
 
 import org.apache.plc4x.java.api.model.PlcTag;
-import org.apache.plc4x.java.s7.readwrite.tag.S7Tag;
+import org.apache.plc4x.java.s7.tag.S7Tag;
 import org.junit.Test;
 
 

@@ -16,12 +16,10 @@
  */
 package org.apache.plc4x.merlot.archiver.impl;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,15 +35,13 @@ import org.slf4j.LoggerFactory;
 
 public class MerlotDataBrowserIoTDBGetDataPVImpl extends HttpServlet {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MerlotDataBrowserRTGetDataPVImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MerlotDataBrowserIoTDBGetDataPVImpl.class);
 
-    private final Pattern opti_pattern = Pattern.compile("optimized_11520\\(([^)]+)\\)");
+   
+    private final Pattern opti_pattern = Pattern.compile("optimized_\\d+\\(([^)]+)\\)");
     private final Pattern ncount_pattern = Pattern.compile("ncount\\(([^)]+)\\)");
-    private final Pattern count_pattern = Pattern.compile("count_3600\\(([^)]+)\\)");
-
-    private Matcher opti_matcher = null;
-    private Matcher ncount_matcher = null;
-    private Matcher count_matcher = null;
+    private final Pattern count_pattern = Pattern.compile("count_\\d+\\(([^)]+)\\)");
+    private final Pattern optimLast_pattern = Pattern.compile("optimLastSample_\\d+\\(([^)]+)\\)");
 
     private final MerlotHtc mhtc;
 
@@ -56,57 +52,49 @@ public class MerlotDataBrowserIoTDBGetDataPVImpl extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        
         String from = req.getParameter("from");
         String to = req.getParameter("to");
         String[] pvs = req.getParameterValues("pv");
-        
-       
-        
+
         LOGGER.info("Inicio Servlet.");
-        if ((null == from) || (null == to)) {
-            return;
-        }
-        if ((null == pvs) || (pvs.length == 0)) {
+        if (from == null || to == null || pvs == null || pvs.length == 0) {
             return;
         }
 
         resp.setContentType("application/octet-stream");
+        OutputStream out = resp.getOutputStream();
+
         for (String pv : pvs) {
-            opti_matcher = opti_pattern.matcher(pv);
-            ncount_matcher = ncount_pattern.matcher(pv);
-            count_matcher = count_pattern.matcher(pv);
+            Matcher opti_matcher = opti_pattern.matcher(pv);
+            Matcher ncount_matcher = ncount_pattern.matcher(pv);
+            Matcher count_matcher = count_pattern.matcher(pv);
+            Matcher optimLast_matcher = optimLast_pattern.matcher(pv);
 
             if (opti_matcher.matches()) {
-                LOGGER.info("optimized_11520(pv) not supported.");
+                LOGGER.info("optimized pattern not supported for PV: {}", pv);
+            } else if (optimLast_matcher.matches()) {
+                LOGGER.info("optimLastSample pattern not supported for PV: {}", pv);
             } else if (ncount_matcher.matches()) {
-                String strpv = ncount_matcher.group(1);
-                int countpv = mhtc.countPVs(strpv, from, to);
-                LOGGER.info("Number of events: " + countpv);
-                resp.getWriter().print(countpv);
-                resp.getWriter().close();
+                LOGGER.info("NCount events");
             } else if (count_matcher.matches()) {
-                LOGGER.info("count_3600(pv) not supported.");
-                resp.getWriter().close();
+                LOGGER.info("count pattern not supported for PV: {}", pv);
             } else {
-                createRawResponse(pv, from, to, resp.getOutputStream(), resp);
-                resp.getOutputStream().close();
+                createRawResponse(pv, from, to, out);
             }
         }
-
+        out.flush();
     }
 
-    private void createRawResponse(String pv, String from, String to, OutputStream out, HttpServletResponse resp) throws IOException {
-        
+    private void createRawResponse(String pv, String from, String to, OutputStream out) throws IOException {
         List<VType> values = mhtc.getPVs(pv, from, to);
-        if (values == null) {
-           out.close();
+        
+        System.out.println(mhtc.getPVs(pv, from, to).size());
+        if (values == null || values.isEmpty()) {
+            return;
         }
+
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         MerlotPBRawSerializer.serializeIoTDBToPBRaw(values, pv, bout);
-        ByteBuf buf = Unpooled.wrappedBuffer(bout.toByteArray());
-//        System.out.println(ByteBufUtil.prettyHexDump(buf));
         out.write(bout.toByteArray());
     }
-
 }

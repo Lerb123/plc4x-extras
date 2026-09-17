@@ -442,7 +442,8 @@ public class PlcGeneralFunctionImpl implements PlcGeneralFunction  {
             }
             
             if (!plcDevices.values().contains(DeviceName)){
-                String factoryFilter = FILTER_FACTORY.replace("*", DriverName);                  
+                String factoryFilter = FILTER_FACTORY.replace("*", DriverName);  
+                System.out.println("DRIVER NAME::: "+DriverName);                
                 ServiceReference[] references = bc.getServiceReferences((String) null, factoryFilter);
                 if (null != references){
                     ServiceReference reference = references[0];

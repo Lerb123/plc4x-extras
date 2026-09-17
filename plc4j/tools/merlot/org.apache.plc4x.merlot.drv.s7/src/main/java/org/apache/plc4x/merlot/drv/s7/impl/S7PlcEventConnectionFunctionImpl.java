@@ -18,7 +18,7 @@ package org.apache.plc4x.merlot.drv.s7.impl;
 
 import org.apache.plc4x.java.api.PlcConnection;
 import org.apache.plc4x.java.api.listener.EventListener;
-import org.apache.plc4x.java.s7.readwrite.protocol.S7HPlcConnection;
+import org.apache.plc4x.java.s7.S7HCotpConnection;
 import org.apache.plc4x.merlot.api.PlcEventConnectionFunction;
 import org.osgi.service.dal.OperationMetadata;
 import org.osgi.service.dal.PropertyMetadata;
@@ -31,15 +31,15 @@ public class S7PlcEventConnectionFunctionImpl implements PlcEventConnectionFunct
 
     @Override
     public void addEventListener(PlcConnection plcConnection, EventListener listener) {
-        if (plcConnection instanceof S7HPlcConnection) {
-            ((S7HPlcConnection) plcConnection).addEventListener(listener);
+        if (plcConnection instanceof S7HCotpConnection) {
+            ((S7HCotpConnection) plcConnection).addEventListener(listener);
         }
     }
 
     @Override
     public void removeEventListener(PlcConnection plcConnection, EventListener listener) {
-        if (plcConnection instanceof S7HPlcConnection) {
-            ((S7HPlcConnection) plcConnection).removeEventListener(listener);
+        if (plcConnection instanceof S7HCotpConnection) {
+            ((S7HCotpConnection) plcConnection).removeEventListener(listener);
         }
     }
 

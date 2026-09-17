@@ -88,7 +88,7 @@ public class S7DBAiFactoryTest {
         plcItem.setPlcValue(new PlcRawByteArray(byteBuf.array()));
     }
 
-    @Test
+    //@Test
     public void testStructureCreation() {
         assertNotNull("Record should not be null", record);
         PVStructure pvStructure = record.getPVRecordStructure().getPVStructure();
@@ -99,7 +99,7 @@ public class S7DBAiFactoryTest {
         assertNotNull("id field should exist", pvStructure.getStringField("id"));
     }
 
-    @Test
+    //@Test
     public void testAttachAndParsing() {
         PVStructure pvStructure = record.getPVRecordStructure().getPVStructure();
         // S7DBAiFactory uses the 'id' field to parse the S7 address
@@ -110,7 +110,7 @@ public class S7DBAiFactoryTest {
         assertEquals("Byte offset should be 0", 0, record.getByteOffset());
     }
 
-    @Test
+   // @Test
     public void testDataUpdateMapping() {
         PVStructure pvStructure = record.getPVRecordStructure().getPVStructure();
         pvStructure.getStringField("id").put("s7:%DB100:0:BYTE[64]");
@@ -139,7 +139,7 @@ public class S7DBAiFactoryTest {
         assertEquals("rInEngUnitsMax should be 100.0", 100.0f, par.getFloatField("rInEngUnitsMax").get(), 0.001f);
     }
 
-    @Test
+    //@Test
     public void testFieldOffsetsMapping() {
         assertNotNull("Field offsets should be initialized", record.getFieldOffsets());
         

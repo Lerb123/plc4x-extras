@@ -24,7 +24,6 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
-import lombok.Getter;
 import org.apache.plc4x.merlot.logrecorder.exception.MerlotLogRecorderSecurityException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -35,7 +34,7 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Getter
+
 public class MerlotLogRecorderJDBCAppender implements EventHandler, ManagedService {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(MerlotLogRecorderJDBCAppender.class);
@@ -194,6 +193,50 @@ public class MerlotLogRecorderJDBCAppender implements EventHandler, ManagedServi
             
             LOGGER.info("Can't create table {}", TABLE_NAME_PROPERTY);
         }
+    }
+
+    public static Logger getLOGGER() {
+        return LOGGER;
+    }
+
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    public BundleContext getBc() {
+        return bc;
+    }
+
+    public static String getMERLOT_OLOG_EVENT_TOPIC() {
+        return MERLOT_OLOG_EVENT_TOPIC;
+    }
+
+    public static String getTABLE_NAME_PROPERTY() {
+        return TABLE_NAME_PROPERTY;
+    }
+
+    public static String getDIALECT_PROPERTY() {
+        return DIALECT_PROPERTY;
+    }
+
+    public static String getDATASOURCE_TARGET() {
+        return DATASOURCE_TARGET;
+    }
+
+    public Map<String, String> getConnectionProperties() {
+        return connectionProperties;
+    }
+
+    public static String getCreateTableQueryGenericTemplate() {
+        return createTableQueryGenericTemplate;
+    }
+
+    public static String getCreateTableQueryOracleTemplate() {
+        return createTableQueryOracleTemplate;
+    }
+
+    public static String getInsertQueryTemplate() {
+        return insertQueryTemplate;
     }
     
 }
