@@ -20,9 +20,9 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import org.apache.karaf.decanter.api.marshaller.Unmarshaller;
 import org.apache.plc4x.merlot.kafka.api.MerlotDecanterCollector;
 import org.apache.plc4x.merlot.kafka.impl.MerlotKafkaDecanterCollectorImpl;
+import org.apache.plc4x.merlot.kafka.impl.MerlotKafkaDecanterProcessorImpl;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
@@ -37,14 +37,12 @@ public class MerlotKafkaManagedServiceFactory implements ManagedServiceFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(MerlotKafkaManagedServiceFactory.class);
 
     private final BundleContext ctx;
-    private final EventAdmin dispatcher;
-    private  Unmarshaller unmarshaller;
+    private MerlotKafkaDecanterProcessorImpl alarmProcessor;
     private Map<String,ServiceRegistration> services = new HashMap<>();
 
-    public MerlotKafkaManagedServiceFactory(BundleContext ctx, EventAdmin dispatcher, Unmarshaller unmarshaller) {
+    public MerlotKafkaManagedServiceFactory(BundleContext ctx, MerlotKafkaDecanterProcessorImpl alarmProcessor) {
         this.ctx = ctx;
-        this.dispatcher = dispatcher;
-        this.unmarshaller = unmarshaller;
+        this.alarmProcessor = alarmProcessor;
     }
 
     @Override
@@ -56,7 +54,7 @@ public class MerlotKafkaManagedServiceFactory implements ManagedServiceFactory {
     public void updated(String pid, Dictionary<String, ?> properties) throws ConfigurationException {
         LOGGER.info("Registering service: {}", pid);
         deleted(pid);
-        MerlotKafkaDecanterCollectorImpl bundle = new MerlotKafkaDecanterCollectorImpl(dispatcher, unmarshaller);
+        MerlotKafkaDecanterCollectorImpl bundle = new MerlotKafkaDecanterCollectorImpl(this.alarmProcessor);
 
         bundle.activate(pid, (Dictionary<String, Object>) properties);
         bundle.init();

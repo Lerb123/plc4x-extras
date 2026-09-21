@@ -20,15 +20,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.salesforce.kafka.test.junit5.SharedKafkaTestResource;
-import java.io.InputStream;
+import java.time.Instant;
 import java.util.Dictionary;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.karaf.decanter.api.marshaller.Unmarshaller;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -45,7 +44,33 @@ public class MerlotKafkaDecanterCollectorImplTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(MerlotKafkaDecanterCollectorImplTest.class);
     private final static String MERLOT_KAFKA_TOPIC = "merlot_test";
     private MerlotKafkaDecanterCollectorImpl consumer;
+    private static MerlotKafkaDecanterProcessorImpl processor;
 
+    @BeforeAll
+    public static void setUp() {
+        processor = new MerlotKafkaDecanterProcessorImpl(new EventAdmin() {
+            @Override
+            public void postEvent(Event event) {
+                assertEquals("decanter/collect/kafka/decanter", event.getTopic());
+                assertEquals("MerlotAlarmCollector", event.getProperty("loki.label.job"));
+                assertEquals("pva://demo.temperature", event.getProperty("alarm.pathpvname"));
+                assertEquals("This is a test message", event.getProperty("alarm.current.message"));
+                assertEquals("merlot_test", event.getProperty("loki.label.topicalarm"));
+                assertEquals("demo.temperature", event.getProperty("loki.label.pvname"));
+                assertEquals("Area 2", event.getProperty("loki.label.component"));
+                assertEquals("MAJOR", event.getProperty("loki.label.severity"));
+                assertEquals("MAJOR", event.getProperty("alarm.current.severity"));
+                assertEquals(Instant.parse("2026-06-20T16:29:16.529877867Z"),event.getProperty("loki.label.alarmtime"));
+                assertEquals(19.5, ((Number) event.getProperty("alarm.value")).doubleValue(), 1e-12);
+                LOGGER.info("Event successfully posted to the topic [{}]", MERLOT_KAFKA_TOPIC);
+            }
+
+            @Override
+            public void sendEvent(Event event) {
+                //Not use
+            }
+        });
+    }
     /**
      * Allows JUnit 5 to automatically detect and manage extensions declared as
      * instance fields, rather than having to register them using @ExtendWith at
@@ -81,30 +106,7 @@ public class MerlotKafkaDecanterCollectorImplTest {
     public void insertDataOnTopicAndConsume() throws JsonProcessingException, InterruptedException, ExecutionException {
 
         //Class to be tested
-        consumer = new MerlotKafkaDecanterCollectorImpl(
-                new EventAdmin() {
-            @Override
-            public void postEvent(Event event) {
-                assertEquals("MerlotAlarmCollector", event.getProperty("loki.label.job"));
-                assertEquals("demo.temperature", event.getProperty("loki.label.pvname"));
-                assertEquals("merlot_test", event.getProperty("loki.label.topicalarm"));
-                assertEquals("MAJOR", event.getProperty("loki.label.severity"));
-                assertEquals(19.5, event.getProperty("alarm.value"));
-            }
-
-            @Override
-            public void sendEvent(Event event) {
-                LOGGER.info("Event sent: {}", event);
-            }
-        },
-                new Unmarshaller() {
-            @Override
-            public Map<String, Object> unmarshal(InputStream in) {
-                // Return empty map for testing
-                return new java.util.HashMap<>();
-            }
-        }
-        );
+        consumer = new MerlotKafkaDecanterCollectorImpl(processor);
 
         //Startup Order of the KafkaConsumer Group. "test-pid" ->It is the name of the cfg configuration file
         consumer.activate("test-pid", setUpConsumer());

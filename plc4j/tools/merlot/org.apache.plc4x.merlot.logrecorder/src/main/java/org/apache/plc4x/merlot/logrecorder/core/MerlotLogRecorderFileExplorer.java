@@ -17,26 +17,23 @@
 package org.apache.plc4x.merlot.logrecorder.core;
 
 import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.stream.Stream;
 import org.osgi.framework.BundleContext;
 
 public class MerlotLogRecorderFileExplorer {
 
-    private final static String MERLOT_DATA_DIRECTORY = "karaf.data";
+    private final static String MERLOT_STORAGE_DIR = "MERLOT_STORAGE_DIR";
 
     private MerlotLogRecorderFileExplorer() {
     }
 
-    public static File findFileByFilename(String searchTerm, BundleContext ctx) {
+    public static File findFileByFilename(String searchTerm) {
         
-        String karafDataDir = ctx.getProperty(MERLOT_DATA_DIRECTORY);
+        String merlotStorageDir = System.getenv(MERLOT_STORAGE_DIR);
         //Search the data/tmp directory in Karaf
-        Path fileTarget = Paths.get(karafDataDir, "tmp", searchTerm);
+        Path fileTarget = Paths.get(merlotStorageDir, searchTerm);
 
         if (Files.exists(fileTarget) && Files.isRegularFile(fileTarget)) {
             return fileTarget.toFile();

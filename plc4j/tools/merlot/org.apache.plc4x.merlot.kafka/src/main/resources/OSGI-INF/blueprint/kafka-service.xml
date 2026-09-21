@@ -18,29 +18,36 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="eager">
     
     <reference id="refEventAdmin"
-        interface="org.osgi.service.event.EventAdmin"
-        timeout="10000"
-        availability="mandatory">
+               interface="org.osgi.service.event.EventAdmin"
+               timeout="10000"
+               availability="mandatory">
     </reference> 
     
-    <reference id="refMarshaller"
+    <!--    <reference id="refMarshaller"
         interface="org.apache.karaf.decanter.api.marshaller.Unmarshaller"
         timeout="20000"
         availability="mandatory">
-    </reference>
-                                 
+    </reference>-->
+                
+    <bean id="alarmProcessorBean" 
+          class="org.apache.plc4x.merlot.kafka.impl.MerlotKafkaDecanterProcessorImpl"
+          scope="singleton">
+          <argument ref="refEventAdmin"/>                  
+    </bean>               
+      
     <bean id="serviceBean" 
-        class="org.apache.plc4x.merlot.kafka.core.MerlotKafkaManagedServiceFactory"
-        scope="singleton"
-        destroy-method="destroy">
+          class="org.apache.plc4x.merlot.kafka.core.MerlotKafkaManagedServiceFactory"
+          scope="singleton"
+          destroy-method="destroy">
 
-        <argument ref="blueprintBundleContext"/>
-        <argument ref="refEventAdmin"/> 
-        <argument ref="refMarshaller"/>                  
+        <argument ref="blueprintBundleContext"/>             
+        <argument ref="alarmProcessorBean"/>             
     </bean>
+    
+  
 
     <service ref="serviceBean" 
-            interface="org.osgi.service.cm.ManagedServiceFactory">
+             interface="org.osgi.service.cm.ManagedServiceFactory">
         <service-properties>
             <entry key="service.pid" value="org.apache.plc4x.merlot.kafka.collector"/>               
         </service-properties>   

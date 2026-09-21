@@ -131,7 +131,7 @@
         
         <!--Others-->
         <bundle start-level="20">mvn:com.fazecast/jSerialComm/${jSerialComm.version}</bundle>
-        <bundle start-level="20">mvn:org.bouncycastle/bcutil-jdk18on/${bctls-jdk18on.version}</bundle>
+        <bundle start-level="20">mvn:org.bouncycastle/bcutil-jdk18on/${bcutil-jdk18on.version}</bundle>
         <bundle start-level="20">mvn:org.bouncycastle/bcprov-jdk18on/${bcprov-jdk18on.version}</bundle>
         <bundle start-level="20">mvn:org.bouncycastle/bctls-jdk18on/${bctls-jdk18on.version}</bundle>
         

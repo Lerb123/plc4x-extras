@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 public class MerlotLogRecorderLogMultipart extends HttpServlet {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(MerlotLogRecorderLogMultipart.class);
+    private final static String MERLOT_STORAGE_DIR = "MERLOT_STORAGE_DIR";
     private final ObjectMapper mapper = new ObjectMapper();
     private Random random = new Random();
     private MerlotLogRecorderAction merlotAction;
@@ -75,7 +76,8 @@ public class MerlotLogRecorderLogMultipart extends HttpServlet {
 
         //Getting the application sections
         for (Part part : req.getParts()) {
-            String directoryPath = "data/tmp";
+            String merlotStorageDir = System.getenv(MERLOT_STORAGE_DIR);
+//            String directoryPath = "data/tmp";
             String fileName = part.getSubmittedFileName();
 
             if (part.getContentType().equals("application/json")) {
@@ -101,7 +103,7 @@ public class MerlotLogRecorderLogMultipart extends HttpServlet {
                 //It is assumed that the attachments were added from the Phoebus Creaty Log
                 try {
                     if (MerlotLogRecorderSecurityAction.validateCredentials(username, password)) {
-                        saveFile(part, directoryPath, fileName);
+                        saveFile(part, merlotStorageDir, fileName);
                     } else {
                         throw new MerlotLogRecorderSecurityException(
                                 String.format("Unable to log in to the system with those credentials:  Username:{} Passwor:{}", username, password));

@@ -29,6 +29,8 @@ import org.apache.plc4x.merlot.db.core.DBBaseFactory;
 import org.epics.nt.NTScalar;
 import org.epics.nt.NTScalarBuilder;
 import org.epics.pvdata.factory.FieldFactory;
+import org.epics.pvdata.property.AlarmSeverity;
+import org.epics.pvdata.property.AlarmStatus;
 import org.epics.pvdata.pv.Field;
 import org.epics.pvdata.pv.FieldBuilder;
 import org.epics.pvdata.pv.FieldCreate;
@@ -82,6 +84,9 @@ public class S7DBMotorFactory extends DBBaseFactory {
                 add("strTimeout", fieldCreate.createScalar(ScalarType.pvString)).
                 createStructure();
 
+
+         
+        //TODO: Agregar un subestructura para la alarma (Accion del operador, Consecuencia por inanción, Tiempo de respuesta)
         PVStructure pvStructure = ntScalarBuilder.
                 value(ScalarType.pvShort).
                 addDescriptor().
@@ -107,6 +112,8 @@ public class S7DBMotorFactory extends DBBaseFactory {
     class DBS7MotorRecord extends DBRecord implements PlcItemListener {
 
         private int BUFFER_SIZE = 14;
+        
+        //TODO: Monitorear ErrorCode
         private static final String MONITOR_TF_FIELDS = "field(write_enable, "
                 + "cmd{iMode, bPB_ResetError, bPB_Forward, bPB_Reverse,"
                 + "bPB_Stop, bPBEN_ResetError, bPBEN_Forward, bPBEN_Reverse,"
@@ -147,6 +154,7 @@ public class S7DBMotorFactory extends DBBaseFactory {
         //pvPar
         private PVInt tInTimeout;
         private PVString strTimeout;
+
 
         private Duration lastDuration;
         byte byTemp;
@@ -194,6 +202,8 @@ public class S7DBMotorFactory extends DBBaseFactory {
             tInTimeout = pvPar.getIntField("tInTimeout");
             strTimeout = pvPar.getStringField("strTimeout");
 
+
+
             fieldOffsets.clear();
             fieldOffsets.add(0, null);
             fieldOffsets.add(1, null);
@@ -229,13 +239,9 @@ public class S7DBMotorFactory extends DBBaseFactory {
             if (null != plcItem) {
                 if (write_enable.get()) {
                     try {
-                        System.out.println("Strtimeout: "+strTimeout.get());
                         Duration userTime = Duration.parse(strTimeout.get());
-                        System.out.println("UserTime: " + userTime);
                         if (!lastDuration.equals(userTime)) {
-                            System.out.println("Antes");
                             int writeValue = S7DBStaticHelper.durationToS7Time(userTime);
-                            System.out.println("Despues");
                             tInTimeout.put(writeValue);
                         }
                     } catch (Exception ex) {

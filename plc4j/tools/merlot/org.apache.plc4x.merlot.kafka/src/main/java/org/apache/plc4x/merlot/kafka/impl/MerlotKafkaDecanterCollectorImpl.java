@@ -16,32 +16,19 @@
  */
 package org.apache.plc4x.merlot.kafka.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.WakeupException;
-import org.apache.karaf.decanter.api.marshaller.Unmarshaller;
-import org.apache.karaf.decanter.collector.utils.PropertiesPreparator;
 import org.apache.plc4x.merlot.kafka.api.MerlotDecanterCollector;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,19 +40,17 @@ public class MerlotKafkaDecanterCollectorImpl implements MerlotDecanterCollector
     private String topic;
     private String eventAdminTopic;
     private volatile boolean consuming = false;
-    private final AtomicBoolean shutdownInitiated = new AtomicBoolean(false);
     private String messageType;
 
     private Dictionary<String, Object> properties;
     private KafkaConsumer<String, String> consumer;
 
-    private final EventAdmin dispatcher;
-    private Unmarshaller unmarshaller;
-    private ExecutorService executor;
 
-    public MerlotKafkaDecanterCollectorImpl(EventAdmin dispatcher, Unmarshaller unmarshaller) {
-        this.dispatcher = dispatcher;
-        this.unmarshaller = unmarshaller;
+    private ExecutorService executor;
+    private final MerlotKafkaDecanterProcessorImpl alarmProcessor;
+
+    public MerlotKafkaDecanterCollectorImpl(MerlotKafkaDecanterProcessorImpl alarmProcessor) {
+        this.alarmProcessor = alarmProcessor;
     }
 
     @Override
@@ -78,7 +63,6 @@ public class MerlotKafkaDecanterCollectorImpl implements MerlotDecanterCollector
     @Override
     public void destroy() {
         consuming = false;
-        shutdownInitiated.set(true);
         if (consumer != null) {
             consumer.wakeup();
         }
@@ -97,10 +81,12 @@ public class MerlotKafkaDecanterCollectorImpl implements MerlotDecanterCollector
 
     public void activate(String pid, Dictionary<String, Object> properties) {
         this.properties = properties;
+
         topic = getValue(properties, "topic", "decanter");
         eventAdminTopic = getValue(properties, EventConstants.EVENT_TOPIC, "decanter/collect/kafka/decanter");
         messageType = getValue(properties, "message.type", "text");
 
+        //Config properties kafka consumer
         Properties config = new Properties();
 
         String bootstrapServers = getValue(properties, "bootstrap.servers", "localhost:9092");
@@ -196,7 +182,7 @@ public class MerlotKafkaDecanterCollectorImpl implements MerlotDecanterCollector
     @Override
     public void run() {
         try {
-            while (consuming && !shutdownInitiated.get()) {
+            while (consuming) {
                 try {
                     consume();
                 } catch (WakeupException e) {
@@ -209,48 +195,30 @@ public class MerlotKafkaDecanterCollectorImpl implements MerlotDecanterCollector
                 try {
                     consumer.close();
                 } catch (Exception e) {
-                    LOGGER.warn("Error closing Kafka consumer", e);
+                    LOGGER.info("Error closing Kafka consumer", e);
                 }
             }
         }
     }
 
-    private void consume() throws UnknownHostException {
+    private void consume() {
         ConsumerRecords<String, String> records = consumer.poll(Duration.ofSeconds(1));
 
         if (records.isEmpty()) {
             return;
         }
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("loki.label.job", "MerlotAlarmCollector");
-        data.put("loki.label.sourcehost", InetAddress.getLocalHost().getHostName());
-
         for (ConsumerRecord<String, String> record : records) {
+
             if (!consuming) {
                 return;
             }
+            try {
+                this.alarmProcessor.processRecord(eventAdminTopic, record);
+            } catch (Exception e) {
+                LOGGER.warn("Registro descartado (key={})", record.key(), e);
+            }
 
-            //Data headers
-            String key = record.key();
-
-            //Alarm values
-            String value = record.value();
-
-//            LOGGER.info("Key: {} Value: {}", key, value);
-            String pathPV = getPathPV(key);
-
-            //Loki paramaters
-            data.put("loki.label.topicalarm", getTopicAlarm(key));
-            data.put("alarm.pathpvname", pathPV);
-            data.put("loki.label.pvname", pathPV.substring(pathPV.indexOf("//") + 2));
-            data.put("loki.label.component", getComponent(key));
-            data.put("loki.label.severity", getSeverity(value));
-            data.put("alarm.value", getValueAlarm(value));
-
-            //Send event bus karaf
-            Event event = new Event(eventAdminTopic, data);
-            dispatcher.postEvent(event);
         }
     }
 
@@ -260,82 +228,4 @@ public class MerlotKafkaDecanterCollectorImpl implements MerlotDecanterCollector
         return (value != null) ? value : defaultValue;
     }
 
-    //Kafka message parameters
-    public static String getTopicAlarm(String keyText) {
-        if (keyText == null) {
-            return null;
-        }
-        String regex = ":/([^/]+)/";
-        Matcher matcher = Pattern.compile(regex).matcher(keyText);
-
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-
-        return null;
-    }
-
-    public static String getPathPV(String keyText) {
-        if (keyText == null) {
-            return null;
-        }
-
-        int indexEndProtocol = keyText.indexOf(":\\/\\/");
-        if (indexEndProtocol == -1) {
-            indexEndProtocol = keyText.indexOf("://");
-        }
-
-        if (indexEndProtocol != -1) {
-            int indexLastSlash = keyText.lastIndexOf("/", indexEndProtocol);
-
-            if (indexLastSlash != -1) {
-                return keyText.substring(indexLastSlash + 1).replace("\\/\\/", "//");
-            }
-        }
-        return null;
-    }
-
-    public static String getComponent(String keyText) {
-        if (keyText == null) {
-            return null;
-        }
-        String regex = "^[^:/]+:/[^/]+/(.+)/[a-zA-Z0-9]+:[\\\\/]{2}";
-
-        Matcher matcher = Pattern.compile(regex).matcher(keyText);
-
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-
-        return null;
-    }
-
-    public static String getSeverity(String valueText) {
-        if (valueText == null) {
-            return null;
-        }
-
-        String regex = "\"severity\"\\s*:\\s*\"([^\"]+)\"";
-
-        Matcher matcher = Pattern.compile(regex).matcher(valueText);
-
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return null;
-    }
-
-    public static String getValueAlarm(String valueText) {
-        if (valueText == null) {
-            return null;
-        }
-        String regex = "\"value\"\\s*:\\s*\"([^\"]+)\"";
-
-        Matcher matcher = Pattern.compile(regex).matcher(valueText);
-
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return null;
-    }
 }
