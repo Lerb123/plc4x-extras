@@ -16,6 +16,8 @@
  */
 package org.apache.plc4x.merlot.kafka.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,14 +35,14 @@ public class MerlotKafkaDecanterProcessorImpl {
 
     private static final Pattern TOPIC_ALARM_PATTERN = Pattern.compile(":/([^/]+)/");
     private static final Pattern COMPONENT_PATTERN = Pattern.compile("^[^:/]+:/[^/]+/(.+)/[a-zA-Z0-9]+:[\\\\/]{2}");
-    private static final Pattern SERVERITY_PATTERN = Pattern.compile("\"severity\"\\s*:\\s*\"([^\"]+)\"");
-    private static final Pattern VALUE_PATTERN = Pattern.compile("\"value\"\\s*:\\s*\"([^\"]+)\"");
-    private static final Pattern CURRENT_MESSAGE_PATTERN = Pattern.compile("\"current_message\"\\s*:\\s*\"([^\"]+)\"");
-    private static final Pattern CURRENT_SEVERITY_PATTERN = Pattern.compile("\"current_severity\"\\s*:\\s*\"([^\"]+)\"");
-    private static final Pattern TIME_PATTERN = Pattern.compile("\"time\"\\s*:\\s*\\{\\s*\"seconds\"\\s*:\\s*(\\d+)\\s*,\\s*\"nano\"\\s*:\\s*(\\d+)\\s*\\}");
+//    private static final Pattern SERVERITY_PATTERN = Pattern.compile("\"severity\"\\s*:\\s*\"([^\"]+)\"");
+//    private static final Pattern VALUE_PATTERN = Pattern.compile("\"value\"\\s*:\\s*\"([^\"]+)\"");
+//    private static final Pattern CURRENT_MESSAGE_PATTERN = Pattern.compile("\"current_message\"\\s*:\\s*\"([^\"]+)\"");
+//    private static final Pattern CURRENT_SEVERITY_PATTERN = Pattern.compile("\"current_severity\"\\s*:\\s*\"([^\"]+)\"");
+//    private static final Pattern TIME_PATTERN = Pattern.compile("\"time\"\\s*:\\s*\\{\\s*\"seconds\"\\s*:\\s*(\\d+)\\s*,\\s*\"nano\"\\s*:\\s*(\\d+)\\s*\\}");
     private static final String ESCAPED_PROTOCOL_SEPARATOR = ":\\/\\/";
     private static final String PROTOCOL_SEPARATOR = "://";
-
+    private ObjectMapper mapper = new ObjectMapper();
     private final EventAdmin dispatcher;
 
     public MerlotKafkaDecanterProcessorImpl(EventAdmin dispatcher) {
@@ -48,10 +50,10 @@ public class MerlotKafkaDecanterProcessorImpl {
     }
 
     public void processRecord(String eventAdminTopic, ConsumerRecord<String, String> record) {
-
+        
         try {
+            Map<String, Object> data = new HashMap<>(12);
 
-            Map<String, Object> data = new HashMap<>();
             data.put("loki.label.job", "MerlotAlarmCollector");
 
             //Data headers
@@ -59,29 +61,36 @@ public class MerlotKafkaDecanterProcessorImpl {
 
             //Alarm values
             String value = record.value();
-
+            JsonNode rootNode = mapper.readTree(value);
+            JsonNode timeNode = rootNode.get("time");
+            
             //LOGGER.info("Key: {} Value: {}", key, value);
             String pathPV = getPathPV(key);
-
+            
+            
+            
             //Loki paramaters
             data.put("loki.label.topicalarm", getDataBasedOnPattern(key, TOPIC_ALARM_PATTERN));
             data.put("alarm.pathpvname", pathPV);
             data.put("loki.label.pvname", pathPV.substring(pathPV.indexOf("//") + 2));
             data.put("loki.label.component", getDataBasedOnPattern(key, COMPONENT_PATTERN));
-            data.put("loki.label.severity", getDataBasedOnPattern(value, SERVERITY_PATTERN));
-            data.put("loki.label.alarmtime", getAlarmTime(value));
-            data.put("alarm.value", getDataBasedOnPattern(value, VALUE_PATTERN));
-            data.put("alarm.current.message", getDataBasedOnPattern(value, CURRENT_MESSAGE_PATTERN));
-            data.put("alarm.current.severity", getDataBasedOnPattern(value, CURRENT_SEVERITY_PATTERN));
+            data.put("loki.label.severity", rootNode.get("severity").asText());
+            data.put("loki.label.alarmtime", Instant.ofEpochSecond(timeNode.get("seconds").asLong(), timeNode.get("nano").asInt()));
+            data.put("alarm.value", rootNode.get("value").asDouble());
+            data.put("alarm.current.message", rootNode.get("current_message").asText());
+            data.put("alarm.current.severity", rootNode.get("current_severity").asText());
 
             //Send event bus karaf
-            dispatcher.postEvent(new Event(eventAdminTopic, data));
+            dispatcher.sendEvent(new Event(eventAdminTopic, data));
+           
 
         } catch (Exception e) {
             LOGGER.info(e.getMessage());
         }
 
     }
+
+   
 
     //Kafka message parameters
     public static String getDataBasedOnPattern(String text, Pattern pattern) {
@@ -94,13 +103,13 @@ public class MerlotKafkaDecanterProcessorImpl {
         return matcher.find() ? matcher.group(1) : null;
     }
 
-    public static Instant getAlarmTime(String valueText) {
-        if (valueText == null) {
-            return null;
-        }
-        Matcher m = TIME_PATTERN.matcher(valueText);
-        return m.find() ? Instant.ofEpochSecond(Long.parseLong(m.group(1)), Long.parseLong(m.group(2))) : null;
-    }
+//    public static Instant getAlarmTime(String valueText) {
+//        if (valueText == null) {
+//            return null;
+//        }
+//        Matcher m = TIME_PATTERN.matcher(valueText);
+//        return m.find() ? Instant.ofEpochSecond(Long.parseLong(m.group(1)), Long.parseLong(m.group(2))) : null;
+//    }
 
     public static String getPathPV(String keyText) {
         if (keyText == null) {

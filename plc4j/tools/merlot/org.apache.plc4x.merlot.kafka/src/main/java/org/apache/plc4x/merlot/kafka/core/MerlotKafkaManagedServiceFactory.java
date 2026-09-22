@@ -37,7 +37,7 @@ public class MerlotKafkaManagedServiceFactory implements ManagedServiceFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(MerlotKafkaManagedServiceFactory.class);
 
     private final BundleContext ctx;
-    private MerlotKafkaDecanterProcessorImpl alarmProcessor;
+    private final MerlotKafkaDecanterProcessorImpl alarmProcessor;
     private Map<String,ServiceRegistration> services = new HashMap<>();
 
     public MerlotKafkaManagedServiceFactory(BundleContext ctx, MerlotKafkaDecanterProcessorImpl alarmProcessor) {

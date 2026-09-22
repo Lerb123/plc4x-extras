@@ -45,7 +45,6 @@ public class MerlotKafkaDecanterCollectorImpl implements MerlotDecanterCollector
     private Dictionary<String, Object> properties;
     private KafkaConsumer<String, String> consumer;
 
-
     private ExecutorService executor;
     private final MerlotKafkaDecanterProcessorImpl alarmProcessor;
 
@@ -56,7 +55,7 @@ public class MerlotKafkaDecanterCollectorImpl implements MerlotDecanterCollector
     @Override
     public void init() {
         consuming = true;
-        this.executor = Executors.newSingleThreadExecutor();
+        this.executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "KafkaDecanterCollector-" + topic));
         this.executor.execute(this);
     }
 
@@ -69,7 +68,7 @@ public class MerlotKafkaDecanterCollectorImpl implements MerlotDecanterCollector
         if (executor != null) {
             executor.shutdown();
             try {
-                if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
+                if (!executor.awaitTermination(6, TimeUnit.SECONDS)) {
                     executor.shutdownNow();
                 }
             } catch (InterruptedException e) {
@@ -167,7 +166,8 @@ public class MerlotKafkaDecanterCollectorImpl implements MerlotDecanterCollector
 
         ClassLoader originClassLoader = Thread.currentThread().getContextClassLoader();
         try {
-            Thread.currentThread().setContextClassLoader(null);
+//            Thread.currentThread().setContextClassLoader(null);
+            Thread.currentThread().setContextClassLoader(KafkaConsumer.class.getClassLoader());
             consumer = new KafkaConsumer<String, String>(config);
             String[] topics = topic.split(",");
             for (int i = 0; i < topics.length; i++) {
@@ -193,7 +193,7 @@ public class MerlotKafkaDecanterCollectorImpl implements MerlotDecanterCollector
         } finally {
             if (consumer != null) {
                 try {
-                    consumer.close();
+                    consumer.close(Duration.ofSeconds(3));
                 } catch (Exception e) {
                     LOGGER.info("Error closing Kafka consumer", e);
                 }
