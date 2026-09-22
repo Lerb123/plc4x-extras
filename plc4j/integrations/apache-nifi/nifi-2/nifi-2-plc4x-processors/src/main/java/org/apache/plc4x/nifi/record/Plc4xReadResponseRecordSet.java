@@ -34,12 +34,7 @@ import org.apache.nifi.serialization.record.RecordSchema;
 import org.apache.nifi.serialization.record.RecordSet;
 import org.apache.plc4x.java.api.messages.PlcReadResponse;
 import org.apache.plc4x.java.api.value.PlcValue;
-<<<<<<<< HEAD:plc4j/integrations/apache-nifi/nifi-2/nifi-2-plc4x-processors/src/main/java/org/apache/plc4x/nifi/record/Plc4xReadResponseRecordSet.java
 import org.apache.plc4x.java.spi.drivers.messages.DefaultPlcSubscriptionEvent;
-========
-import org.apache.plc4x.java.spi.messages.DefaultPlcSubscriptionEvent;
-import org.apache.plc4x.java.spi.messages.utils.PlcResponseItem;
->>>>>>>> f4dff1e (Fix: headers rat (#726)):plc4j/integrations/apache-nifi/nifi-1/nifi-plc4x-processors/src/main/java/org/apache/plc4x/nifi/record/Plc4xReadResponseRecordSet.java
 import org.apache.plc4x.nifi.util.Plc4xCommon;
 
 public class Plc4xReadResponseRecordSet implements RecordSet, Closeable {
@@ -47,11 +42,11 @@ public class Plc4xReadResponseRecordSet implements RecordSet, Closeable {
     private final PlcReadResponse readResponse;
     private final Set<String> rsColumnNames;
     private boolean moreRows;
-    private final String timestampFieldName; 
+    private final String timestampFieldName;
     private boolean isSubscription = false;
     private Instant timestamp;
 
-   	private final AtomicReference<RecordSchema> recordSchema = new AtomicReference<>(null);
+    private final AtomicReference<RecordSchema> recordSchema = new AtomicReference<>(null);
 
     public Plc4xReadResponseRecordSet(final PlcReadResponse readResponse, RecordSchema recordSchema, String timestampFieldName, ComponentLog logger) {
         this.timestampFieldName = timestampFieldName;
@@ -62,23 +57,23 @@ public class Plc4xReadResponseRecordSet implements RecordSet, Closeable {
             timestamp = Instant.now();
         }
         moreRows = true;
-        
+
         isSubscription = readResponse.getRequest() == null;
 
         if (this.logger.isDebugEnabled())
             logger.debug("Creating record schema from PlcReadResponse");
-        
+
         Map<String, ? extends PlcValue> responseDataStructure;
 
-        responseDataStructure = !isSubscription? 
+        responseDataStructure = !isSubscription?
             readResponse.getAsPlcValue().getStruct():
             plc4xSubscriptionResponseRecordSet((DefaultPlcSubscriptionEvent) readResponse);
-  
+
         rsColumnNames = responseDataStructure.keySet();
-               
+
         if (recordSchema == null) {
-        	RecordSchema schema = Plc4xCommon.createSchema(responseDataStructure, this.timestampFieldName);     	
-        	this.recordSchema.set(schema);
+            RecordSchema schema = Plc4xCommon.createSchema(responseDataStructure, this.timestampFieldName);
+            this.recordSchema.set(schema);
         } else {
             this.recordSchema.set(recordSchema);
         }
@@ -89,26 +84,21 @@ public class Plc4xReadResponseRecordSet implements RecordSet, Closeable {
 
     public Map<String, PlcValue> plc4xSubscriptionResponseRecordSet(final DefaultPlcSubscriptionEvent subscriptionEvent) {
         moreRows = true;
-        
+
         if (logger.isDebugEnabled())
             logger.debug("Creating record schema from DefaultPlcSubscriptionEvent");
-        
+
         Map<String, PlcValue> responseDataStructure = new HashMap<>();
 
-<<<<<<<< HEAD:plc4j/integrations/apache-nifi/nifi-2/nifi-2-plc4x-processors/src/main/java/org/apache/plc4x/nifi/record/Plc4xReadResponseRecordSet.java
         for (String tagName : subscriptionEvent.getTagNames()) {
             PlcValue plcValue = subscriptionEvent.getPlcValue(tagName);
             responseDataStructure.put(tagName, plcValue);
-========
-        for (Map.Entry<String, PlcResponseItem<PlcValue>> entry : subscriptionEvent.getValues().entrySet()) {
-            responseDataStructure.put(entry.getKey(), entry.getValue().getValue());
->>>>>>>> f4dff1e (Fix: headers rat (#726)):plc4j/integrations/apache-nifi/nifi-1/nifi-plc4x-processors/src/main/java/org/apache/plc4x/nifi/record/Plc4xReadResponseRecordSet.java
         }
 
         return responseDataStructure;
     }
 
-    
+
     @Override
     public RecordSchema getSchema() {
         return this.recordSchema.get();
@@ -131,7 +121,7 @@ public class Plc4xReadResponseRecordSet implements RecordSet, Closeable {
     public Record next() throws IOException {
         if (moreRows) {
             Record record;
-            
+
             record = createRecord(readResponse);
 
             setMoreRows(false);
@@ -156,18 +146,18 @@ public class Plc4xReadResponseRecordSet implements RecordSet, Closeable {
             final String tagName = tag.getFieldName();
 
             final Object value;
-            
+
             if (rsColumnNames.contains(tagName)) {
                 if (!isSubscription) {
                     value = normalizeValue(readResponse.getAsPlcValue().getValue(tagName));
                 } else {
                     value = normalizeValue(readResponse.getPlcValue(tagName));
                 }
-            	
+
             } else {
                 value = null;
             }
-            
+
             if (logger.isDebugEnabled())
                 logger.debug("Adding {} tag value to record.", tagName);
             values.put(tagName, value);
@@ -179,11 +169,11 @@ public class Plc4xReadResponseRecordSet implements RecordSet, Closeable {
         } else {
             values.put(timestampFieldName, timestamp.toEpochMilli());
         }
-        
+
         if (logger.isDebugEnabled())
             logger.debug("Adding timestamp tag {} to record.", timestampFieldName);
 
-        	
+
         return new MapRecord(getSchema(), values);
     }
 
@@ -193,7 +183,7 @@ public class Plc4xReadResponseRecordSet implements RecordSet, Closeable {
             logger.trace("Value data type: {}", r.getClass());
         }
         return r;
-        
+
     }
 
 
