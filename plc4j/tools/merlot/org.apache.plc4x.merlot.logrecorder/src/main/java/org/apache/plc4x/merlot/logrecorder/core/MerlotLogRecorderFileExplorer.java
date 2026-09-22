@@ -17,44 +17,23 @@
 package org.apache.plc4x.merlot.logrecorder.core;
 
 import java.io.File;
-<<<<<<< HEAD
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-=======
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.stream.Stream;
->>>>>>> 169fec95 (General Changes Following the Migration to Version 1.0.0 of plc4x)
-import org.osgi.framework.BundleContext;
 
 public class MerlotLogRecorderFileExplorer {
 
-<<<<<<< HEAD
     private final static String MERLOT_STORAGE_DIR = "MERLOT_STORAGE_DIR";
-=======
-    private final static String MERLOT_DATA_DIRECTORY = "karaf.data";
->>>>>>> 169fec95 (General Changes Following the Migration to Version 1.0.0 of plc4x)
 
     private MerlotLogRecorderFileExplorer() {
     }
 
-<<<<<<< HEAD
+
     public static File findFileByFilename(String searchTerm) {
         
         String merlotStorageDir = System.getenv(MERLOT_STORAGE_DIR);
         //Search the data/tmp directory in Karaf
         Path fileTarget = Paths.get(merlotStorageDir, searchTerm);
-=======
-    public static File findFileByFilename(String searchTerm, BundleContext ctx) {
-        
-        String karafDataDir = ctx.getProperty(MERLOT_DATA_DIRECTORY);
-        //Search the data/tmp directory in Karaf
-        Path fileTarget = Paths.get(karafDataDir, "tmp", searchTerm);
->>>>>>> 169fec95 (General Changes Following the Migration to Version 1.0.0 of plc4x)
 
         if (Files.exists(fileTarget) && Files.isRegularFile(fileTarget)) {
             return fileTarget.toFile();

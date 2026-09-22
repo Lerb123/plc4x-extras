@@ -232,6 +232,13 @@ public class SimulatedPlcTagFunctionImpl implements PlcTagFunction {
         throw new UnsupportedOperationException("Not supported yet."); 
     }
 
+    @Override
+    public ImmutablePair<PlcTag, Object[]> getPlcTag(PlcTag plcTag, ByteBuf byteBuf, int offset) {
+        return null;
+    }
+
+  
+
 
 
 

@@ -131,11 +131,8 @@
         
         <!--Others-->
         <bundle start-level="20">mvn:com.fazecast/jSerialComm/${jSerialComm.version}</bundle>
-<<<<<<< HEAD
+        
         <bundle start-level="20">mvn:org.bouncycastle/bcutil-jdk18on/${bcutil-jdk18on.version}</bundle>
-=======
-        <bundle start-level="20">mvn:org.bouncycastle/bcutil-jdk18on/${bctls-jdk18on.version}</bundle>
->>>>>>> 169fec95 (General Changes Following the Migration to Version 1.0.0 of plc4x)
         <bundle start-level="20">mvn:org.bouncycastle/bcprov-jdk18on/${bcprov-jdk18on.version}</bundle>
         <bundle start-level="20">mvn:org.bouncycastle/bctls-jdk18on/${bctls-jdk18on.version}</bundle>
         
@@ -187,10 +184,6 @@
         
         <bundle start-level="50">mvn:org.apache.plc4x.merlot.das/org.apache.plc4x.merlot.das/${project.version}</bundle>
         <bundle start-level="60">mvn:org.apache.plc4x.merlot.das.ref/org.apache.plc4x.merlot.das.ref/${project.version}</bundle>
-        
-        <!--<bundle start-level="100">mvn:org.apache.plc4x.merlot.das.base/org.apache.plc4x.merlot.das.base/${project.version}</bundle>-->
-        <!--<configfile finalname="/etc/org.apache.plc4x.merlot.das.devices.cfg">mvn:org.apache.plc4x.merlot.das.base/org.apache.plc4x.merlot.das.base/${project.version}/cfg</configfile>-->
-        <!-- <bundle start-level="40">mvn:org.apache.plc4x.dummy/org.apache.plc4x.dummy/${project.version}</bundle>   -->
     </feature>
 
     <feature name="plc4x-core" version="${project.version}">
@@ -219,8 +212,6 @@
         <bundle start-level="40">mvn:org.apache.plc4x/plc4j-transports-tls/${plc4x.version}</bundle>
         <bundle start-level="40">mvn:org.apache.plc4x/plc4j-utils-audit-log-api/${plc4x.version}</bundle>
         <bundle start-level="40">mvn:org.apache.plc4x/plc4j-utils-audit-log-impl/${plc4x.version}</bundle>
-<!--        <bundle start-level="40">mvn:org.apache.plc4x/plc4j-utils-pcap-replay/${plc4x.version}</bundle>
-        <bundle start-level="40">mvn:org.apache.plc4x/plc4j-utils-pcap-shared/${plc4x.version}</bundle>-->
         <bundle start-level="40">mvn:org.apache.plc4x/plc4j-utils-raw-sockets/${plc4x.version}</bundle>
         <bundle start-level="30">mvn:org.apache.plc4x/plc4j-tools-event-pump/${plc4x.version}</bundle>
         <bundle start-level="40">mvn:org.apache.plc4x/plc4j-utils-subscription-emulation/${plc4x.version}</bundle>
@@ -798,7 +789,6 @@
         <!--<bundle>mvn:org.apache.directory.server/apacheds-all/2.0.0.AM26</bundle>-->
         <bundle
         >wrap:mvn:org.apache.directory.api/api-all/2.1.7/$Bundle-SymbolicName=api-all&amp;Bundle-Version=2.1.7&amp;Bundle-ManifestVersion=&quot;2&quot;&amp;Export-Package=*;version=&quot;2.1.7&quot;,!*</bundle>
-        <!--<bundle>mvn:org.apache.directory.api/api-all/2.1.4</bundle>-->
         <bundle
             start-level="80"
         >mvn:org.apache.plc4x.merlot.uns/org.apache.plc4x.merlot.uns/${project.version}</bundle>
@@ -817,16 +807,10 @@
         >mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-lang/2.4_6</bundle>
         <bundle
         >mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-pool/1.5.4_4</bundle>
-        <!--<bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.antlr-runtime/3.5.3_1</bundle>-->
-        <!--        <bundle>mvn:org.apache.directory.studio/org.antlr.antlr/2.7.7</bundle>       -->
-        <!--<bundle>wrap:mvn:org.apache.directory.studio/org.antlr.antlr/2.7.7/$Bundle-SymbolicName=org.antlr.antlr&amp;Bundle-Version=2.7.7&amp;Bundle-ManifestVersion=&quot;2&quot;&amp;Export-Package=*,antlr.*;version=&quot;2.7.7&quot;,!*</bundle>-->
         <bundle
         >wrap:mvn:junit/junit/4.13.2/$Bundle-SymbolicName=junit&amp;Bundle-Version=4.13.2&amp;Bundle-ManifestVersion=&quot;2&quot;&amp;Export-Package=*;version=&quot;4.13.2&quot;,!*</bundle>
-        <!--<bundle>wrap:mvn:org.antlr/antlr/3.5.3/$Bundle-SymbolicName=antrl&amp;Bundle-Version=3.5.3&amp;Bundle-ManifestVersion=&quot;2&quot;&amp;Export-Package=*;version=&quot;3.5.3&quot;,!*</bundle>-->
         <bundle
         >wrap:mvn:org.antlr/antlr-complete/3.5.3/$Bundle-SymbolicName=antrl&amp;Bundle-Version=3.5.3&amp;Bundle-ManifestVersion=&quot;2&quot;&amp;Export-Package=*;version=&quot;3.5.3&quot;,!*</bundle>
-        <!--<bundle>wrap:mvn:org.antlr/antlr-runtime/3.5.3/$Bundle-SymbolicName=antrl&amp;Bundle-Version=3.5.3&amp;Bundle-ManifestVersion=&quot;2&quot;&amp;Export-Package=*;version=&quot;3.5.3&quot;,!*</bundle>-->
-        <!--        <bundle>mvn:org.antlr/antlr-runtime/3.5.3</bundle> -->
 
         <bundle>mvn:org.apache.directory.api/api-asn1-api/2.1.7</bundle>
         <bundle>mvn:org.apache.directory.api/api-asn1-ber/2.1.7</bundle>
@@ -880,10 +864,6 @@
 
         <bundle
         >wrap:mvn:org.apache.directory.server/apacheds-core-entry/1.5.7/$Bundle-SymbolicName=kerberos-shared&amp;Bundle-Version=1.5.7&amp;Bundle-ManifestVersion=&quot;2&quot;&amp;Export-Package=*;version=&quot;1.5.7&quot;,!*</bundle>
-        <!--<bundle>mvn:org.apache.directory.server/apacheds-core-entry/1.5.7</bundle>-->
-
-        <!--<bundle>wrap:mvn:org.apache.directory.server/apacheds-all/2.0.0.AM27/$Bundle-SymbolicName=apacheds-all&amp;Bundle-Version=2.0.0.AM27&amp;Bundle-ManifestVersion=&quot;2&quot;&amp;Export-Package=*;version=&quot;2.0.0.AM27&quot;,!*</bundle>-->
-
 
         <bundle
         >mvn:org.apache.directory.server/apacheds-interceptor-kerberos/2.0.0.AM27</bundle>

@@ -154,5 +154,10 @@ public class ModbusPlcTagFunctionImpl implements PlcTagFunction {
     public String[] getServicePropertyKeys() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public ImmutablePair<PlcTag, Object[]> getPlcTag(PlcTag plcTag, ByteBuf byteBuf, int offset) {
+       return null;
+    }
     
 }

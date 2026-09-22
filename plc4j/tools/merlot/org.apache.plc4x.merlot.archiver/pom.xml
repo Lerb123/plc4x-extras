@@ -61,11 +61,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
-<!--                <configuration>
-                    <source>21</source>
-                    <target>21</target>
-                    <maxmem>256M</maxmem>
-                </configuration>-->
             </plugin>
             
             <plugin>
@@ -333,21 +328,6 @@
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite-engine</artifactId>
             <version>${junit-platform.version}</version> <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>4.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.core</artifactId>
-            <version>4.4.10</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.plc4x.merlot.api</groupId>
-            <artifactId>org.apache.plc4x.merlot.api</artifactId>
-            <version>0.13.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

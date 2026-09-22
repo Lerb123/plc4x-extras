@@ -16,18 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-<<<<<<<< HEAD:plc4j/tools/merlot/org.apache.plc4x.merlot.isa182.alarm/src/main/java/org/apache/plc4x/merlot/isa182/alarm/controller/MerlotAlarmISA18_2WebSocketAdapter.java
 package org.apache.plc4x.merlot.isa182.alarm.controller;
 
 public class MerlotAlarmISA18_2WebSocketAdapter {
     
 }
-========
-package org.apache.plc4x.nifi.subscription;
-
-public enum Plc4xSubscriptionType {
-    CHANGE, // of state (Event is sent as soon as a value changes)
-    CYCLIC, //(The Event is sent in regular cyclic intervals)
-    EVENT //(The Event is usually explicitly sent form the PLC as a signal)
-}
->>>>>>>> f4dff1e (Fix: headers rat (#726)):plc4j/integrations/apache-nifi/nifi-2/nifi-2-plc4x-processors/src/main/java/org/apache/plc4x/nifi/subscription/Plc4xSubscriptionType.java

@@ -17,12 +17,9 @@
 package org.apache.plc4x.merlot.drv.s7.impl;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.plc4x.java.api.model.PlcTag;
 import static org.apache.plc4x.java.api.types.PlcValueType.BOOL;
-import static org.apache.plc4x.java.api.types.PlcValueType.USINT;
-import org.apache.plc4x.java.s7.readwrite.MemoryArea;
 import static org.apache.plc4x.java.s7.readwrite.MemoryArea.DATA_BLOCKS;
 import static org.apache.plc4x.java.s7.readwrite.MemoryArea.DIRECT_PERIPHERAL_ACCESS;
 import static org.apache.plc4x.java.s7.readwrite.MemoryArea.FLAGS_MARKERS;
@@ -267,6 +264,11 @@ public class S7PlcTagFunctionImpl implements PlcTagFunction {
     @Override
     public String[] getServicePropertyKeys() {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public ImmutablePair<PlcTag, Object[]> getPlcTag(PlcTag plcTag, ByteBuf byteBuf, int offset) {
+       return null;
     }
     
     

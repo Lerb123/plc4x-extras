@@ -54,11 +54,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
-<!--                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <maxmem>256M</maxmem>
-                </configuration>-->
             </plugin>
         </plugins>
     </build>
@@ -93,12 +88,6 @@
             <groupId>org.apache.plc4x.merlot.db</groupId>
             <artifactId>org.apache.plc4x.merlot.db</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.plc4x</groupId>
-            <artifactId>plc4j-driver-simulated</artifactId>
-            <version>0.13.0-SNAPSHOT</version>
-            <type>jar</type>
         </dependency>
     </dependencies>
 </project>

@@ -21,10 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.apache.plc4x.merlot.logrecorder.core.MerlotLogRecorderSecurityAction;
-import org.apache.plc4x.merlot.logrecorder.servlets.MerlotLogRecorderLogMultipart;
 import org.json.JSONObject;
-
 import javax.servlet.http.Part;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -36,7 +33,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.plc4x.merlot.logrecorder.api.MerlotLogRecorderAction;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,6 +41,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.apache.plc4x.merlot.logrecorder.servlets.MerlotLogRecorderLogMultipart;
+import org.apache.plc4x.merlot.logrecorder.api.MerlotLogRecorderAction;
+import org.apache.plc4x.merlot.logrecorder.core.MerlotLogRecorderSecurityAction;
 
 //TODO: Hacer las implementacion de cada metodo
 public class MerlotLogRecorderServletDefinition {

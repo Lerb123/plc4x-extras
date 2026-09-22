@@ -56,11 +56,7 @@ public class MerlotLogRecorderLog extends HttpServlet {
         String searchFile = String.format("%s", info[1]);
 
         //MerlotLogRecorderFileExplorer: Look for the attached file, which should be located in the Karaf local file system at “data/tmp”
-<<<<<<< HEAD
         File attachedFile = MerlotLogRecorderFileExplorer.findFileByFilename(searchFile);
-=======
-        File attachedFile = MerlotLogRecorderFileExplorer.findFileByFilename(searchFile, ctx);
->>>>>>> 169fec95 (General Changes Following the Migration to Version 1.0.0 of plc4x)
 
         if (attachedFile != null) {
            LOGGER.info("The attached file exists");
