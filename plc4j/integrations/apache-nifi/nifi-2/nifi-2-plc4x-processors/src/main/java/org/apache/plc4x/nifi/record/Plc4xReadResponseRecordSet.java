@@ -34,7 +34,12 @@ import org.apache.nifi.serialization.record.RecordSchema;
 import org.apache.nifi.serialization.record.RecordSet;
 import org.apache.plc4x.java.api.messages.PlcReadResponse;
 import org.apache.plc4x.java.api.value.PlcValue;
+<<<<<<<< HEAD:plc4j/integrations/apache-nifi/nifi-2/nifi-2-plc4x-processors/src/main/java/org/apache/plc4x/nifi/record/Plc4xReadResponseRecordSet.java
 import org.apache.plc4x.java.spi.drivers.messages.DefaultPlcSubscriptionEvent;
+========
+import org.apache.plc4x.java.spi.messages.DefaultPlcSubscriptionEvent;
+import org.apache.plc4x.java.spi.messages.utils.PlcResponseItem;
+>>>>>>>> f4dff1e (Fix: headers rat (#726)):plc4j/integrations/apache-nifi/nifi-1/nifi-plc4x-processors/src/main/java/org/apache/plc4x/nifi/record/Plc4xReadResponseRecordSet.java
 import org.apache.plc4x.nifi.util.Plc4xCommon;
 
 public class Plc4xReadResponseRecordSet implements RecordSet, Closeable {
@@ -90,9 +95,14 @@ public class Plc4xReadResponseRecordSet implements RecordSet, Closeable {
         
         Map<String, PlcValue> responseDataStructure = new HashMap<>();
 
+<<<<<<<< HEAD:plc4j/integrations/apache-nifi/nifi-2/nifi-2-plc4x-processors/src/main/java/org/apache/plc4x/nifi/record/Plc4xReadResponseRecordSet.java
         for (String tagName : subscriptionEvent.getTagNames()) {
             PlcValue plcValue = subscriptionEvent.getPlcValue(tagName);
             responseDataStructure.put(tagName, plcValue);
+========
+        for (Map.Entry<String, PlcResponseItem<PlcValue>> entry : subscriptionEvent.getValues().entrySet()) {
+            responseDataStructure.put(entry.getKey(), entry.getValue().getValue());
+>>>>>>>> f4dff1e (Fix: headers rat (#726)):plc4j/integrations/apache-nifi/nifi-1/nifi-plc4x-processors/src/main/java/org/apache/plc4x/nifi/record/Plc4xReadResponseRecordSet.java
         }
 
         return responseDataStructure;
