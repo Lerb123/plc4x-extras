@@ -131,7 +131,11 @@
         
         <!--Others-->
         <bundle start-level="20">mvn:com.fazecast/jSerialComm/${jSerialComm.version}</bundle>
+<<<<<<< HEAD
         <bundle start-level="20">mvn:org.bouncycastle/bcutil-jdk18on/${bcutil-jdk18on.version}</bundle>
+=======
+        <bundle start-level="20">mvn:org.bouncycastle/bcutil-jdk18on/${bctls-jdk18on.version}</bundle>
+>>>>>>> 169fec95 (General Changes Following the Migration to Version 1.0.0 of plc4x)
         <bundle start-level="20">mvn:org.bouncycastle/bcprov-jdk18on/${bcprov-jdk18on.version}</bundle>
         <bundle start-level="20">mvn:org.bouncycastle/bctls-jdk18on/${bctls-jdk18on.version}</bundle>
         

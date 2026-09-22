@@ -214,6 +214,7 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback-classic.version}</version>
+<<<<<<< HEAD
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -266,36 +267,44 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.5.11</version>
+=======
+>>>>>>> 169fec95 (General Changes Following the Migration to Version 1.0.0 of plc4x)
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.10.3</version>
+            <version>${junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>5.10.3</version>
+            <version>${junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.10.3</version>
+            <version>${junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
-<!--
-        <dependency>
-            <groupId>org.apache.plc4x.merlot.db</groupId>
-            <artifactId>org.apache.plc4x.merlot.db</artifactId>
-            <version>0.13.0-SNAPSHOT</version>
-        </dependency>
--->
+        <!--
+                <dependency>
+                    <groupId>org.apache.plc4x.merlot.db</groupId>
+                    <artifactId>org.apache.plc4x.merlot.db</artifactId>
+                    <version>0.13.0-SNAPSHOT</version>
+                </dependency>
+        -->
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
             <version>${protobuf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.plc4x</groupId>
+            <artifactId>plc4j-spi-values</artifactId>
+            <version>${plc4x.version}</version>
+            <type>jar</type>
         </dependency>
     </dependencies>
     

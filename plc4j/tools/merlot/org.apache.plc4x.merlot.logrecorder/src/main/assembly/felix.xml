@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,6 +17,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+=======
+>>>>>>> 169fec95 (General Changes Following the Migration to Version 1.0.0 of plc4x)
 <?xml version="1.0" encoding="UTF-8"?>
 <assembly>
  <id>all</id>
