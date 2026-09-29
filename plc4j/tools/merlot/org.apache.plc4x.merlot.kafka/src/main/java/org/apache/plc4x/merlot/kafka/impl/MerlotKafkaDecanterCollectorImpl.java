@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -40,13 +41,15 @@ public class MerlotKafkaDecanterCollectorImpl implements MerlotDecanterCollector
     private String topic;
     private String eventAdminTopic;
     private volatile boolean consuming = false;
-    private String messageType;
 
-    private Dictionary<String, Object> properties;
     private KafkaConsumer<String, String> consumer;
-
     private ExecutorService executor;
     private final MerlotKafkaDecanterProcessorImpl alarmProcessor;
+
+    // Control de Inactividad
+    private int emptyPollCount = 0;
+    // Si hace 10 polls seguidos sin recibir nada (10 segundos), detiene el proceso
+    private static final int MAX_EMPTY_POLLS = 10; 
 
     public MerlotKafkaDecanterCollectorImpl(MerlotKafkaDecanterProcessorImpl alarmProcessor) {
         this.alarmProcessor = alarmProcessor;
@@ -55,6 +58,7 @@ public class MerlotKafkaDecanterCollectorImpl implements MerlotDecanterCollector
     @Override
     public void init() {
         consuming = true;
+        this.emptyPollCount = 0;
         this.executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "KafkaDecanterCollector-" + topic));
         this.executor.execute(this);
     }
@@ -63,12 +67,16 @@ public class MerlotKafkaDecanterCollectorImpl implements MerlotDecanterCollector
     public void destroy() {
         consuming = false;
         if (consumer != null) {
-            consumer.wakeup();
+            try {
+                consumer.wakeup(); // Despierta el poll inmediatamente
+            } catch (Exception e) {
+                LOGGER.warn("Error en wakeup del consumidor", e);
+            }
         }
         if (executor != null) {
             executor.shutdown();
             try {
-                if (!executor.awaitTermination(6, TimeUnit.SECONDS)) {
+                if (!executor.awaitTermination(3, TimeUnit.SECONDS)) {
                     executor.shutdownNow();
                 }
             } catch (InterruptedException e) {
@@ -79,101 +87,33 @@ public class MerlotKafkaDecanterCollectorImpl implements MerlotDecanterCollector
     }
 
     public void activate(String pid, Dictionary<String, Object> properties) {
-        this.properties = properties;
+        if (this.consumer != null) {
+            closeConsumer();
+        }
 
         topic = getValue(properties, "topic", "decanter");
         eventAdminTopic = getValue(properties, EventConstants.EVENT_TOPIC, "decanter/collect/kafka/decanter");
-        messageType = getValue(properties, "message.type", "text");
 
-        //Config properties kafka consumer
         Properties config = new Properties();
+        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getValue(properties, "bootstrap.servers", "localhost:9092"));
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, getValue(properties, "group.id", "decanter"));
+        config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, getValue(properties, "enable.auto.commit", "true"));
+        config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, getValue(properties, "key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer"));
+        config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, getValue(properties, "value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer"));
 
-        String bootstrapServers = getValue(properties, "bootstrap.servers", "localhost:9092");
-        config.put("bootstrap.servers", bootstrapServers);
-
-        String groupId = getValue(properties, "group.id", "decanter");
-        config.put("group.id", groupId);
-
-        String enableAutoCommit = getValue(properties, "enable.auto.commit", "true");
-        config.put("enable.auto.commit", enableAutoCommit);
-
-        String autoCommitIntervalMs = getValue(properties, "auto.commit.interval.ms", "1000");
-        config.put("auto.commit.interval.ms", autoCommitIntervalMs);
-
-        String sessionTimeoutMs = getValue(properties, "session.timeout.ms", "10000");
-        config.put("session.timeout.ms", sessionTimeoutMs);
-
-        String keyDeserializer = getValue(properties, "key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        config.put("key.deserializer", keyDeserializer);
-
-        String valueDeserializer = getValue(properties, "value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        config.put("value.deserializer", valueDeserializer);
-
-        String securityProtocol = getValue(properties, "security.protocol", null);
-        if (securityProtocol != null) {
-            config.put("security.protocol", securityProtocol);
-        }
-
-        String sslTruststoreLocation = getValue(properties, "ssl.truststore.location", null);
-        if (sslTruststoreLocation != null) {
-            config.put("ssl.truststore.location", sslTruststoreLocation);
-        }
-
-        String sslTruststorePassword = getValue(properties, "ssl.truststore.password", null);
-        if (sslTruststorePassword != null) {
-            config.put("ssl.truststore.password", sslTruststorePassword);
-        }
-
-        String sslKeystoreLocation = getValue(properties, "ssl.keystore.location", null);
-        if (sslKeystoreLocation != null) {
-            config.put("ssl.keystore.location", sslKeystoreLocation);
-        }
-
-        String sslKeystorePassword = getValue(properties, "ssl.keystore.password", null);
-        if (sslKeystorePassword != null) {
-            config.put("ssl.keystore.password", sslKeystorePassword);
-        }
-
-        String sslKeyPassword = getValue(properties, "ssl.key.password", null);
-        if (sslKeyPassword != null) {
-            config.put("ssl.key.password", sslKeyPassword);
-        }
-
-        String sslProvider = getValue(properties, "ssl.provider", null);
-        if (sslProvider != null) {
-            config.put("ssl.provider", sslProvider);
-        }
-
-        String sslCipherSuites = getValue(properties, "ssl.cipher.suites", null);
-        if (sslCipherSuites != null) {
-            config.put("ssl.cipher.suites", sslCipherSuites);
-        }
-
-        String sslEnabledProtocols = getValue(properties, "ssl.enabled.protocols", null);
-        if (sslEnabledProtocols != null) {
-            config.put("ssl.enabled.protocols", sslEnabledProtocols);
-        }
-
-        String sslTruststoreType = getValue(properties, "ssl.truststore.type", null);
-        if (sslTruststoreType != null) {
-            config.put("ssl.truststore.type", sslTruststoreType);
-        }
-
-        String sslKeystoreType = getValue(properties, "ssl.keystore.type", null);
-        if (sslKeystoreType != null) {
-            config.put("ssl.keystore.type", sslKeystoreType);
-        }
+        //TODO: Security features are missing (ADD)
+        
+        //Note: Zero retention and short timeouts to prevent RAM from becoming fragmented
+        config.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, "5000");
+        config.put(ConsumerConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, "5000");
+        config.put(ConsumerConfig.RECEIVE_BUFFER_CONFIG, "32768");
+        config.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "50");
 
         ClassLoader originClassLoader = Thread.currentThread().getContextClassLoader();
         try {
-//            Thread.currentThread().setContextClassLoader(null);
             Thread.currentThread().setContextClassLoader(KafkaConsumer.class.getClassLoader());
-            consumer = new KafkaConsumer<String, String>(config);
-            String[] topics = topic.split(",");
-            for (int i = 0; i < topics.length; i++) {
-                topics[i] = topics[i].replaceAll("\\s+", "");
-            }
-            consumer.subscribe(Arrays.asList(topics));
+            consumer = new KafkaConsumer<>(config);
+            consumer.subscribe(Arrays.asList(topic.split(",")));
         } finally {
             Thread.currentThread().setContextClassLoader(originClassLoader);
         }
@@ -186,46 +126,67 @@ public class MerlotKafkaDecanterCollectorImpl implements MerlotDecanterCollector
                 try {
                     consume();
                 } catch (WakeupException e) {
+                    LOGGER.info("Kafka consumer detained by explicit order.");
+                    break;
                 } catch (Exception e) {
-                    LOGGER.info(e.getMessage(), e);
+                    LOGGER.error("Critical error in Kafka. Shutting down the collector completely to avoid consuming memory.", e);
+                    break;
                 }
             }
         } finally {
-            if (consumer != null) {
-                try {
-                    consumer.close(Duration.ofSeconds(3));
-                } catch (Exception e) {
-                    LOGGER.info("Error closing Kafka consumer", e);
-                }
-            }
+            consuming = false;
+            closeConsumer();
+            LOGGER.info("Kafka collector completely shut down.");
         }
     }
 
     private void consume() {
+        // Poll de 1 segundo
         ConsumerRecords<String, String> records = consumer.poll(Duration.ofSeconds(1));
 
         if (records.isEmpty()) {
+            emptyPollCount++;
+            LOGGER.debug("There is no data in Kafka. Attempt {} of {}", emptyPollCount, MAX_EMPTY_POLLS);
+
+            // Note:If there are no messages after X attempts, the entire thread is shut down
+            if (emptyPollCount >= MAX_EMPTY_POLLS) {
+                LOGGER.warn("Kafka has not sent any data for {} seconds. Stopping the collector completely...", MAX_EMPTY_POLLS);
+                consuming = false;
+            }
             return;
         }
 
-        for (ConsumerRecord<String, String> record : records) {
+        // Note: If data is received, the inactivity counter is reset
+        emptyPollCount = 0;
 
+        for (ConsumerRecord<String, String> record : records) {
             if (!consuming) {
                 return;
             }
             try {
                 this.alarmProcessor.processRecord(eventAdminTopic, record);
             } catch (Exception e) {
-                LOGGER.warn("Registro descartado (key={})", record.key(), e);
+                LOGGER.warn("Error processing record; discarding without pasting: {}", record.key(), e);
             }
-
         }
     }
 
-    //Initial parameters
-    private String getValue(Dictionary<String, Object> config, String key, String defaultValue) {
-        String value = (String) config.get(key);
-        return (value != null) ? value : defaultValue;
+    private synchronized void closeConsumer() {
+        if (consumer != null) {
+            try {
+                consumer.unsubscribe();
+                consumer.close(Duration.ofSeconds(1));
+            } catch (Exception e) {
+                LOGGER.warn("Error closing the KafkaConsumer client", e);
+            } finally {
+                consumer = null; // Liberar referencia para el GC de Java
+            }
+        }
     }
 
+    private String getValue(Dictionary<String, Object> config, String key, String defaultValue) {
+        if (config == null) return defaultValue;
+        Object value = config.get(key);
+        return (value != null) ? value.toString() : defaultValue;
+    }
 }

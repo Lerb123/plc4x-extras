@@ -18,8 +18,10 @@
  */
 package org.apache.plc4x.merlot.isa182.alarm.appender;
 
+import java.util.Dictionary;
 import org.apache.plc4x.merlot.isa182.alarm.api.MerlotAlarmISA18_2Appender;
 import org.apache.plc4x.merlot.isa182.alarm.model.MerlotAlarmISA18_2;
+import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +36,21 @@ public class MerlotAlarmISA18_2HistoricalRegisterAppender implements MerlotAlarm
     @Override
     public void handleEvent(Event event) {
        //TODO
+    }
+
+    @Override
+    public void init() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void destroy() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void updated(Dictionary<String, ?> properties) throws ConfigurationException {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     
 }

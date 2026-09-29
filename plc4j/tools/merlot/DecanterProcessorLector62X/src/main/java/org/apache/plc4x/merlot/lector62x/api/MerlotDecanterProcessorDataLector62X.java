@@ -16,14 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.plc4x.merlot.isa182.alarm.api;
+package org.apache.plc4x.merlot.lector62x.api;
 
-import org.apache.plc4x.merlot.isa182.alarm.model.MerlotAlarmISA18_2;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.event.EventHandler;
 
-public interface MerlotAlarmISA18_2Appender extends EventHandler, ManagedService{
-    void save(MerlotAlarmISA18_2 alarm);
+
+public interface MerlotDecanterProcessorDataLector62X extends EventHandler, ManagedService {
     void init();
     void destroy();
+    
+    void saveData(String ... data);
 }

@@ -227,8 +227,9 @@
                         <feature>transaction</feature>
                         <feature>pax-jdbc</feature>
                         <feature>pax-jdbc-config</feature>
-                        <feature>pax-jdbc-postgresql</feature>                                      -->
-                        <feature>pax-jdbc-pool-hikaricp</feature>                                     -->
+                        <feature>pax-jdbc-postgresql</feature>
+                        <feature>pax-jdbc-pool-hikaricp</feature>
+                        <feature>decanter-collector-socket</feature>
                     </bootFeatures>
                     <javase>11</javase>
                     <generateConsistencyReport>${project.build.directory}</generateConsistencyReport>

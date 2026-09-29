@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -16,8 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-=======
->>>>>>> 169fec95 (General Changes Following the Migration to Version 1.0.0 of plc4x)
 Feature: Create a fault report
     This test simulates what would happen if you created a log from the 
     CsStudio/Phoebus graphical interface, as well as viewing it from its

@@ -20,6 +20,7 @@ package org.apache.plc4x.merlot.isa182.alarm.model;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 public class MerlotAlarmISA18_2 {
      public static final String ALARM_MODEL_VERSION = "1.0.0";
@@ -59,6 +60,10 @@ public class MerlotAlarmISA18_2 {
     //Getters
     //Setters
     //ToString
+
+    public MerlotAlarmISA18_2(Map<String, Object> properties) {
+        
+    }
      
      
      

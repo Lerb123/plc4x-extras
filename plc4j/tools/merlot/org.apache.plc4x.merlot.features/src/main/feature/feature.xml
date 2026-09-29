@@ -162,6 +162,7 @@
         <!--No usan la API de Merlot-->
         <feature>plc4x-kafka</feature>
         <feature>plc4x-logrecord</feature>
+        <feature>plc4x-lector62x</feature>
         <feature>grpc</feature>
         <feature>plc4x-h2</feature>
         <feature>plc4x-h2-svr</feature>
@@ -1044,6 +1045,10 @@
         <bundle start-level="25" >mvn:org.apache.plc4x/org.apache.plc4x.merlot.logrecorder/${project.version}</bundle>
         <configfile finalname="/etc/org.apache.plc4x.merlot.logrecorder.cfg">mvn:org.apache.plc4x/org.apache.plc4x.merlot.logrecorder/${project.version}/cfg</configfile>
         <configfile finalname="/etc/org.apache.plc4x.merlot.logrecorder.connection.database.cfg">mvn:org.apache.plc4x/org.apache.plc4x.merlot.logrecorder/${project.version}/cfg</configfile>
+    </feature>
+    <feature name="plc4x-lector62x" version="${project.version}">
+        <bundle start-level="25" >mvn:org.apache.plc4x/DecanterProcessorLector62X/${project.version}</bundle>
+        <configfile finalname="/etc/org.apache.plc4x.merlot.lector62x.connection.database.cfg">mvn:org.apache.plc4x/DecanterProcessorLector62X/${project.version}/cfg</configfile>
     </feature>
 
 </features>

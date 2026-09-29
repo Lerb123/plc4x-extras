@@ -35,11 +35,6 @@ public class MerlotKafkaDecanterProcessorImpl {
 
     private static final Pattern TOPIC_ALARM_PATTERN = Pattern.compile(":/([^/]+)/");
     private static final Pattern COMPONENT_PATTERN = Pattern.compile("^[^:/]+:/[^/]+/(.+)/[a-zA-Z0-9]+:[\\\\/]{2}");
-//    private static final Pattern SERVERITY_PATTERN = Pattern.compile("\"severity\"\\s*:\\s*\"([^\"]+)\"");
-//    private static final Pattern VALUE_PATTERN = Pattern.compile("\"value\"\\s*:\\s*\"([^\"]+)\"");
-//    private static final Pattern CURRENT_MESSAGE_PATTERN = Pattern.compile("\"current_message\"\\s*:\\s*\"([^\"]+)\"");
-//    private static final Pattern CURRENT_SEVERITY_PATTERN = Pattern.compile("\"current_severity\"\\s*:\\s*\"([^\"]+)\"");
-//    private static final Pattern TIME_PATTERN = Pattern.compile("\"time\"\\s*:\\s*\\{\\s*\"seconds\"\\s*:\\s*(\\d+)\\s*,\\s*\"nano\"\\s*:\\s*(\\d+)\\s*\\}");
     private static final String ESCAPED_PROTOCOL_SEPARATOR = ":\\/\\/";
     private static final String PROTOCOL_SEPARATOR = "://";
     private ObjectMapper mapper = new ObjectMapper();
@@ -102,14 +97,6 @@ public class MerlotKafkaDecanterProcessorImpl {
 
         return matcher.find() ? matcher.group(1) : null;
     }
-
-//    public static Instant getAlarmTime(String valueText) {
-//        if (valueText == null) {
-//            return null;
-//        }
-//        Matcher m = TIME_PATTERN.matcher(valueText);
-//        return m.find() ? Instant.ofEpochSecond(Long.parseLong(m.group(1)), Long.parseLong(m.group(2))) : null;
-//    }
 
     public static String getPathPV(String keyText) {
         if (keyText == null) {
