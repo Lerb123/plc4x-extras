@@ -255,12 +255,12 @@ public class PlcItemImpl implements PlcItem {
 
                 itemInnerBuffer = (size == -1) ? new byte[plcvalue.getRaw().length] :
                                                  new byte[size];
-                                                 LOGGER.error("1.3");                 
+                                                 LOGGER.info("Creando Buffer");                 
                 itemBuffer = Unpooled.wrappedBuffer(itemInnerBuffer);
-                                            LOGGER.error("1.4"); 
+                                            LOGGER.info("Asignando ese buffer al item"); 
                 //Update all clients
                 itemClients.forEach(c -> c.atach(this));     
-                                            LOGGER.error("1.5"); 
+                                            LOGGER.info("Actualizando a los clientes"); 
             }
 
             //Transfers data to a byte buffer
