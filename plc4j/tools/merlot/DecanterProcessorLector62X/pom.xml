@@ -104,6 +104,32 @@
     </build>
     <dependencies>
         <dependency>
+            <groupId>org.epics</groupId>
+            <artifactId>epics-util</artifactId>
+            <version>${epics.util.version}</version>
+        </dependency> 
+        <dependency>
+            <groupId>org.epics</groupId>
+            <artifactId>epics-pvaccess</artifactId>
+            <version>${epics.pvaccess.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.epics</groupId>
+            <artifactId>epics-pvdata</artifactId>
+            <version>${epics.pvdata.version}</version>
+        </dependency>       
+        <dependency>
+            <groupId>org.epics</groupId>
+            <artifactId>gpclient</artifactId>
+            <version>${epics.gpclient.version}</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.epics</groupId>
+            <artifactId>gpclient-pva</artifactId>
+            <version>${epics.gpclient.pva.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.service.event</artifactId>
             <version>${org.osgi.service.event.version}</version>
@@ -132,6 +158,12 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>${javax.servlet.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.plc4x.merlot.archiver</groupId>
+            <artifactId>org.apache.plc4x.merlot.archiver</artifactId>
+            <version>${project.version}</version>
             <type>jar</type>
         </dependency>
     </dependencies>

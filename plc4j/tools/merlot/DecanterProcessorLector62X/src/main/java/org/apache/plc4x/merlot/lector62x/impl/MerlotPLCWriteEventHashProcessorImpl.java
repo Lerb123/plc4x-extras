@@ -18,24 +18,37 @@
  */
 package org.apache.plc4x.merlot.lector62x.impl;
 
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import org.apache.plc4x.merlot.archiver.api.MerlotGPClient;
 import org.apache.plc4x.merlot.lector62x.api.MerlotDecanterHashUtility;
+import org.epics.gpclient.GPClientInstance;
 import org.osgi.service.event.Event;
+import org.slf4j.LoggerFactory;
 
-public class MerlotPLCWriteEventHashProcessor implements MerlotDecanterHashUtility {
+public class MerlotPLCWriteEventHashProcessorImpl implements MerlotDecanterHashUtility {
 
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(MerlotPLCWriteEventHashProcessorImpl.class);
     private int[] bufferClass;
+    private final GPClientInstance gpClient;
 
-    public MerlotPLCWriteEventHashProcessor() {
-        //TODO: Pedir al blueprint el GPclient (wrapper)
+    public MerlotPLCWriteEventHashProcessorImpl(MerlotGPClient gpMerlotClient) {
+        this.gpClient = gpMerlotClient.gpClientFactory("MerlotHashTable");
         bufferClass = new int[4];
     }
 
+    
     public void init() {
         //TODO: Arranca monitoreo del pva del piston
     }
 
     public void destroy() {
         this.bufferClass = null;
+        try {
+            this.gpClient.close();
+        } catch (Exception ex) {
+            LOGGER.info("Close connection GPClient");
+        }
     }
 
     @Override
@@ -58,15 +71,14 @@ public class MerlotPLCWriteEventHashProcessor implements MerlotDecanterHashUtili
 
     @Override
     public void handleEvent(Event event) {
+        
         if (event.equals(MERLOT_LECTOR62X_EVENT_TOPIC)) {
             String payloadEvent = (String) event.getProperty("payload");
             try {
-               writePV(searchValueFromEventLector(payloadEvent.split(";")));
+                writePV(searchValueFromEventLector(payloadEvent.split(";")));
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+               LOGGER.info(e.getMessage());
             }
-            //2. Aplicar Hash al arreglo de digitos y mandar a escribir con gpclient
-//            writePV(applyHash());
         }
     }
 
@@ -78,26 +90,38 @@ public class MerlotPLCWriteEventHashProcessor implements MerlotDecanterHashUtili
     private int searchValueFromEventLector(String... data) {
 
         //Deben ser enviados como numero a SQL
-        String oficinadestino = (String) data[4];
-        String idTipoProcesoPLC = data[9];
+        String officeDestiny = (String) data[4];
+        String idTypeProcessPLC = data[9];
 
         //TODO: Disponer del service para buscar el registro que coincida entre oficinadestino y idTipoProcesoPLC
         //TODO: Consulta a la tabla piston enviando ambos paramtros y esperando
-//        bufferClass[0] = (Character.getNumericValue(officeDestiny.charAt(0)));
-//        bufferClass[1] = (Character.getNumericValue(officeDestiny.charAt(1)));
-//        bufferClass[2] = (Character.getNumericValue(officeDestiny.charAt(2)));
-//        bufferClass[3] = (Character.getNumericValue(officeDestiny.charAt(3)));
+        bufferClass[0] = (Character.getNumericValue(officeDestiny.charAt(0)));
+        bufferClass[1] = (Character.getNumericValue(officeDestiny.charAt(1)));
+        bufferClass[2] = (Character.getNumericValue(officeDestiny.charAt(2)));
+        bufferClass[3] = (Character.getNumericValue(officeDestiny.charAt(3)));
         return 0;
     }
+    
+    /**
+     * El finalizador (o mezclador final, conocido como fmix) de MurmurHash3 es 
+     * una serie de operaciones bit a bit y multiplicaciones con constantes que 
+     * provocan un efecto avalancha. Esto significa que cambiar un solo bit en 
+     * la entrada modifica aproximadamente la mitad de los bits en el resultado final.
+     * @param x
+     * @return 
+     */
+public static int mix(int x) {
+    x ^= x >>> 16;
+    x *= 0x85ebca6b;
+    x ^= x >>> 13;
+    x *= 0xc2b2ae35;
+    x ^= x >>> 16;
+    return x;
+}
 
-    public static void main(String[] args) {
-        MerlotPLCWriteEventHashProcessor m = new MerlotPLCWriteEventHashProcessor();
-        String n = "1234";
-        m.searchValueFromEventLector(n);
-        System.out.println("Hash: " + m.applyHash());
-
-        for (int bufferClas : m.getBufferClass()) {
-            System.out.println("N: " + bufferClas);
-        }
-    }
+public static  int applyHash(int office, int processType) {
+    int h = mix(office * 8 + processType);   // 8 tipos por oficina
+    return Integer.remainderUnsigned(h, 500);
+}
+   
 }

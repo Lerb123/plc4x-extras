@@ -188,9 +188,7 @@ public class S7DBWriterHandlerImpl implements DBWriterHandler {
                             bitOffset  = ((fieldOffsets.get(index) != null)?((Number)(Object)fieldOffsets.get(index).right).byteValue():(byte) -1);
 
                             //bitOffset = (fieldOffsets.get(index) != null) ? ((Number)(Object)fieldOffsets.get(index).right).byteValue() : (byte) -1;
-                            System.out.println("Buffer: "+byteBuf);
-                            System.out.println("Byte: "+byteOffset);
-                            System.out.println("Bit: "+bitOffset);
+
                             if (optPlcItem.isPresent()) {
                                 optPlcItem.get().itemWrite(byteBuf, byteOffset, bitOffset);  
                             }   
