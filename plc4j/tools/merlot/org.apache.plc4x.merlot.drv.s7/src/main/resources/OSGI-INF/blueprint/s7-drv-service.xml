@@ -69,6 +69,21 @@
         <argument ref="blueprintBundleContext"/>            
     </bean>    
     
+
+    <!--Tag Simplifier-->
+    <bean id="S7TagSimplifierImplBean" class="org.apache.plc4x.merlot.drv.s7.impl.S7TagSimplifier"/>
+    
+    <service id="S7TagSimplifierImplService"     
+              ref="S7TagSimplifierImplBean" 
+              interface="org.apache.plc4x.merlot.api.TagSimplifier">
+        <service-properties>
+            <entry key="driver.code.tag.simplifier" value="s7"/>                          
+        </service-properties>
+    </service>   
+    <!--TagSimplifier service-->
+   
+    
+      
     <service  ranking="0" ref="S7PlcTagFunctionBean" auto-export="interfaces">
         <service-properties>
             <entry key="dal.function.UID"         value="org.apache.plc4x.s7"/>

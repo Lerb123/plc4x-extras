@@ -602,6 +602,7 @@ public class PlcDeviceImpl implements PlcDevice {
         if (null == plcEventConnectionFunction) {
             doDriverStateSubscripotion();
         }
+        
     }
 
     //TODO: Make listener of OSGi service with filter

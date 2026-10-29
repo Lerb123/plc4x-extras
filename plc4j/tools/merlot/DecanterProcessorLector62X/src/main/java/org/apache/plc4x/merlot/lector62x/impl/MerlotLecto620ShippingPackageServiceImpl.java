@@ -20,7 +20,6 @@ import org.apache.plc4x.merlot.lector62x.api.MerlotLecto620ShippingPackageReposi
 import org.apache.plc4x.merlot.lector62x.api.MerlotLecto620ShippingPackageService;
 import org.apache.plc4x.merlot.lector62x.api.MerlotLector620ShippingPackageDTO;
 import org.apache.plc4x.merlot.lector62x.api.MerlotLector620ShippingPackageResponse;
-import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

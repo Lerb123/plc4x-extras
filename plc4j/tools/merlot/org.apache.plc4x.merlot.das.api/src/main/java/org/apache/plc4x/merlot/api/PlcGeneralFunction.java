@@ -319,5 +319,10 @@ public interface PlcGeneralFunction extends PlcFunction {
     */
     public void write(UUID uuid, String tag, String value);    
     
+    /**
+     * 
+     * @param uid Find the right writer based on the DBFactory type
+     * @return Writer specific to DBFactory
+     */
     public Optional<DBWriterHandler> getWriterHandler(String uid);
 }

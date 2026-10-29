@@ -22,6 +22,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
@@ -31,12 +36,13 @@ import org.apache.plc4x.merlot.api.PlcGeneralFunction;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.api.PlcItemListener;
 import org.apache.plc4x.merlot.api.PlcSecureBoot;
+import org.apache.plc4x.merlot.api.TagSimplifier;
+import org.apache.plc4x.merlot.api.core.MerlotProcessingDinamicsTags;
+import org.apache.plc4x.merlot.api.core.MerlotProcessingDinamicsTags.Group;
 import org.apache.plc4x.merlot.db.api.DBRecord;
 import org.apache.plc4x.merlot.db.api.DBRecordFactory;
-import org.apache.plc4x.merlot.api.PlcDevice;
 import org.epics.pvdata.pv.PVBoolean;
 import org.epics.pvdata.pv.PVDouble;
-import org.epics.pvdata.pv.PVInt;
 import org.epics.pvdata.pv.PVScalar;
 import org.epics.pvdata.pv.PVString;
 import org.epics.pvdatabase.PVDatabase;
@@ -59,8 +65,8 @@ public class DBPersistImpl implements EventHandler {
             + "PvUuId TEXT NOT NULL PRIMARY KEY,"
             + "PvName TEXT,"
             + "PvType TEXT,"
-            + "PvId TEXT,"
-            + "PvOffset TEXT,"
+            + "PvDeviceName TEXT," //Paso de PvId a PvDeviceName
+            + "PvTag TEXT," //Paso de PvOffset a PvTag
             + "PvDescriptor TEXT,"
             + "PvScanTime TEXT,"
             + "PvScanEnable TEXT,"
@@ -190,63 +196,141 @@ public class DBPersistImpl implements EventHandler {
         }
     }
 
-    public void restore() throws SQLException, InvalidSyntaxException {
-        String filter = null;
-        if (null != dbConnection) {
+    private record GroupKey(String deviceName, String scanTime) {}
 
-            var stmt = dbConnection.createStatement();
-            var rs = stmt.executeQuery(SQL_SELECT_PVRECORDS);
+    private static final class CumulativeGroupAndTag {
+
+        boolean enabled;
+        final List<String> tags = new ArrayList<>();
+        final List<PVRecord> records = new ArrayList<>();   // en el mismo orden que tags
+        final List<String> dbFactories = new ArrayList<>();   // en el mismo orden que tags
+
+    }
+
+    public void restore() throws SQLException, InvalidSyntaxException {
+        if (dbConnection == null) {
+            return;
+        }
+
+
+        Map<GroupKey, CumulativeGroupAndTag> tagsAndAccumulatedGroups = new LinkedHashMap<>();
+        String filter = null;
+        try (var stmt = dbConnection.createStatement(); var rs = stmt.executeQuery(SQL_SELECT_PVRECORDS)) {
 
             while (rs.next()) {
+                String pvType = rs.getString("pvType");
 
                 filter = "(db.record.type=" + rs.getString("pvType") + ")";
-
                 ServiceReference[] refs = bc.getServiceReferences(DBRecordFactory.class.getName(), filter);
+                final DBRecordFactory recordFactory = (DBRecordFactory) bc.getService(refs[0]);
+                String dbRecordDriver = (String) refs[0].getProperty("db.record.driver");
+                PVRecord pvRecord = recordFactory.create(rs.getString("PvName"));
 
-                if (null != refs) {
+                
+                //pvRecord.getPVStructure().getStringField("id").put(rs.getString("PvId"));
+                //pvRecord.getPVStructure().getStringField("offset").put(rs.getString("PvOffset"));
+                
+                //Replace with PvDeviceName
+                pvRecord.getPVStructure().getStringField("id").put(rs.getString("PvDeviceName"));
+                //I use this field to generate the group
+                pvRecord.getPVStructure().getStringField("scan_time").put(rs.getString("pvScanTime"));
+                //It is set to 0 until it is recalculated.
+                pvRecord.getPVStructure().getStringField("offset").put("0");
 
-                    final DBRecordFactory recordFactory = (DBRecordFactory) bc.getService(refs[0]);
+                pvRecord.getPVStructure().getStringField("descriptor").put(rs.getString("PvDescriptor"));
+                pvRecord.getPVStructure().getBooleanField("scan_enable").put(Boolean.parseBoolean(rs.getString("PvScanEnable")));
+                pvRecord.getPVStructure().getBooleanField("write_enable").put(Boolean.parseBoolean(rs.getString("PvWriteEnable")));
+                pvRecord.getPVStructure().getDoubleField("display.limitLow").put(Double.parseDouble(rs.getString("PvDisplayLimitLow")));
+                pvRecord.getPVStructure().getDoubleField("display.limitHigh").put(Double.parseDouble(rs.getString("PvDisplayLimitHigh")));
+                pvRecord.getPVStructure().getStringField("display.description").put(rs.getString("PvDisplayDescription"));
+                pvRecord.getPVStructure().getStringField("display.format").put(rs.getString("PvDisplayFormat"));
+                pvRecord.getPVStructure().getStringField("display.units").put(rs.getString("PvDisplayUnits"));
+                pvRecord.getPVStructure().getDoubleField("control.limitLow").put(Double.parseDouble(rs.getString("PvControlLimitLow")));
+                pvRecord.getPVStructure().getDoubleField("control.limitHigh").put(Double.parseDouble(rs.getString("PvControlLimitHigh")));
+                pvRecord.getPVStructure().getDoubleField("control.minStep").put(Double.parseDouble(rs.getString("PvControlMinStep")));
 
-                    PVRecord pvRecord = recordFactory.create(rs.getString("PvName"));
-                    pvRecord.getPVStructure().getStringField("id").put(rs.getString("PvId"));
-                    pvRecord.getPVStructure().getStringField("offset").put(rs.getString("PvOffset"));
-                    pvRecord.getPVStructure().getStringField("descriptor").put(rs.getString("PvDescriptor"));
-                    pvRecord.getPVStructure().getStringField("scan_time").put(rs.getString("pvScanTime"));
-                    pvRecord.getPVStructure().getBooleanField("scan_enable").put(Boolean.parseBoolean(rs.getString("PvScanEnable")));
-                    pvRecord.getPVStructure().getBooleanField("write_enable").put(Boolean.parseBoolean(rs.getString("PvWriteEnable")));
-                    pvRecord.getPVStructure().getDoubleField("display.limitLow").put(Double.parseDouble(rs.getString("PvDisplayLimitLow")));
-                    pvRecord.getPVStructure().getDoubleField("display.limitHigh").put(Double.parseDouble(rs.getString("PvDisplayLimitHigh")));
-                    pvRecord.getPVStructure().getStringField("display.description").put(rs.getString("PvDisplayDescription"));
-                    pvRecord.getPVStructure().getStringField("display.format").put(rs.getString("PvDisplayFormat"));
-                    pvRecord.getPVStructure().getStringField("display.units").put(rs.getString("PvDisplayUnits"));
-                    pvRecord.getPVStructure().getDoubleField("control.limitLow").put(Double.parseDouble(rs.getString("PvControlLimitLow")));
-                    pvRecord.getPVStructure().getDoubleField("control.limitHigh").put(Double.parseDouble(rs.getString("PvControlLimitHigh")));
-                    pvRecord.getPVStructure().getDoubleField("control.minStep").put(Double.parseDouble(rs.getString("PvControlMinStep")));
+                //Aggregate by group (device + scan time)
+                GroupKey clave = new GroupKey(rs.getString("PvDeviceName"), rs.getString("pvScanTime"));
+                CumulativeGroupAndTag a = tagsAndAccumulatedGroups.computeIfAbsent(clave, k -> new CumulativeGroupAndTag());
+                a.enabled |= Boolean.parseBoolean(rs.getString("PvScanEnable"));
+                a.tags.add(rs.getString("PvTag"));
+                a.records.add(pvRecord);
+                a.dbFactories.add((String) refs[0].getProperty("db.record.driver"));
+            }
+        }
+        createGrupsAndItems(tagsAndAccumulatedGroups);
+        MerlotProcessingDinamicsTags.clear();
+    }
 
-                    //Talk to PLC4X
-                    Optional<PlcItem> plcItem = plcGeneralFunction.getPlcItem(rs.getString("PvId"));
+    /**
+     * 
+     * @param pvRecord Process variable
+     * @param plcItem Memory area to be linked to the process variable
+     * @param dbFactory Define the data type that will be used to locate the specific write handler.
+     */
+    private void saveAndActiveWriter(PVRecord pvRecord, PlcItem plcItem, String dbFactory) {
+        if (null == master.findRecord(pvRecord.getRecordName())) {
+            //Attach the pvRecord to the item
+            plcItem.addItemListener((PlcItemListener) pvRecord);
+            //Register the pvRecord on the EPICS server
+            master.addRecord(pvRecord);
+            //The write handler type is assigned to that pvRecord
+            Optional<DBWriterHandler> writer = plcGeneralFunction.getWriterHandler(dbFactory);
+            if (writer.isPresent()) {
+                writer.get().putDBRecord((DBRecord) pvRecord);
+            }
+        }
 
-                    if (plcItem.isPresent()) {
-                        if (null == master.findRecord(pvRecord.getRecordName())) {
-                            plcItem.get().addItemListener((PlcItemListener) pvRecord);
-                            master.addRecord(pvRecord);
+    }
 
-                            //Each record is registered as a service under the name of the writer, which must be used for that record.
-                            String dbRecordDriver = (String) refs[0].getProperty("db.record.driver");
+    /**
+     * 
+     * @param tagsAndAccumulatedGroups List of: process variable addresses, process variables, and data type definitions
+     */
+    private void createGrupsAndItems(Map<GroupKey, CumulativeGroupAndTag> tagsAndAccumulatedGroups) {
+        for (Map.Entry<GroupKey, CumulativeGroupAndTag> e : tagsAndAccumulatedGroups.entrySet()) {
+            GroupKey key = e.getKey();
+            CumulativeGroupAndTag a = e.getValue();
 
-                            Optional<DBWriterHandler> writer = plcGeneralFunction.getWriterHandler(dbRecordDriver);
-                            if (writer.isPresent()) {
-                                writer.get().putDBRecord((DBRecord) pvRecord);
-                            }
+            Group g = MerlotProcessingDinamicsTags.getOrCreateGroup(
+                    key.deviceName(), key.scanTime(), String.valueOf(a.enabled), plcGeneralFunction);
+            if (g == null) {
+                continue;
+            }
 
-                        } else {
-                            LOGGER.info("DBRecord [?] already exist.", rs.getString("PvId"));
-                        }
+            String driverCode = MerlotProcessingDinamicsTags.getDriverCodeByDeviceName(key.deviceName());
 
-                    } else {
-                        LOGGER.error("PlcItem [?] don't exist.", rs.getString("PvId"));
+            try {
+                ServiceReference[] refs = bc.getServiceReferences(TagSimplifier.class.getName(),
+                        "(driver.code.tag.simplifier=" + driverCode + ")");
+                if (refs == null) {
+                    LOGGER.error("There is no TagSimplifier registered for the driver [{}]", driverCode);
+                    continue;
+                }
+
+                TagSimplifier simplifier = (TagSimplifier) bc.getService(refs[0]);
+                MerlotProcessingDinamicsTags.registerSimplifier(driverCode, simplifier);
+
+               
+                for (TagSimplifier.ItemBlock b : simplifier.simplify(a.tags, 15)) {
+                    PlcItem item = MerlotProcessingDinamicsTags.setItem(g, b, plcGeneralFunction);
+                    if (item == null) {
+                        LOGGER.error("The item could not be created [{}]", b.tagSimplificado());
+                        continue;
+                    }
+
+                    for (int i = 0; i < b.tagsOriginales().size(); i++) {
+                        int src = b.sourceIndexes().get(i);
+                        PVRecord pv = a.records.get(src);
+
+                        // TODO: El offset se fija antes de registrar el record en el servidor
+                        pv.getPVStructure().getStringField("offset").put(b.offsetRelativo(i).toString());
+                        saveAndActiveWriter(pv, item, a.dbFactories.get(src));
                     }
                 }
+
+            } catch (InvalidSyntaxException ex) {
+                LOGGER.error("Error: {}", ex.getMessage());
             }
         }
     }

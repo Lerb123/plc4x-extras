@@ -39,6 +39,7 @@ import org.apache.plc4x.merlot.api.PlcGroup;
 import org.apache.plc4x.merlot.api.PlcItem;
 import org.apache.plc4x.merlot.api.PlcModel;
 import org.apache.plc4x.merlot.api.PlcSecureBoot;
+import org.apache.plc4x.merlot.api.core.MerlotProcessingDinamicsTags;
 import org.apache.plc4x.merlot.scheduler.api.Job;
 import org.apache.plc4x.merlot.scheduler.api.JobContext;
 import org.osgi.framework.BundleContext;
@@ -305,16 +306,11 @@ public class PlcSecureBootImpl implements PlcSecureBoot, Job {
                                 rsDevices.getString("DeviceDescription"),
                                 rsDevices.getString("DeviceEnable"));
 
+                        
                         if (optPlcDevice.isPresent()) {
                             LOGGER.info("Created PlcDevice [{}].", optPlcDevice.get().getDeviceKey());
-                            System.out.println(optPlcDevice.get());
-                            //PlcGroups
-                            groups.addAll(createGroup(optPlcDevice.get().getUid().toString()));
-
-                            //PlcItems
-                            for (PlcGroup group : groups) {
-                                items.addAll(createItems(group.getGroupUid().toString()));
-                            }
+                            //1. Save the device (rsDevices): record device
+                            MerlotProcessingDinamicsTags.setDevice(rsDevices);
                         }
 
                         if (isDeviceEnable.equals("true")) {
@@ -355,8 +351,8 @@ public class PlcSecureBootImpl implements PlcSecureBoot, Job {
         statement = dbConnection.createStatement();
 
         statement.execute(SQL_CREATE_TABLE_DEVICES);
-        statement.execute(SQL_CREATE_TABLE_GROUPS);
-        statement.execute(SQL_CREATE_TABLE_ITEMS);
+//        statement.execute(SQL_CREATE_TABLE_GROUPS);
+//        statement.execute(SQL_CREATE_TABLE_ITEMS);
     }
 
     private void insertDevice(String driverName, PlcDevice plcDevice) throws SQLException {
