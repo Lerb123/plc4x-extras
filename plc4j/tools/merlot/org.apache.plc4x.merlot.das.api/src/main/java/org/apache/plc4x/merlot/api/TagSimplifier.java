@@ -23,37 +23,44 @@ public interface TagSimplifier {
     /**
      * Group the tags into blocks.
      *
-     * @param tags tags originals as written by the user.
+     * @param requests tags as written by the user, each one together with the
+     * data type (PvType) of the record it belongs to.
      * @param maxGapBytes maximum allowed spacing between tags when joining
-     * them; null (o 0) Use the driver's default value (15)
+     * them; null (or 0) uses the driver's default value (15)
      * @return List of blocks containing the list of original addresses, the
      * simplified addresses, offsets, area number, starting byte, and number of
      * bytes
      */
-    List<ItemBlock> simplify(List<String> tags, Integer maxGapBytes);
+    List<ItemBlock> simplify(List<TagRequest> requests, Integer maxGapBytes);
 
     /**
+     * Same as {@link #simplify(List, Integer)} using the driver's default gap.
      *
-     * @param tags tags originals as written by the user.
+     * @param requests tags as written by the user, with their data type.
      * @return List of blocks containing the list of original addresses, the
      * simplified addresses, offsets, area number, starting byte, and number of
      * bytes
      */
-    default List<ItemBlock> simplify(List<String> tags) {
-        return simplify(tags, null);
+    default List<ItemBlock> simplify(List<TagRequest> requests) {
+        return simplify(requests, null);
     }
 
     /**
      * The absolute offset of a tag, as written. Returns "null" if the tag is
      * invalid.
-     */
-    /**
      *
      * @param tag Memory address from which the value at that position is
      * retrieved
      * @return Numeric position value in its direction
      */
     Offset offsetBase(String tag);
+
+    /**
+     * A tag as the user wrote it, plus the data type (PvType) of its record.
+     * The type is needed because some types (for example the S7 compound
+     * types) occupy more bytes than the address letter suggests.
+     */
+    record TagRequest(String tag, String dataType) {}
 
     /**
      * Representation of an offset: Byte.bit
@@ -73,8 +80,10 @@ public interface TagSimplifier {
 
     /**
      * The result of simplification: a range that can be read in a single pass.
-     * Original tags and offsets are parallel lists (same position = same tag).
-     * The offsets are already calculated relative to the start of the block.
+     * Original tags, offsets and source indexes are parallel lists (same
+     * position = same tag). The offsets are already calculated relative to the
+     * start of the block. sourceIndexes holds the position each tag had in the
+     * list given to simplify().
      */
     record ItemBlock(
             String area,
@@ -87,11 +96,8 @@ public interface TagSimplifier {
 
         /**
          *
-         * @param positionInList Receives the list position corresponding to
-         * where the process variable was saved when processing the PVRecords
-         * table
-         * @return The new offset, recalculated based on the PlcItem that was
-         * just generated
+         * @param positionInList Position inside this block's lists
+         * @return The new offset, recalculated based on the start of the block
          */
         public Offset offsetRelativo(int positionInList) {
             return offsets.get(positionInList);
@@ -99,10 +105,8 @@ public interface TagSimplifier {
 
         /**
          *
-         * @param tag Get the original tag to find it in the list of original
-         * tags
-         * @return The new offset, recalculated based on the PlcItem that was
-         * just generated
+         * @param tag The original tag, to find it in the list of original tags
+         * @return The new offset, recalculated based on the start of the block
          */
         public Offset offsetRelativo(String tag) {
             if (tag == null) {

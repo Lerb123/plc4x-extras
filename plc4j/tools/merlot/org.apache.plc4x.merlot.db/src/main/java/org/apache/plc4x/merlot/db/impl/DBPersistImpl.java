@@ -201,9 +201,9 @@ public class DBPersistImpl implements EventHandler {
     private static final class CumulativeGroupAndTag {
 
         boolean enabled;
-        final List<String> tags = new ArrayList<>();
-        final List<PVRecord> records = new ArrayList<>();   // en el mismo orden que tags
-        final List<String> dbFactories = new ArrayList<>();   // en el mismo orden que tags
+        final List<TagSimplifier.TagRequest> requests = new ArrayList<>();   // tag + tipo de dato (PvType)
+        final List<PVRecord> records = new ArrayList<>();
+        final List<String> dbFactories = new ArrayList<>();
 
     }
 
@@ -220,8 +220,14 @@ public class DBPersistImpl implements EventHandler {
             while (rs.next()) {
                 String pvType = rs.getString("pvType");
 
-                filter = "(db.record.type=" + rs.getString("pvType") + ")";
+                filter = "(db.record.type=" + pvType + ")";
                 ServiceReference[] refs = bc.getServiceReferences(DBRecordFactory.class.getName(), filter);
+                if (refs == null) {
+                    // Se salta ANTES de agregar a las tres listas, para que sigan alineadas
+                    LOGGER.warn("There is no DBRecordFactory for the type [{}], record [{}] skipped",
+                            pvType, rs.getString("PvName"));
+                    continue;
+                }
                 final DBRecordFactory recordFactory = (DBRecordFactory) bc.getService(refs[0]);
                 String dbRecordDriver = (String) refs[0].getProperty("db.record.driver");
                 PVRecord pvRecord = recordFactory.create(rs.getString("PvName"));
@@ -253,9 +259,9 @@ public class DBPersistImpl implements EventHandler {
                 GroupKey clave = new GroupKey(rs.getString("PvDeviceName"), rs.getString("pvScanTime"));
                 CumulativeGroupAndTag a = tagsAndAccumulatedGroups.computeIfAbsent(clave, k -> new CumulativeGroupAndTag());
                 a.enabled |= Boolean.parseBoolean(rs.getString("PvScanEnable"));
-                a.tags.add(rs.getString("PvTag"));
+                a.requests.add(new TagSimplifier.TagRequest(rs.getString("PvTag"), pvType));
                 a.records.add(pvRecord);
-                a.dbFactories.add((String) refs[0].getProperty("db.record.driver"));
+                a.dbFactories.add(dbRecordDriver);
             }
         }
         createGrupsAndItems(tagsAndAccumulatedGroups);
@@ -311,8 +317,10 @@ public class DBPersistImpl implements EventHandler {
                 TagSimplifier simplifier = (TagSimplifier) bc.getService(refs[0]);
                 MerlotProcessingDinamicsTags.registerSimplifier(driverCode, simplifier);
 
-               
-                for (TagSimplifier.ItemBlock b : simplifier.simplify(a.tags, 15)) {
+                // Marca qué registros quedaron asociados a un item
+                boolean[] covered = new boolean[a.records.size()];
+
+                for (TagSimplifier.ItemBlock b : simplifier.simplify(a.requests, 15)) {
                     PlcItem item = MerlotProcessingDinamicsTags.setItem(g, b, plcGeneralFunction);
                     if (item == null) {
                         LOGGER.error("The item could not be created [{}]", b.tagSimplificado());
@@ -320,12 +328,22 @@ public class DBPersistImpl implements EventHandler {
                     }
 
                     for (int i = 0; i < b.tagsOriginales().size(); i++) {
+                        // Posición real del tag en a.requests, y por tanto en a.records y a.dbFactories
                         int src = b.sourceIndexes().get(i);
                         PVRecord pv = a.records.get(src);
 
                         // TODO: El offset se fija antes de registrar el record en el servidor
                         pv.getPVStructure().getStringField("offset").put(b.offsetRelativo(i).toString());
                         saveAndActiveWriter(pv, item, a.dbFactories.get(src));
+                        covered[src] = true;
+                    }
+                }
+
+                // Registros que no entraron en ningún bloque: tag inválido o tipo desconocido
+                for (int k = 0; k < covered.length; k++) {
+                    if (!covered[k]) {
+                        LOGGER.info("PV [{}] has no item: invalid tag or unknown type [{}]",
+                                a.records.get(k).getRecordName(), a.requests.get(k));
                     }
                 }
 

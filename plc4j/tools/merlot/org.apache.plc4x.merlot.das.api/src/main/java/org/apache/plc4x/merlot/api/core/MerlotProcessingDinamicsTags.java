@@ -43,7 +43,7 @@ public class MerlotProcessingDinamicsTags {
     private static final Map<String, Device> devices = new LinkedHashMap<>();
     private static final Map<String, Group> groups = new LinkedHashMap<>();
     private static final Map<String, Item> items = new LinkedHashMap<>();
-    private static final Map<String, ItemBlock> bloquesByItem = new HashMap<>();
+    private static final Map<String, ItemBlock> itemBlock = new HashMap<>();
     private static final Map<ClaveGrupoIdx, Group> groupsByDeviceAndScan = new HashMap<>();
 
     //One simplifier per driver. Concurrent because each module registers it at its own time.
@@ -118,33 +118,7 @@ public class MerlotProcessingDinamicsTags {
         return s == null ? "" : s.trim().toLowerCase(Locale.ROOT);
     }
 
-    /**
-     * Simplify the tags in a group using the simplifier on your device's
-     * controller.
-     *
-     * @param g Group that defines the scan time for the memory area block.
-     * @param tags List of memory addresses for each variable in the PLC.
-     * @param maxGapBytes The separation that must exist between the new
-     * simplified memory areas.
-     * @return List of blocks containing the list of original addresses, the
-     * simplified addresses, offsets, area number, starting byte, and number of
-     * bytes
-     */
-    public static List<ItemBlock> simplificarGrupo(Group g, List<String> tags, Integer maxGapBytes) {
-        Device d = devices.get(g.deviceUuid());
-        if (d == null) {
-            System.out.println("Device not found for the group: " + g.groupName());
-            return List.of();
-        }
-
-        TagSimplifier s = getSimplifier(d.driverName());
-        if (s == null) {
-            System.out.println("There is no registered simplifier for the driver: " + d.driverName());
-            return List.of();
-        }
-
-        return s.simplify(tags, maxGapBytes);
-    }
+   
 
     /**
      *
@@ -276,7 +250,7 @@ public class MerlotProcessingDinamicsTags {
                 g.groupEnable());
 
         items.put(i.itemUuid(), i);
-        bloquesByItem.put(i.itemUuid(), block);
+        itemBlock.put(i.itemUuid(), block);
 
         Optional<PlcItem> optPlcItem = gf.createItem(i.itemUuid, i.groupUuid, i.deviceUuid, i.itemName, i.itemDescription, i.itemTag, i.itemEnable);
         System.out.println("Item created: " + i.itemName + " with simplified tags: " + i.itemTag);
@@ -296,8 +270,8 @@ public class MerlotProcessingDinamicsTags {
      * of the PlcItem
      * @return Block that condenses the simplified tag for the PlcItem
      */
-    public static ItemBlock getBloque(String itemUuid) {
-        return bloquesByItem.get(itemUuid);
+    public static ItemBlock getBlockItem(String itemUuid) {
+        return itemBlock.get(itemUuid);
     }
 
     /**
@@ -309,7 +283,7 @@ public class MerlotProcessingDinamicsTags {
         groups.clear();
         groupsByDeviceAndScan.clear();
         items.clear();
-        bloquesByItem.clear();
+        itemBlock.clear();
         countGroup = 0;
         countItem = 0;
     }

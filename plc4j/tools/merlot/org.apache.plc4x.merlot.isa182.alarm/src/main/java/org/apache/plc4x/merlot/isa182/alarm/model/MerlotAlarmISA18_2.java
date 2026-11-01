@@ -28,13 +28,9 @@ public class MerlotAlarmISA18_2 {
      // --- 1\. Identificación básica y Agrupación --- 
      private String tagName; // Nombre único de la etiqueta o punto (Tag / Point) [4, 5]
      private String alarmDescription; // Descripción corta de la alarma o variable de proceso [6, 7] 
-     private AlarmType alarmType; // Tipo de alarma (ej. High, Low, Deviation) [8-10] 
-     private String alarmGroup; // Grupo o área del proceso a la que pertenece [6, 11] 
      
     // --- 2\. Atributos de Diseño Básico y Configuración (Clause 10.5) --- 
-     private double alarmSetpoint; // Límite o umbral de disparo [6, 9, 12] 
      private AlarmPriority alarmPriority; // Nivel de prioridad o importancia operacional [6, 9, 13, 14] 
-     private List <String> alarmClasses;// Clases a las que pertenece (ej. Seguridad, Ambiental) [9, 13, 15]
      private double deadband; // Histéresis para retorno a condición normal sin fluctuar [13, 16] 
      private double onDelaySeconds; // Temporizador de retardo a la activación (filtro de picos) [17] 
      private double offDelaySeconds; // Temporizador de retardo a la desactivación (evita chattering) [17] 
@@ -70,12 +66,11 @@ public class MerlotAlarmISA18_2 {
      public enum AlarmPriority { 
          LOW,
          MEDIUM,
-         HIGH,
-         HIGHEST // Priorización según impacto y tiempo de respuesta [30, 31] 
+         HIGH
      }
      
      public enum AlarmType { 
-         ABSOLUTE_HIGH,
+         MAJOR,
          ABSOLUTE_LOW, 
          HIGH_HIGH, 
          LOW_LOW,
